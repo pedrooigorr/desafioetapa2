@@ -149,9 +149,25 @@ st.divider()
 pagina_atual = st.session_state.pagina
 
 if pagina_atual == "📊 Visão Geral":
+    st.markdown(
+        "### Bem-vindo(a) ao Radar Cultural! 👋\n"
+        "Este painel nasceu de uma pergunta simples: **quem no Ceará tem "
+        "acesso a museu, teatro ou cinema perto de casa — e quem não tem?** "
+        "Cruzamos dados oficiais de população, renda e equipamentos "
+        "culturais dos 184 municípios cearenses para mostrar, de forma "
+        "visual, onde a cultura está concentrada e onde ela quase não "
+        "chega.\n\n"
+        "A ideia é ajudar gestores públicos, organizações culturais e "
+        "qualquer pessoa curiosa a **enxergar essa desigualdade e decidir "
+        "com mais clareza onde investir**. Use os filtros à esquerda para "
+        "explorar por mesorregião, faixa de população ou tipo de "
+        "equipamento — e navegue pelas abas acima para se aprofundar em "
+        "cada análise."
+    )
     st.caption(
-        "Prévia de todas as análises. Clique em um card ou na navbar acima "
-        "para abrir a visão completa e maior de cada uma."
+        "Prévia de todas as análises abaixo. Clique em um card ou na "
+        "navbar acima para abrir a visão completa e maior de cada uma — "
+        "lá você também encontra a explicação de como cada uma foi feita."
     )
 
     linha1_a, linha1_b = st.columns(2)
@@ -234,6 +250,22 @@ elif pagina_atual == "🗺️ Mapa do Ceará":
     )
     st.plotly_chart(mapa_municipios(df_f, altura=680), use_container_width=True)
 
+    with st.expander("🔍 Como esse mapa foi feito"):
+        st.markdown(
+            "1. Pegamos as coordenadas (latitude/longitude) oficiais dos "
+            "184 municípios do Ceará, uma por município.\n"
+            "2. Cada ponto no mapa representa um município — o **tamanho** "
+            "do ponto é proporcional à **população** e a **cor** é "
+            "proporcional à **renda per capita** (quanto mais forte o "
+            "terracota, maior a renda).\n"
+            "3. O mapa usa OpenStreetMap como base cartográfica, sem "
+            "custo e sem precisar de chave de API.\n\n"
+            "**Por que um mapa em vez de uma tabela?** Fica muito mais "
+            "fácil enxergar de cara o padrão geográfico: renda mais alta "
+            "concentrada perto de Fortaleza e do litoral, caindo conforme "
+            "se afasta para o interior/sertão."
+        )
+
 elif pagina_atual == "🏛️ Presença de Equipamentos":
     st.subheader("🏛️ Presença de cada equipamento cultural")
     st.caption(
@@ -244,6 +276,20 @@ elif pagina_atual == "🏛️ Presença de Equipamentos":
         grafico_presenca_equipamentos(df_f, altura=680), use_container_width=True
     )
 
+    with st.expander("🔍 Como esse gráfico foi feito"):
+        st.markdown(
+            "Para cada um dos 4 equipamentos (museu, teatro/sala de "
+            "espetáculo, cinema e biblioteca), calculamos:\n\n"
+            "`% = (nº de municípios filtrados que têm o equipamento) "
+            "÷ (total de municípios filtrados) × 100`\n\n"
+            "Os dados de existência de cada equipamento vêm da MUNIC/IBGE "
+            "2014, respondida pela própria prefeitura de cada município. "
+            "**Achado curioso:** biblioteca aparece em 100% dos municípios "
+            "— por isso ela não é usada nas análises de equidade e "
+            "prioridade mais à frente, já que não ajuda a diferenciar "
+            "quem tem acesso cultural de quem não tem."
+        )
+
 elif pagina_atual == "📈 Equidade por Mesorregião":
     st.subheader("🗺️ Equidade cultural por Mesorregião")
     st.caption(
@@ -253,6 +299,24 @@ elif pagina_atual == "📈 Equidade por Mesorregião":
     st.plotly_chart(
         grafico_equidade_por_mesorregiao(df_f, altura=680), use_container_width=True
     )
+
+    with st.expander("🔍 Como esse gráfico foi feito"):
+        st.markdown(
+            "1. Agrupamos os municípios filtrados pelas suas 7 "
+            "**mesorregiões** oficiais do IBGE (Metropolitana de "
+            "Fortaleza, Norte, Noroeste, Sertões, Jaguaribe, Centro-Sul e "
+            "Sul Cearense).\n"
+            "2. Para cada mesorregião, calculamos o **% de municípios sem "
+            "nenhum** dos 3 equipamentos que de fato diferenciam acesso "
+            "cultural (museu, teatro ou cinema — biblioteca fica de fora "
+            "por ser praticamente universal).\n"
+            "3. A cor das barras mostra a **renda média per capita** da "
+            "mesorregião, para cruzar as duas informações num só gráfico.\n\n"
+            "O resultado mostra o que a intuição já sugere: a "
+            "Metropolitana de Fortaleza tem a menor % de municípios "
+            "desassistidos e a maior renda — o interior carrega o ônus "
+            "duplo de menos renda e menos acesso cultural."
+        )
 
 elif pagina_atual == "🚩 Municípios Prioritários":
     st.subheader("🚩 Municípios prioritários (baixa renda + pouco acesso)")
@@ -275,6 +339,25 @@ elif pagina_atual == "🚩 Municípios Prioritários":
         hide_index=True,
         height=650,
     )
+
+    with st.expander("🔍 Como esse ranking foi feito"):
+        st.markdown(
+            "Criamos o **Índice de Prioridade** para combinar, num só "
+            "número, dois fatores que juntos indicam urgência de "
+            "atenção: **falta de equipamento cultural** e **baixa renda**."
+            "\n\n"
+            "Fórmula:\n\n"
+            "`Índice = (3 − nº de equipamentos raros) × "
+            "(1 − renda per capita ÷ maior renda per capita do estado)`\n\n"
+            "Onde \"equipamentos raros\" conta só museu, teatro e cinema "
+            "(de 0 a 3) — biblioteca fica de fora por existir em quase "
+            "todo município. Assim, um município **sem nenhum** desses "
+            "3 equipamentos e com renda **bem abaixo** da média pontua "
+            "alto; um município rico mesmo sem equipamentos, ou um "
+            "município pobre mas já bem servido culturalmente, pontua "
+            "mais baixo. Quanto maior o índice, mais o município "
+            "**merece atenção prioritária**."
+        )
 
 st.divider()
 st.caption(

@@ -24,13 +24,15 @@ from src.data_loader import (
     carregar_dados,
     montar_tabela_prioritarios,
 )
-from src.theme import destacar_coluna
+from src.theme import CSS_CUSTOMIZADO, destacar_coluna, estilo_texto_tabela
 
 st.set_page_config(
     page_title="Radar Cultural — ZeroKai",
     page_icon="🎭",
     layout="wide",
 )
+
+st.markdown(CSS_CUSTOMIZADO, unsafe_allow_html=True)
 
 PAGINAS = [
     "📊 Visão Geral",
@@ -222,9 +224,9 @@ if pagina_atual == "📊 Visão Geral":
             st.subheader("🚩 Municípios Prioritários")
             tabela_preview = montar_tabela_prioritarios(df_f, n=5)
             st.dataframe(
-                tabela_preview.style.apply(
-                    destacar_coluna, subset=["Índice de Prioridade"]
-                ).format(
+                tabela_preview.style.set_properties(**estilo_texto_tabela())
+                .apply(destacar_coluna, subset=["Índice de Prioridade"])
+                .format(
                     {
                         "Índice de Prioridade": "{:.2f}",
                         "Renda per capita (R$)": "{:.2f}",
@@ -252,14 +254,17 @@ elif pagina_atual == "🗺️ Mapa do Ceará":
 
     with st.expander("🔍 Como esse mapa foi feito"):
         st.markdown(
-            "1. Pegamos as coordenadas (latitude/longitude) oficiais dos "
-            "184 municípios do Ceará, uma por município.\n"
-            "2. Cada ponto no mapa representa um município — o **tamanho** "
-            "do ponto é proporcional à **população** e a **cor** é "
-            "proporcional à **renda per capita** (quanto mais forte o "
-            "terracota, maior a renda).\n"
-            "3. O mapa usa OpenStreetMap como base cartográfica, sem "
-            "custo e sem precisar de chave de API.\n\n"
+            "1. Pegamos o **contorno oficial do Ceará** (fronteira do "
+            "estado) e as coordenadas (latitude/longitude) dos 184 "
+            "municípios.\n"
+            "2. Em vez de usar um mapa de fundo tradicional (que sempre "
+            "mostraria os estados vizinhos), desenhamos **só a forma do "
+            "Ceará** preenchida, com o restante do mundo em branco — assim "
+            "o foco fica 100% no estado.\n"
+            "3. Cada ponto representa um município — o **tamanho** é "
+            "proporcional à **população** e a **cor** é proporcional à "
+            "**renda per capita** (quanto mais forte o terracota, maior a "
+            "renda).\n\n"
             "**Por que um mapa em vez de uma tabela?** Fica muito mais "
             "fácil enxergar de cara o padrão geográfico: renda mais alta "
             "concentrada perto de Fortaleza e do litoral, caindo conforme "
@@ -330,9 +335,9 @@ elif pagina_atual == "🚩 Municípios Prioritários":
     )
     tabela_completa = montar_tabela_prioritarios(df_f, n=n_linhas)
     st.dataframe(
-        tabela_completa.style.apply(
-            destacar_coluna, subset=["Índice de Prioridade"]
-        ).format(
+        tabela_completa.style.set_properties(**estilo_texto_tabela())
+        .apply(destacar_coluna, subset=["Índice de Prioridade"])
+        .format(
             {"Índice de Prioridade": "{:.2f}", "Renda per capita (R$)": "{:.2f}"}
         ),
         use_container_width=True,

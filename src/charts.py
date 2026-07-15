@@ -8,22 +8,77 @@ as páginas dedicadas de cada gráfico (altura maior).
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
+from src.ceara_boundary import CEARA_GEOJSON
 from src.data_loader import EQUIPAMENTOS
-from src.theme import NORDESTE_DISCRETA, NORDESTE_SEQUENCIAL
+from src.mascara_fora_ceara import MASCARA_GEOJSON
+from src.theme import (
+    NORDESTE_DISCRETA,
+    NORDESTE_SEQUENCIAL,
+    TEXTO_ESCURO,
+    aplicar_texto_escuro,
+)
+
+_CEARA_CENTRO = {"lat": -5.32, "lon": -39.34}
+_CEARA_ZOOM = 6.3
+_COR_FUNDO_PAGINA = "#FFFDF8"  # mesma cor de fundo do app (config.toml)
 
 
 def mapa_municipios(df: pd.DataFrame, altura: int = 600):
     """
-    Mapa do Ceará com um ponto por município — tamanho proporcional à
-    população, cor proporcional à renda per capita. Usa OpenStreetMap
-    (não precisa de token do Mapbox).
+    Mapa real (OpenStreetMap, com nomes de cidades e estradas) mostrando
+    só o Ceará — os estados vizinhos ficam "apagados" por uma máscara na
+    cor de fundo do app, e um contorno terracota demarca a fronteira.
+    Tem um ponto por município — tamanho proporcional à população (em
+    escala raiz quadrada, para Fortaleza não "engolir" as bolhas menores),
+    cor proporcional à renda per capita.
     """
-    fig = px.scatter_mapbox(
+    df = df.copy()
+    # Raiz quadrada comprime a escala: Fortaleza (~2,4 mi hab.) não deixa os
+    # municípios pequenos praticamente invisíveis no mapa
+    df["_tamanho"] = df["populacao"] ** 0.5
+
+    fig = go.Figure()
+
+    # Camada 1: máscara cobrindo tudo AO REDOR do Ceará, na cor de fundo do
+    # app — "apaga" visualmente os estados vizinhos sem esconder o mapa
+    # real (ruas, nomes de cidades) dentro do próprio Ceará
+    fig.add_trace(
+        go.Choroplethmapbox(
+            geojson=MASCARA_GEOJSON,
+            locations=["mascara"],
+            z=[1],
+            featureidkey="properties.id",
+            colorscale=[[0, _COR_FUNDO_PAGINA], [1, _COR_FUNDO_PAGINA]],
+            showscale=False,
+            marker_line_width=0,
+            hoverinfo="skip",
+        )
+    )
+
+    # Camada 2: contorno do Ceará (só a borda, dá o acabamento visual)
+    fig.add_trace(
+        go.Choroplethmapbox(
+            geojson=CEARA_GEOJSON,
+            locations=["CE"],
+            z=[1],
+            featureidkey="properties.SIGLA",
+            colorscale=[[0, "#C1440E"], [1, "#C1440E"]],
+            showscale=False,
+            marker_opacity=0,
+            marker_line_color="#C1440E",
+            marker_line_width=2.5,
+            hoverinfo="skip",
+        )
+    )
+
+    # Camada 3: um ponto por município, por cima de tudo
+    pontos = px.scatter_mapbox(
         df,
         lat="lat",
         lon="lon",
-        size="populacao",
+        size="_tamanho",
         color="renda_per_capita",
         hover_name="municipio",
         hover_data={
@@ -31,24 +86,37 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
             "renda_per_capita": ":.2f",
             "n_equipamentos": True,
             "populacao": ":,",
+            "_tamanho": False,
             "lat": False,
             "lon": False,
         },
         color_continuous_scale=NORDESTE_SEQUENCIAL,
-        size_max=32,
-        zoom=6,
-        center={"lat": -5.2, "lon": -39.3},
+        size_max=27,
         labels={
             "renda_per_capita": "Renda per capita (R$)",
             "mesorregiao": "Mesorregião",
             "n_equipamentos": "Nº de equipamentos",
             "populacao": "População",
         },
-    )
+    ).data[0]
+    pontos.marker.sizemin = 3.5
+    fig.add_trace(pontos)
+
     fig.update_layout(
         mapbox_style="open-street-map",
+        mapbox=dict(center=_CEARA_CENTRO, zoom=_CEARA_ZOOM),
         height=altura,
         margin=dict(t=10, l=0, r=0, b=0),
+        coloraxis=dict(
+            colorscale=NORDESTE_SEQUENCIAL,
+            cmin=df["renda_per_capita"].min(),
+            cmax=df["renda_per_capita"].max(),
+            colorbar=dict(
+                title=dict(text="Renda per<br>capita (R$)", font=dict(color=TEXTO_ESCURO)),
+                tickfont=dict(color=TEXTO_ESCURO),
+            ),
+        ),
+        font=dict(color=TEXTO_ESCURO, size=13),
     )
     return fig
 
@@ -71,6 +139,7 @@ def grafico_renda_x_equipamentos(df: pd.DataFrame, altura: int = 420):
         color_discrete_sequence=NORDESTE_DISCRETA,
     )
     fig.update_layout(yaxis=dict(dtick=1), height=altura, margin=dict(t=10))
+    aplicar_texto_escuro(fig)
     return fig
 
 
@@ -94,7 +163,18 @@ def grafico_presenca_equipamentos(df: pd.DataFrame, altura: int = 420):
         color="% dos municípios que têm",
         color_continuous_scale=NORDESTE_SEQUENCIAL,
     )
-    fig.update_layout(coloraxis_showscale=False, height=altura, margin=dict(t=10))
+    fig.update_traces(
+        textposition="outside",
+        textfont=dict(color=TEXTO_ESCURO, size=13),
+        cliponaxis=False,
+    )
+    fig.update_layout(
+        coloraxis_showscale=False,
+        height=altura,
+        margin=dict(t=10),
+        xaxis=dict(range=[0, 112]),
+    )
+    aplicar_texto_escuro(fig)
     return fig
 
 
@@ -127,6 +207,12 @@ def grafico_equidade_por_mesorregiao(df: pd.DataFrame, altura: int = 420):
         },
         color_continuous_scale=NORDESTE_SEQUENCIAL,
     )
+    fig.update_traces(
+        textposition="outside",
+        textfont=dict(color=TEXTO_ESCURO, size=13),
+        cliponaxis=False,
+    )
     fig.update_xaxes(tickangle=-25)
     fig.update_layout(height=altura, margin=dict(t=10))
+    aplicar_texto_escuro(fig)
     return fig

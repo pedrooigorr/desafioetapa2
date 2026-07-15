@@ -1,0 +1,44 @@
+# Sobre os dados
+
+O app já está rodando com os **dados reais** cruzados a partir de:
+- IBGE — MUNIC, Suplemento de Cultura **2014** (equipamentos culturais)
+- Atlas Brasil (PNUD) — população e renda per capita, **Censo 2010**
+
+O arquivo final está em `data/radar_cultural_ce.csv`, com os 184 municípios
+do Ceará e as colunas:
+
+| Coluna | Descrição |
+|---|---|
+| `municipio` | Nome do município |
+| `codigo_ibge` | Código IBGE de 7 dígitos |
+| `mesorregiao` | Uma das 7 mesorregiões do Ceará |
+| `populacao` | População (Censo 2010) |
+| `renda_per_capita` | Renda per capita em R$ (Censo 2010) |
+| `tem_museu` / `tem_teatro_sala_espetaculo` / `tem_cinema` / `tem_biblioteca` | Existência de cada equipamento (MUNIC 2014) |
+| `n_equipamentos` | Soma dos 4 equipamentos acima (0 a 4) |
+
+**Achado relevante:** biblioteca pública existe em **100% dos municípios do
+Ceará**, então ela não ajuda a diferenciar quem tem acesso cultural de quem
+não tem. Por isso os KPIs e o Índice de Prioridade do app usam apenas
+museu + teatro + cinema como equipamentos "raros" — vale citar esse achado
+no relatório do desafio, é um ponto forte para o critério de tratamento de
+dados.
+
+## Como os dados foram cruzados
+
+1. **MUNIC 2014**, aba "Equipamentos" (existência de museu/teatro/cinema/
+   biblioteca) + aba "Variáveis externas" (nome do município), filtrado
+   para código IBGE começando em `23` (Ceará) → 184 municípios.
+2. **Atlas Brasil**, filtrado para linhas com "(CE)" no nome → 184
+   municípios, cruzado com o passo 1 pelo nome do município normalizado
+   (sem acento, maiúsculo) — bateram 184/184, sem nenhuma linha perdida.
+3. **Mesorregião**: cruzada pelo código IBGE do município usando a
+   classificação oficial de mesorregiões do IBGE (código de 4 dígitos:
+   2 primeiros = UF, 2 seguintes = mesorregião).
+
+## Se quiserem atualizar para dados mais recentes
+
+A MUNIC tem edições de Cultura mais novas (2018, 2021) que trazem dados mais
+atuais — e a Renda per capita 2022 (Censo) ainda não está disponível no
+Atlas Brasil, mas o IBGE SIDRA deve publicar em breve. Se baixarem essas
+versões mais novas, é só mandar aqui que refaço o cruzamento.

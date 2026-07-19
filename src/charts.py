@@ -26,14 +26,7 @@ _COR_FUNDO_PAGINA = "#FFFDF8"  # mesma cor de fundo do app (config.toml)
 
 
 def mapa_municipios(df: pd.DataFrame, altura: int = 600):
-    """
-    Mapa real (OpenStreetMap, com nomes de cidades e estradas) mostrando
-    só o Ceará — os estados vizinhos ficam "apagados" por uma máscara na
-    cor de fundo do app, e um contorno terracota demarca a fronteira.
-    Tem um ponto por município — tamanho proporcional à população (em
-    escala raiz quadrada, para Fortaleza não "engolir" as bolhas menores),
-    cor proporcional à renda per capita.
-    """
+
     df = df.copy()
     # Raiz quadrada comprime a escala: Fortaleza (~2,4 mi hab.) não deixa os
     # municípios pequenos praticamente invisíveis no mapa

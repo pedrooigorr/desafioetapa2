@@ -755,7 +755,7 @@ dependencies = [
 requires-dist = [
     { name = "pandas", specifier = ">=2.0" },
     { name = "plotly", specifier = ">=5.20" },
-    { name = "streamlit", specifier = ">=1.36" },
+    { name = "streamlit", specifier = ">=1.37" },
 ]
 
 [[package]]

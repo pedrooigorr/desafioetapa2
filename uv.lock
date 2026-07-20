@@ -747,6 +747,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "pandas" },
+    { name = "pillow" },
     { name = "plotly" },
     { name = "streamlit" },
 ]
@@ -754,6 +755,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "pandas", specifier = ">=2.0" },
+    { name = "pillow", specifier = ">=10.1" },
     { name = "plotly", specifier = ">=5.20" },
     { name = "streamlit", specifier = ">=1.37" },
 ]

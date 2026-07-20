@@ -2,27 +2,33 @@
 Cultura Ceará — Squad ZeroKai
 Desafio dos Dados VIVO 2026 — Etapa 2
 
-Duas features num só app:
+Três features num só app:
   - Painel do Gestor (Radar Cultural): equidade no acesso a equipamentos
     culturais nos 184 municípios do Ceará. Fala com quem decide política
     pública.
-  - Cultura Perto de Mim (Feed Cultural): cadastro de eventos por
-    artistas/produtores locais + feed estilo "stories" pro cidadão
-    descobrir o que rola perto dele. Fala com quem consome cultura.
+  - Demanda Cidadã: o cidadão escolhe seu município, vê o que já existe
+    e registra o que mais gostaria de ver entre o que falta — vira
+    contador público, peso no Índice de Prioridade e sugestão no
+    Simulador.
+  - Simulador & Transparência: simula o impacto de instalar um
+    equipamento num município, e gera cards públicos de cobrança cívica
+    a partir do Índice de Prioridade.
 
 Este arquivo só monta a página. Lógica de dados do Radar está em
 src/data_loader.py, gráficos em src/charts.py, paleta em src/theme.py,
-modelo de eventos em src/eventos.py e a interface do feed em src/feed_ui.py.
+demanda cidadã em src/demanda.py, simulador em src/simulador.py e o
+painel de transparência em src/transparencia.py.
 """
 
 import streamlit as st
 
-from datetime import date
+import pandas as pd
 
 from src.charts import (
     grafico_equidade_por_mesorregiao,
     grafico_presenca_equipamentos,
     mapa_municipios,
+    mapa_simulador,
 )
 from src.data_loader import (
     EQUIPAMENTOS,
@@ -30,13 +36,25 @@ from src.data_loader import (
     carregar_dados,
     montar_tabela_prioritarios,
 )
-from src.eventos import CATEGORIAS, inicializar_estado
-from src.feed_ui import (
-    CSS_FEED,
-    renderizar_card,
-    renderizar_formulario_cadastro,
-    renderizar_timeline,
+from src.demanda import (
+    CATEGORIAS_SIMULAVEIS,
+    MAPA_CATEGORIA_COLUNA,
+    categoria_mais_pedida,
+    categorias_existentes,
+    categorias_faltantes,
+    inicializar_pedidos,
+    indice_prioridade_ajustado,
+    pedidos_do_municipio,
+    peso_demanda,
+    ranking_pedidos_ceara,
+    registrar_pedido,
+    total_pedidos,
 )
+from src.simulador import (
+    TIPOS_EQUIPAMENTO,
+    calcular_simulacao,
+)
+from src.transparencia import gerar_card_municipio, montar_ranking_publico
 from src.theme import CSS_CUSTOMIZADO, destacar_coluna, estilo_texto_tabela
 
 st.set_page_config(
@@ -46,16 +64,19 @@ st.set_page_config(
 )
 
 st.markdown(CSS_CUSTOMIZADO, unsafe_allow_html=True)
-st.markdown(CSS_FEED, unsafe_allow_html=True)
 
-inicializar_estado()
+inicializar_pedidos()
 
 df = carregar_dados()
 
 # ----------------------------------------------------------------------
-# Cabeçalho + seletor de modo (as duas features do projeto)
+# Cabeçalho + seletor de modo (as três features do projeto)
 # ----------------------------------------------------------------------
-MODOS = ["👨‍💼 Painel do Gestor", "🎉 Cultura Perto de Mim"]
+MODOS = [
+    "👨‍💼 Painel do Gestor",
+    "🗳️ Demanda Cidadã",
+    "💰 Simulador & Transparência",
+]
 if "modo_app" not in st.session_state:
     st.session_state.modo_app = MODOS[0]
 
@@ -69,7 +90,7 @@ st.markdown(
     "##### Squad ZeroKai · Desafio dos Dados VIVO 2026 · ODS 4, 10 e 11"
 )
 
-modo_cols = st.columns(2)
+modo_cols = st.columns(3)
 for col, modo in zip(modo_cols, MODOS):
     with col:
         st.button(
@@ -381,11 +402,28 @@ if st.session_state.modo_app == MODOS[0]:
             value=min(30, len(df_f)),
         )
         tabela_completa = montar_tabela_prioritarios(df_f, n=n_linhas)
+        tabela_completa["Pedidos da população"] = tabela_completa["Município"].map(
+            total_pedidos
+        )
+        tabela_completa["Índice Ajustado (c/ demanda)"] = tabela_completa[
+            "Município"
+        ].map(lambda m: peso_demanda(m)) + tabela_completa["Índice de Prioridade"]
+
+        if tabela_completa["Pedidos da população"].sum() > 0:
+            st.caption(
+                "💡 As colunas **Pedidos da população** e **Índice Ajustado** "
+                "vêm dos pedidos registrados em '🗳️ Demanda Cidadã' nesta sessão."
+            )
+
         st.dataframe(
             tabela_completa.style.set_properties(**estilo_texto_tabela())
             .apply(destacar_coluna, subset=["Índice de Prioridade"])
             .format(
-                {"Índice de Prioridade": "{:.2f}", "Renda per capita (R$)": "{:.2f}"}
+                {
+                    "Índice de Prioridade": "{:.2f}",
+                    "Renda per capita (R$)": "{:.2f}",
+                    "Índice Ajustado (c/ demanda)": "{:.2f}",
+                }
             ),
             use_container_width=True,
             hide_index=True,
@@ -408,7 +446,12 @@ if st.session_state.modo_app == MODOS[0]:
                 "alto; um município rico mesmo sem equipamentos, ou um "
                 "município pobre mas já bem servido culturalmente, pontua "
                 "mais baixo. Quanto maior o índice, mais o município "
-                "**merece atenção prioritária**."
+                "**merece atenção prioritária**.\n\n"
+                "O **Índice Ajustado** soma a esse índice um peso pequeno e "
+                "suave (raiz quadrada do total de pedidos, ×0,05) vindo dos "
+                "pedidos registrados em '🗳️ Demanda Cidadã' — assim a "
+                "demanda real da população também conta, sem sozinha virar "
+                "o ranking de cabeça pra baixo."
             )
 
     st.divider()
@@ -419,89 +462,331 @@ if st.session_state.modo_app == MODOS[0]:
     )
 
 # ========================================================================
-# MODO 2 — CULTURA PERTO DE MIM (Feed Cultural)
+# MODO 2 — DEMANDA CIDADÃ
 # ========================================================================
-else:
-    PAGINAS_CIDADAO = ["📰 Feed de Eventos", "🎨 Divulgar Evento"]
-    if "pagina_cidadao" not in st.session_state:
-        st.session_state.pagina_cidadao = PAGINAS_CIDADAO[0]
-
-    def ir_para_cidadao(pagina: str):
-        st.session_state.pagina_cidadao = pagina
-
-    st.sidebar.header("Filtros — Cultura Perto de Mim")
-    municipio_usuario = st.sidebar.selectbox(
-        "📍 Meu município",
-        ["(não informar)"] + sorted(df["municipio"].unique()),
-        help="Usado para calcular a distância até cada evento (simulado, "
-        "sem precisar de GPS real)",
+elif st.session_state.modo_app == MODOS[1]:
+    st.markdown(
+        "### O que falta de cultura na sua cidade? 🗳️\n"
+        "Escolha seu município, veja o que já existe lá — e registre, "
+        "entre o que falta, o que você mais gostaria de ver. Seu pedido "
+        "entra numa contagem pública e ajuda a apontar pra onde o "
+        "investimento deveria ir."
     )
-    categorias_sel = st.sidebar.multiselect(
-        "Categorias", list(CATEGORIAS.keys()), default=list(CATEGORIAS.keys())
-    )
-    so_gratuitos = st.sidebar.checkbox("Só eventos gratuitos")
 
-    nav_cols = st.columns(len(PAGINAS_CIDADAO))
-    for col, pagina in zip(nav_cols, PAGINAS_CIDADAO):
+    municipio_cidadao = st.selectbox(
+        "📍 Meu município", sorted(df["municipio"].unique())
+    )
+    linha_municipio = df.loc[df["municipio"] == municipio_cidadao].iloc[0]
+
+    st.markdown(f"##### O que {municipio_cidadao} já tem")
+    existentes = categorias_existentes(df, municipio_cidadao)
+    cols_existentes = st.columns(4)
+    for col, (categoria, _coluna) in zip(cols_existentes, MAPA_CATEGORIA_COLUNA.items()):
         with col:
-            st.button(
-                pagina,
-                use_container_width=True,
-                type="primary"
-                if st.session_state.pagina_cidadao == pagina
-                else "secondary",
-                on_click=ir_para_cidadao,
-                args=(pagina,),
+            tem = categoria in existentes
+            cor = "#4C6444" if tem else "#C1440E"
+            simbolo = "✓" if tem else "✗"
+            st.markdown(
+                f'<div style="text-align:center; padding:14px; border-radius:12px; '
+                f'background:{cor}; color:#FFFDF8; font-weight:700;">'
+                f"{simbolo}<br>{categoria}</div>",
+                unsafe_allow_html=True,
             )
 
     st.divider()
 
-    if st.session_state.pagina_cidadao == "📰 Feed de Eventos":
+    st.markdown(f"##### O que você mais gostaria de ver em {municipio_cidadao}?")
+    st.caption(
+        "As opções abaixo são só o que falta — incluindo tipos que a "
+        "gente não tem como confirmar se existem hoje (Centro Cultural, "
+        "Oficina Itinerante), mas que valem como pedido de qualquer jeito."
+    )
+    opcoes_faltantes = categorias_faltantes(df, municipio_cidadao)
+    categoria_escolhida = st.radio(
+        "Escolha uma opção", opcoes_faltantes, label_visibility="collapsed"
+    )
+
+    if st.button("🗳️ Registrar meu pedido", type="primary", use_container_width=True):
+        registrar_pedido(municipio_cidadao, categoria_escolhida)
+        st.success(f"Pedido registrado: {categoria_escolhida} em {municipio_cidadao}!")
+        st.rerun()
+
+    st.divider()
+
+    # --------------------------------------------------------------
+    # Contador público
+    # --------------------------------------------------------------
+    total_local = total_pedidos(municipio_cidadao)
+    categoria_top, votos_top = categoria_mais_pedida(municipio_cidadao)
+
+    if total_local > 0:
         st.markdown(
-            "### O que tá rolando perto de você? 🎉\n"
-            "Eventos culturais publicados por artistas, coletivos e "
-            "produtores do Ceará — música, teatro, feira, exposição e "
-            "muito mais, direto da sua região."
+            f"### 📣 {votos_top} pessoa{'s' if votos_top != 1 else ''} em "
+            f"**{municipio_cidadao}** pede{'m' if votos_top != 1 else ''} "
+            f"**{categoria_top}**"
         )
-
-        eventos_ordenados = sorted(
-            st.session_state.eventos, key=lambda e: e["data_evento"]
+        pedidos_municipio = pedidos_do_municipio(municipio_cidadao)
+        tabela_pedidos = pd.DataFrame(
+            {"Categoria": list(pedidos_municipio.keys()), "Pedidos": list(pedidos_municipio.values())}
+        ).sort_values("Pedidos", ascending=False)
+        st.dataframe(
+            tabela_pedidos.style.set_properties(**estilo_texto_tabela()),
+            use_container_width=True,
+            hide_index=True,
         )
-        eventos_filtrados = [
-            ev
-            for ev in eventos_ordenados
-            if ev["categoria"] in categorias_sel
-            and (not so_gratuitos or ev.get("gratuito"))
-            and ev["data_evento"] >= date.today()
-        ]
-
-        st.markdown("##### 🗓️ Próximos dias")
-        renderizar_timeline(eventos_filtrados)
-
-        st.markdown("##### 📰 Eventos")
-        if not eventos_filtrados:
-            st.info(
-                "Nenhum evento encontrado com esses filtros. Tenta ajustar "
-                "as categorias na barra lateral, ou publique o seu em "
-                "'🎨 Divulgar Evento'!"
-            )
-        else:
-            colunas = st.columns(2)
-            for i, evento in enumerate(eventos_filtrados):
-                with colunas[i % 2]:
-                    municipio_para_distancia = (
-                        None
-                        if municipio_usuario == "(não informar)"
-                        else municipio_usuario
-                    )
-                    renderizar_card(evento, df, municipio_para_distancia)
-
     else:
-        renderizar_formulario_cadastro(df)
+        st.info(
+            f"Ainda não há pedidos registrados pra {municipio_cidadao} "
+            "nesta sessão. Seja o primeiro!"
+        )
+
+    st.markdown("##### 📊 O que o Ceará está pedindo")
+    ranking_geral = ranking_pedidos_ceara()
+    if ranking_geral:
+        st.dataframe(
+            pd.DataFrame(ranking_geral)
+            .rename(
+                columns={
+                    "municipio": "Município",
+                    "categoria_mais_pedida": "Mais pedido",
+                    "votos_categoria": "Votos no mais pedido",
+                    "total_pedidos": "Total de pedidos",
+                }
+            )
+            .style.set_properties(**estilo_texto_tabela()),
+            use_container_width=True,
+            hide_index=True,
+        )
+    else:
+        st.caption("Nenhum pedido registrado ainda em nenhum município.")
+
+    with st.expander("🔍 Como esse pedido se conecta com o resto do app"):
+        st.markdown(
+            "1. **Índice de Prioridade** (Painel do Gestor): cada pedido "
+            "adiciona um peso pequeno e suave (raiz quadrada do total de "
+            "pedidos) ao índice do município — dá pra ver a versão "
+            "ajustada na página '🚩 Municípios Prioritários'.\n"
+            "2. **Simulador de Investimento**: ao clicar num município que "
+            "já tem pedidos registrados, o simulador sugere automaticamente "
+            "simular o tipo de equipamento mais pedido pela população "
+            "dali (quando esse tipo for simulável — museu, teatro ou "
+            "cinema).\n\n"
+            "Tudo isso é calculado só com os pedidos desta sessão do "
+            "navegador — reinicia ao recarregar a página, mesma decisão "
+            "de escopo do resto do protótipo."
+        )
+
+
+# ========================================================================
+# MODO 3 — SIMULADOR DE INVESTIMENTO
+# ========================================================================
+else:
+    st.markdown(
+        "### Onde investir pra reduzir o deserto cultural? 💰\n"
+        "Escolha um tipo de equipamento e um raio de atuação na barra "
+        "lateral, depois **clique num município no mapa** — o sistema "
+        "calcula quantas pessoas passariam a ter acesso cultural e o "
+        "quanto isso reduz o déficit da mesorregião."
+    )
+
+    st.sidebar.header("Filtros — Simulador")
+    tipo_label = st.sidebar.selectbox(
+        "Tipo de equipamento a simular",
+        list(TIPOS_EQUIPAMENTO.values()),
+        key="sel_tipo_equipamento",
+    )
+    coluna_equipamento = next(
+        k for k, v in TIPOS_EQUIPAMENTO.items() if v == tipo_label
+    )
+    raio_km = st.sidebar.slider(
+        "Raio de atuação (km)",
+        min_value=5,
+        max_value=100,
+        value=20,
+        help="Distância que o equipamento consegue atender — quem mora "
+        "dentro desse raio passa a ser considerado 'com acesso'",
+    )
+
+    st.caption(
+        f"🟢 verde = município já tem {tipo_label.lower()} · 🔴 terracota = "
+        "deserto cultural para esse equipamento. Clique num ponto do mapa."
+    )
+
+    evento_mapa = st.plotly_chart(
+        mapa_simulador(df, coluna_equipamento, altura=600),
+        on_select="rerun",
+        selection_mode="points",
+        key="mapa_simulador_plot",
+        use_container_width=True,
+    )
+
+    municipio_clicado = None
+    if evento_mapa and evento_mapa.selection and evento_mapa.selection.points:
+        ponto = evento_mapa.selection.points[0]
+        customdata = ponto.get("customdata")
+        if customdata:
+            municipio_clicado = customdata[0]
+
+    if municipio_clicado:
+        categoria_pedida, votos_pedidos = categoria_mais_pedida(municipio_clicado)
+        if categoria_pedida and categoria_pedida in CATEGORIAS_SIMULAVEIS:
+            if categoria_pedida != tipo_label:
+                col_sugestao, col_botao = st.columns([3, 1])
+                with col_sugestao:
+                    st.info(
+                        f"💡 A população de **{municipio_clicado}** pediu "
+                        f"**{categoria_pedida}** ({votos_pedidos} "
+                        f"pedido{'s' if votos_pedidos != 1 else ''}) em "
+                        "'🗳️ Demanda Cidadã' — quer simular isso?"
+                    )
+                with col_botao:
+                    if st.button(
+                        f"Simular {categoria_pedida}", use_container_width=True
+                    ):
+                        st.session_state["sel_tipo_equipamento"] = categoria_pedida
+                        st.rerun()
+        elif categoria_pedida:
+            st.caption(
+                f"ℹ️ A população de {municipio_clicado} pediu mais "
+                f"'{categoria_pedida}' em '🗳️ Demanda Cidadã', mas esse "
+                "tipo ainda não é simulável nesta versão (só museu, "
+                "teatro e cinema)."
+            )
+
+    st.divider()
+
+    if municipio_clicado:
+        resultado = calcular_simulacao(df, municipio_clicado, coluna_equipamento, raio_km)
+        with st.container(border=True):
+            st.subheader(f"📍 Simulação: {tipo_label} em {municipio_clicado}")
+            populacao_fmt = f"{resultado['populacao_beneficiada']:,}".replace(",", ".")
+            st.markdown(
+                f"Se um(a) **{tipo_label.lower()}** fosse instalado(a) em "
+                f"**{municipio_clicado}**, cerca de **{populacao_fmt} pessoas** "
+                f"passariam a ter acesso cultural em menos de **{raio_km} km**, "
+                f"reduzindo o déficit de {tipo_label.lower()} na mesorregião "
+                f"**{resultado['mesorregiao']}** em "
+                f"**{resultado['reducao_relativa']:.0f}%**."
+            )
+            c1, c2, c3 = st.columns(3)
+            c1.metric("População beneficiada", populacao_fmt)
+            c2.metric(
+                "Municípios que passam a ter acesso",
+                resultado["n_municipios_beneficiados"],
+            )
+            c3.metric(
+                "Redução do déficit na mesorregião",
+                f"{resultado['reducao_relativa']:.0f}%",
+            )
+            if resultado["municipios_beneficiados"]:
+                st.caption(
+                    "Municípios beneficiados: "
+                    + ", ".join(resultado["municipios_beneficiados"])
+                )
+    else:
+        st.info("👆 Clique em um ponto do mapa para rodar a simulação.")
+
+    with st.expander("🔍 Como essa simulação é calculada"):
+        st.markdown(
+            "1. Ao clicar num município, calculamos a **distância real** "
+            "(fórmula de haversine, mesma usada no Feed Cultural) entre "
+            "ele e todos os outros 183 municípios do Ceará.\n"
+            "2. Município **dentro do raio escolhido** e que **hoje não "
+            "tem** o equipamento selecionado → conta como **beneficiado** "
+            "(passaria a ter acesso).\n"
+            "3. A **população beneficiada** soma a população de todos "
+            "esses municípios (incluindo o próprio alvo, se ele também "
+            "não tinha o equipamento).\n"
+            "4. A **redução do déficit da mesorregião** compara o % de "
+            "municípios sem o equipamento na mesorregião do alvo, antes e "
+            "depois de considerar quem passaria a ter acesso."
+        )
+
+    st.divider()
+
+    # --------------------------------------------------------------
+    # Painel de Transparência do Gestor
+    # --------------------------------------------------------------
+    st.subheader("📣 Painel de Transparência do Gestor")
+    st.markdown(
+        "A versão **pública** do Índice de Prioridade: um ranking de fácil "
+        "leitura de quais municípios têm o maior deserto cultural do "
+        "Ceará — com cards prontos pra baixar e compartilhar. A ideia é "
+        "que o mesmo dado usado pra planejamento também vire "
+        "**ferramenta de cobrança cívica**, não só de análise interna."
+    )
+    st.caption(
+        "100% dado real — mesmo Índice de Prioridade do Radar Cultural, "
+        "sem nenhum valor ilustrativo aqui."
+    )
+
+    ranking_publico = montar_ranking_publico(df, n=30)
+    st.dataframe(
+        ranking_publico.style.set_properties(**estilo_texto_tabela())
+        .apply(destacar_coluna, subset=["Índice de Prioridade"])
+        .format(
+            {
+                "Índice de Prioridade": "{:.2f}",
+                "Renda per capita (R$)": "{:.2f}",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
+        height=420,
+    )
+
+    st.markdown("##### 🖼️ Gerar card pra compartilhar")
+    municipio_card = st.selectbox(
+        "Escolha um município do ranking acima",
+        ranking_publico["Município"].tolist(),
+    )
+    linha_escolhida = ranking_publico.loc[
+        ranking_publico["Município"] == municipio_card
+    ].iloc[0]
+
+    col_preview, col_info = st.columns([1, 1.3])
+    with col_preview:
+        card_png = gerar_card_municipio(linha_escolhida, len(ranking_publico))
+        st.image(card_png, width=320)
+        st.download_button(
+            "📥 Baixar card (PNG)",
+            data=card_png,
+            file_name=f"radar_cultural_{municipio_card.lower().replace(' ', '_')}.png",
+            mime="image/png",
+            use_container_width=True,
+        )
+    with col_info:
+        st.markdown(
+            f"**{municipio_card}** é o **{int(linha_escolhida['#'])}º** "
+            f"município com maior déficit cultural do ranking (de "
+            f"{len(ranking_publico)} analisados).\n\n"
+            f"- Mesorregião: {linha_escolhida['Mesorregião']}\n"
+            f"- População: {int(linha_escolhida['População']):,}".replace(",", ".")
+            + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$)']:.2f}\n"
+            f"- Equipamentos culturais (museu/teatro/cinema): "
+            f"{int(linha_escolhida['Equipamentos (de 3)'])} de 3\n"
+            f"- Índice de Prioridade: {linha_escolhida['Índice de Prioridade']:.2f}"
+        )
+        st.caption(
+            "Formato retrato (1080×1350), pronto pra Stories/Instagram/"
+            "WhatsApp — o objetivo é que qualquer pessoa, jornalista ou "
+            "vereador possa baixar e cobrar publicamente."
+        )
+
+    with st.expander("🔍 Como esse ranking foi feito"):
+        st.markdown(
+            "Usa exatamente o mesmo **Índice de Prioridade** calculado no "
+            "Radar Cultural (ver a explicação completa na página "
+            "'🚩 Municípios Prioritários' do Painel do Gestor) — nenhum "
+            "dado novo ou estimado entra aqui. A diferença é só de "
+            "**formato**: em vez de uma tabela técnica, um card visual "
+            "pensado pra circular fora do ambiente de gestão — em redes "
+            "sociais, grupos de WhatsApp, matérias de jornal local."
+        )
 
     st.divider()
     st.caption(
-        "Feed Cultural — protótipo. Os eventos cadastrados ficam salvos "
-        "só durante essa sessão do navegador (somem ao recarregar a "
-        "página). Ver data/README.md para detalhes."
+        "Simulador & Transparência — protótipo. Fórmulas de distância e "
+        "impacto, e o ranking do Painel de Transparência, usam dados "
+        "reais do Radar Cultural."
     )

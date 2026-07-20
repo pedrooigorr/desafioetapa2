@@ -42,3 +42,54 @@ A MUNIC tem edições de Cultura mais novas (2018, 2021) que trazem dados mais
 atuais — e a Renda per capita 2022 (Censo) ainda não está disponível no
 Atlas Brasil, mas o IBGE SIDRA deve publicar em breve. Se baixarem essas
 versões mais novas, é só mandar aqui que refaço o cruzamento.
+
+## Demanda Cidadã (substituiu o antigo "Cultura Perto de Mim")
+
+O segundo modo do app ("🗳️ Demanda Cidadã") deixou de ser um feed de
+descoberta de eventos e virou uma ferramenta de coleta de demanda: o
+cidadão escolhe o município dele, vê o que já existe (dado real do Radar
+Cultural) e registra — entre o que falta — o que mais gostaria de ver.
+Inclui duas categorias "aspiracionais" (Centro Cultural, Oficina
+Itinerante Cultural) que não têm coluna no dataset real, então sempre
+aparecem como opção de pedido, em qualquer município.
+
+Isso se conecta com o resto do app de duas formas, ambas em
+`src/demanda.py`:
+
+1. **Índice de Prioridade ajustado**: cada pedido soma um peso pequeno e
+   suave (raiz quadrada do total de pedidos × 0,05) ao Índice de
+   Prioridade do município — visível na página "🚩 Municípios
+   Prioritários" do Painel do Gestor, numa coluna separada (o índice
+   original, calculado só com dado real, nunca é sobrescrito).
+2. **Sugestão no Simulador**: ao clicar num município que já tem pedidos
+   registrados, o Simulador de Investimento sugere automaticamente
+   simular o tipo de equipamento mais pedido pela população dali (quando
+   esse tipo for simulável — museu, teatro ou cinema; biblioteca e as
+   categorias aspiracionais ainda não entram no Simulador).
+
+Persistência: sessão do navegador, como o resto do protótipo — os
+pedidos somem ao recarregar a página. Os arquivos antigos do Feed
+(`src/eventos.py`, `src/feed_ui.py`) não são mais usados pelo
+`streamlit_app.py` e podem ser apagados do repositório.
+
+## Painel de Transparência do Gestor (Simulador & Transparência)
+
+O terceiro modo do app ("💰 Simulador & Transparência") tem duas partes:
+
+1. **Simulador de Investimento** — mapa clicável, calcula com dados 100%
+   reais (mesmas coordenadas e fórmula de distância do resto do app) o
+   impacto de instalar um equipamento cultural num município.
+2. **Painel de Transparência** — versão pública do Índice de Prioridade
+   (o mesmo já usado em "🚩 Municípios Prioritários"), com cards em
+   formato retrato prontos pra baixar e compartilhar em redes sociais —
+   pensado como ferramenta de cobrança cívica, não só de planejamento
+   interno. Gerado com Pillow (`src/transparencia.py`), sem depender de
+   nenhuma fonte de dado externa.
+
+**Nota:** cogitamos incluir também um "Termômetro de Investimento
+Público" cruzando o Índice de Prioridade com investimento público real
+(via SALIC/Lei Rouanet) — a API existe e é pública, mas o formato dela
+(sem filtro confiável por UF, registros de projeto enormes) tornou a
+extração inviável dentro do tempo do desafio. Decidimos substituir por
+este Painel de Transparência, que já entrega o mesmo tipo de pressão de
+accountability usando só dado que já tínhamos validado.

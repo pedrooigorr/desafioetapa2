@@ -26,7 +26,14 @@ _COR_FUNDO_PAGINA = "#FFFDF8"  # mesma cor de fundo do app (config.toml)
 
 
 def mapa_municipios(df: pd.DataFrame, altura: int = 600):
-
+    """
+    Mapa real (OpenStreetMap, com nomes de cidades e estradas) mostrando
+    só o Ceará — os estados vizinhos ficam "apagados" por uma máscara na
+    cor de fundo do app, e um contorno terracota demarca a fronteira.
+    Tem um ponto por município — tamanho proporcional à população (em
+    escala raiz quadrada, para Fortaleza não "engolir" as bolhas menores),
+    cor proporcional à renda per capita.
+    """
     df = df.copy()
     # Raiz quadrada comprime a escala: Fortaleza (~2,4 mi hab.) não deixa os
     # municípios pequenos praticamente invisíveis no mapa
@@ -111,6 +118,77 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
         ),
         font=dict(color=TEXTO_ESCURO, size=13),
     )
+    return fig
+
+
+def mapa_simulador(df: pd.DataFrame, coluna_equipamento: str, altura: int = 600):
+    """
+    Mapa clicável para o Simulador de Investimento: cada município aparece
+    colorido conforme TEM ou NÃO TEM o equipamento escolhido — verde
+    "cactos" para quem tem, terracota para quem não tem (deserto cultural).
+    Usa `custom_data=["municipio"]` para que o clique no ponto (via
+    `st.plotly_chart(..., on_select="rerun")`) identifique qual município
+    foi selecionado.
+    """
+    df = df.copy()
+    df["_status"] = df[coluna_equipamento].map({True: "Tem", False: "Não tem"})
+    df["_tamanho"] = df["populacao"] ** 0.5
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Choroplethmapbox(
+            geojson=MASCARA_GEOJSON,
+            locations=["mascara"],
+            z=[1],
+            featureidkey="properties.id",
+            colorscale=[[0, _COR_FUNDO_PAGINA], [1, _COR_FUNDO_PAGINA]],
+            showscale=False,
+            marker_line_width=0,
+            hoverinfo="skip",
+        )
+    )
+    fig.add_trace(
+        go.Choroplethmapbox(
+            geojson=CEARA_GEOJSON,
+            locations=["CE"],
+            z=[1],
+            featureidkey="properties.SIGLA",
+            colorscale=[[0, "#C1440E"], [1, "#C1440E"]],
+            showscale=False,
+            marker_opacity=0,
+            marker_line_color="#C1440E",
+            marker_line_width=2.5,
+            hoverinfo="skip",
+        )
+    )
+
+    pontos_fig = px.scatter_mapbox(
+        df,
+        lat="lat",
+        lon="lon",
+        size="_tamanho",
+        color="_status",
+        custom_data=["municipio"],
+        hover_name="municipio",
+        color_discrete_map={"Tem": "#4C6444", "Não tem": "#C1440E"},
+        size_max=26,
+        labels={"_status": "Situação"},
+    )
+    for trace in pontos_fig.data:
+        trace.marker.sizemin = 4
+        trace.hovertemplate = "<b>%{customdata[0]}</b><extra></extra>"
+        fig.add_trace(trace)
+
+    fig.update_layout(
+        mapbox_style="open-street-map",
+        mapbox=dict(center=_CEARA_CENTRO, zoom=_CEARA_ZOOM),
+        height=altura,
+        margin=dict(t=10, l=0, r=0, b=0),
+        legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0),
+        clickmode="event+select",
+    )
+    aplicar_texto_escuro(fig)
     return fig
 
 

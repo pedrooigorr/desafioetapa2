@@ -175,13 +175,9 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
             f"R$ {linha_ranking['Renda per capita (R$)']:.2f}".replace(".", ","),
         ),
         (
-           (
-    "EQUIPAMENTOS CULTURAIS",
-    (
-        f"{int(linha_ranking['Equipamentos (de 3)'])} de 3 "
-        "(museu, teatro, cinema)"
-    ),
-),
+            "EQUIPAMENTOS CULTURAIS",
+            (f"{int(linha_ranking['Equipamentos (de 3)'])} de 3 "
+            "(museu, teatro, cinema)"),
         ),
         ("ÍNDICE DE PRIORIDADE", f"{linha_ranking['Índice de Prioridade']:.2f}"),
     ]

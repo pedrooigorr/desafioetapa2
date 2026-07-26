@@ -267,12 +267,14 @@ header[data-testid="stHeader"] button {
     filter: brightness(0) invert(1);
 }
 
-/* Reduz o respiro padrão do Streamlit acima do conteúdo, pra o header
-   colado ficar bem rente à barra de ferramentas, sem espaço branco
-   entre as duas */
+/* Reduz o respiro padrão do Streamlit acima e abaixo do conteúdo — em
+   cima pra o header ficar rente à barra de ferramentas, embaixo pra o
+   footer ficar colado no final da página, sem sobrar margem branca
+   depois dele */
 div[data-testid="stMainBlockContainer"],
 .block-container {
     padding-top: 0.5rem !important;
+    padding-bottom: 0 !important;
 }
 
 /* Header — barra terracota cheia, contrasta com o fundo claro do app.

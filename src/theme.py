@@ -238,9 +238,11 @@ div[data-testid="stMetricLabel"] {
 }
 
 /* O Streamlit limita o conteúdo a uma coluna central e alguns dos
-   contêineres pai cortam (overflow: hidden) qualquer coisa que tente
+   contêineres pai cortam (overflow-x: hidden) qualquer coisa que tente
    vazar pra fora dessa coluna — isso libera esse corte especificamente
-   pros elementos que precisam ser full-bleed (header/footer) */
+   pros elementos que precisam ser full-bleed (header/footer).
+   IMPORTANTE: só o eixo X — mexer no Y quebra o scroll vertical da página,
+   que o Streamlit implementa via overflow-y nesses mesmos containers. */
 [data-testid="stAppViewContainer"],
 [data-testid="stMain"],
 section.main,
@@ -248,7 +250,7 @@ section.main,
 .block-container,
 [data-testid="stVerticalBlockBorderWrapper"],
 [data-testid="stVerticalBlock"] {
-    overflow: visible !important;
+    overflow-x: visible !important;
 }
 html, body {
     overflow-x: hidden !important;

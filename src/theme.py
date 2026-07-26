@@ -237,11 +237,40 @@ div[data-testid="stMetricLabel"] {
     font-weight: 700 !important;
 }
 
+/* O Streamlit limita o conteúdo a uma coluna central e alguns dos
+   contêineres pai cortam (overflow: hidden) qualquer coisa que tente
+   vazar pra fora dessa coluna — isso libera esse corte especificamente
+   pros elementos que precisam ser full-bleed (header/footer) */
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+section.main,
+[data-testid="stMainBlockContainer"],
+.block-container,
+[data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stVerticalBlock"] {
+    overflow: visible !important;
+}
+html, body {
+    overflow-x: hidden !important;
+}
+
+/* Barra de ferramentas fixa do Streamlit (Share, estrela, lápis, GitHub) —
+   pinta de laranja igual ao header, pra virar uma continuação dele em vez
+   de ficar cortando o título por cima */
+header[data-testid="stHeader"] {
+    background: #C1440E !important;
+}
+header[data-testid="stHeader"] svg,
+header[data-testid="stHeader"] button {
+    filter: brightness(0) invert(1);
+}
+
 /* Reduz o respiro padrão do Streamlit acima do conteúdo, pra o header
-   colado ficar bem rente ao topo da página */
+   colado ficar bem rente à barra de ferramentas, sem espaço branco
+   entre as duas */
 div[data-testid="stMainBlockContainer"],
 .block-container {
-    padding-top: 1.5rem !important;
+    padding-top: 0.5rem !important;
 }
 
 /* Header — barra terracota cheia, contrasta com o fundo claro do app.
@@ -261,7 +290,6 @@ div[data-testid="stMainBlockContainer"],
     right: 50%;
     margin-left: -50vw;
     margin-right: -50vw;
-    margin-top: -1.5rem;
     margin-bottom: 20px;
 }
 .radar-header-icone {

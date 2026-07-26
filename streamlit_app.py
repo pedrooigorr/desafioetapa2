@@ -378,6 +378,7 @@ if st.session_state.modo_app == MODOS[0]:
                 )
 
     elif pagina_atual == "🗺️ Mapa do Ceará":
+        st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
         st.subheader("🗺️ Mapa do Ceará — renda e população por município")
         st.caption(
             "Cada ponto é um município — o tamanho indica a população e a cor "
@@ -406,6 +407,7 @@ if st.session_state.modo_app == MODOS[0]:
             )
 
     elif pagina_atual == "🏛️ Presença de Equipamentos":
+        st.markdown(barra_secao("#F2A93B"), unsafe_allow_html=True)
         st.subheader("🏛️ Presença de cada equipamento cultural")
         st.caption(
             "% dos municípios filtrados que possuem cada tipo de equipamento "
@@ -430,6 +432,7 @@ if st.session_state.modo_app == MODOS[0]:
             )
 
     elif pagina_atual == "📈 Equidade por Mesorregião":
+        st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
         st.subheader("🗺️ Equidade cultural por Mesorregião")
         st.caption(
             "% de municípios sem museu, teatro ou cinema em cada mesorregião — "
@@ -458,6 +461,7 @@ if st.session_state.modo_app == MODOS[0]:
             )
 
     elif pagina_atual == "🚩 Municípios Prioritários":
+        st.markdown(barra_secao("#8C1C13"), unsafe_allow_html=True)
         st.subheader("🚩 Municípios prioritários (baixa renda + pouco acesso)")
         st.caption(
             "Ranking pelo Índice de Prioridade: combina ausência de museu, "
@@ -576,7 +580,12 @@ elif st.session_state.modo_app == MODOS[1]:
         "Escolha uma opção", opcoes_faltantes, label_visibility="collapsed"
     )
 
-    if st.button("🗳️ Registrar meu pedido", type="primary", use_container_width=True):
+    col_botao, _ = st.columns([1, 3])
+    with col_botao:
+        se_registrou = st.button(
+            "🗳️ Registrar meu pedido", type="primary", use_container_width=True
+        )
+    if se_registrou:
         registrar_pedido(municipio_cidadao, categoria_escolhida)
         st.success(f"Pedido registrado: {categoria_escolhida} em {municipio_cidadao}!")
         st.rerun()

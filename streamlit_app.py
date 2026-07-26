@@ -200,41 +200,96 @@ if st.session_state.modo_app == MODOS[0]:
         )
 
     # --------------------------------------------------------------
-    # Filtros (sidebar)
+    # Filtros (expander horizontal, agrupados por categoria)
     # --------------------------------------------------------------
-    st.sidebar.header("Filtros — Painel do Gestor")
-
-    mesorregioes_sel = st.sidebar.multiselect(
-        "Mesorregião",
-        sorted(df["mesorregiao"].unique()),
-        default=sorted(df["mesorregiao"].unique()),
-    )
-
-    excluir_fortaleza = st.sidebar.checkbox(
-        "Excluir Fortaleza da análise",
-        value=False,
-        help="Fortaleza concentra grande parte da população e dos equipamentos "
-        "— desmarque para ver só o padrão do interior",
-    )
-
+    todas_mesorregioes = sorted(df["mesorregiao"].unique())
     pop_min, pop_max = int(df["populacao"].min()), int(df["populacao"].max())
-    faixa_pop = st.sidebar.slider(
-        "Faixa de população", pop_min, pop_max, (pop_min, pop_max)
+
+    def _n_filtros_ativos_gestor() -> int:
+        n = 0
+        if set(st.session_state.get("filtro_mesorregioes", todas_mesorregioes)) != set(
+            todas_mesorregioes
+        ):
+            n += 1
+        if st.session_state.get("filtro_excluir_fortaleza", False):
+            n += 1
+        if st.session_state.get("filtro_faixa_pop", (pop_min, pop_max)) != (
+            pop_min,
+            pop_max,
+        ):
+            n += 1
+        if st.session_state.get("filtro_equip", []):
+            n += 1
+        return n
+
+    def _limpar_filtros_gestor():
+        st.session_state.filtro_mesorregioes = todas_mesorregioes
+        st.session_state.filtro_excluir_fortaleza = False
+        st.session_state.filtro_faixa_pop = (pop_min, pop_max)
+        st.session_state.filtro_equip = []
+
+    n_ativos = _n_filtros_ativos_gestor()
+    rotulo_filtros = "🔎 Filtros" + (
+        f" · {n_ativos} ativo{'s' if n_ativos != 1 else ''}" if n_ativos else ""
     )
 
-    equip_filtro = st.sidebar.multiselect(
-        "Mostrar apenas municípios SEM:",
-        options=list(EQUIPAMENTOS.values()),
-        default=[],
-        help="Selecione um ou mais equipamentos para ver só quem não tem",
-    )
+    with st.expander(rotulo_filtros, expanded=False):
+        col_titulo, col_limpar = st.columns([4, 1])
+        with col_titulo:
+            st.caption("Ajuste o recorte de municípios usado em todos os gráficos abaixo.")
+        with col_limpar:
+            st.button(
+                "🧹 Limpar filtros",
+                on_click=_limpar_filtros_gestor,
+                use_container_width=True,
+                disabled=n_ativos == 0,
+            )
+
+        st.markdown("**📍 Localização**")
+        col_meso, col_fortaleza = st.columns([3, 1])
+        with col_meso:
+            mesorregioes_sel = st.pills(
+                "Mesorregião",
+                todas_mesorregioes,
+                selection_mode="multi",
+                default=todas_mesorregioes,
+                key="filtro_mesorregioes",
+                label_visibility="collapsed",
+            )
+        with col_fortaleza:
+            excluir_fortaleza = st.checkbox(
+                "Excluir Fortaleza",
+                key="filtro_excluir_fortaleza",
+                help="Fortaleza concentra grande parte da população e dos "
+                "equipamentos — marque para ver só o padrão do interior",
+            )
+
+        st.markdown("**👥 População**")
+        faixa_pop = st.slider(
+            "Faixa de população",
+            pop_min,
+            pop_max,
+            value=(pop_min, pop_max),
+            key="filtro_faixa_pop",
+            label_visibility="collapsed",
+        )
+
+        st.markdown("**🏛️ Equipamentos**")
+        equip_filtro = st.pills(
+            "Mostrar apenas municípios SEM:",
+            options=list(EQUIPAMENTOS.values()),
+            selection_mode="multi",
+            default=[],
+            key="filtro_equip",
+            help="Selecione um ou mais equipamentos para ver só quem não tem",
+        )
 
     df_f = aplicar_filtros(
         df,
-        mesorregioes=mesorregioes_sel,
+        mesorregioes=mesorregioes_sel or [],
         faixa_populacao=faixa_pop,
         excluir_fortaleza=excluir_fortaleza,
-        equipamentos_ausentes=equip_filtro,
+        equipamentos_ausentes=equip_filtro or [],
     )
 
     # --------------------------------------------------------------
@@ -669,23 +724,25 @@ else:
         "quanto isso reduz o déficit da mesorregião."
     )
 
-    st.sidebar.header("Filtros — Simulador")
-    tipo_label = st.sidebar.selectbox(
-        "Tipo de equipamento a simular",
-        list(TIPOS_EQUIPAMENTO.values()),
-        key="sel_tipo_equipamento",
-    )
+    col_tipo, col_raio = st.columns([1.3, 1])
+    with col_tipo:
+        tipo_label = st.selectbox(
+            "Tipo de equipamento a simular",
+            list(TIPOS_EQUIPAMENTO.values()),
+            key="sel_tipo_equipamento",
+        )
     coluna_equipamento = next(
         k for k, v in TIPOS_EQUIPAMENTO.items() if v == tipo_label
     )
-    raio_km = st.sidebar.slider(
-        "Raio de atuação (km)",
-        min_value=5,
-        max_value=100,
-        value=20,
-        help="Distância que o equipamento consegue atender — quem mora "
-        "dentro desse raio passa a ser considerado 'com acesso'",
-    )
+    with col_raio:
+        raio_km = st.slider(
+            "Raio de atuação (km)",
+            min_value=5,
+            max_value=100,
+            value=20,
+            help="Distância que o equipamento consegue atender — quem mora "
+            "dentro desse raio passa a ser considerado 'com acesso'",
+        )
 
     st.caption(
         f"🟢 verde = município já tem {tipo_label.lower()} · 🔴 terracota = "

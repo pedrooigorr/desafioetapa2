@@ -127,16 +127,16 @@ def aplicar_texto_escuro(fig, tamanho_fonte: int = 13):
     usada em todos os gráficos do app para manter a mesma identidade visual.
     """
     fig.update_layout(
-        font=dict(color=TEXTO_ESCURO, size=tamanho_fonte),
-        xaxis=dict(
-            title_font=dict(color=TEXTO_ESCURO, size=tamanho_fonte + 1),
-            tickfont=dict(color=TEXTO_ESCURO, size=tamanho_fonte),
-        ),
-        yaxis=dict(
-            title_font=dict(color=TEXTO_ESCURO, size=tamanho_fonte + 1),
-            tickfont=dict(color=TEXTO_ESCURO, size=tamanho_fonte),
-        ),
-        legend=dict(font=dict(color=TEXTO_ESCURO, size=tamanho_fonte)),
+        font={"color": TEXTO_ESCURO, "size": tamanho_fonte},
+        xaxis={
+            "title_font": {"color": TEXTO_ESCURO, "size": tamanho_fonte + 1},
+            "tickfont": {"color": TEXTO_ESCURO, "size": tamanho_fonte},
+        },
+        yaxis={
+            "title_font": {"color": TEXTO_ESCURO, "size": tamanho_fonte + 1},
+            "tickfont": {"color": TEXTO_ESCURO, "size": tamanho_fonte},
+        },
+        legend={"font": {"color": TEXTO_ESCURO, "size": tamanho_fonte}},
     )
     return fig
 

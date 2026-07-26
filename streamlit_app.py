@@ -20,9 +20,8 @@ demanda cidadã em src/demanda.py, simulador em src/simulador.py e o
 painel de transparência em src/transparencia.py.
 """
 
-import streamlit as st
-
 import pandas as pd
+import streamlit as st
 
 from src.charts import (
     grafico_equidade_por_mesorregiao,
@@ -43,7 +42,6 @@ from src.demanda import (
     categorias_existentes,
     categorias_faltantes,
     inicializar_pedidos,
-    indice_prioridade_ajustado,
     pedidos_do_municipio,
     peso_demanda,
     ranking_pedidos_ceara,
@@ -54,15 +52,14 @@ from src.simulador import (
     TIPOS_EQUIPAMENTO,
     calcular_simulacao,
 )
-from src.transparencia import gerar_card_municipio, montar_ranking_publico
 from src.theme import (
-    CSS_CUSTOMIZADO,
     COR_DEMANDA,
     COR_DEMANDA_CLARO,
     COR_GESTOR,
     COR_GESTOR_CLARO,
     COR_SIMULADOR,
     COR_SIMULADOR_CLARO,
+    CSS_CUSTOMIZADO,
     barra_secao,
     cabecalho_app,
     cartao_hero,
@@ -70,6 +67,7 @@ from src.theme import (
     estilo_texto_tabela,
     rodape_app,
 )
+from src.transparencia import gerar_card_municipio, montar_ranking_publico
 
 st.set_page_config(
     page_title="Cultura Ceará — ZeroKai",
@@ -106,43 +104,43 @@ st.markdown(
 )
 
 CARDS_HERO = [
-    dict(
-        modo=MODOS[0],
-        icone="👨‍💼",
-        titulo="Painel do Gestor",
-        texto=(
+    {
+        "modo": MODOS[0],
+        "icone": "👨‍💼",
+        "titulo": "Painel do Gestor",
+        "texto": (
             "O raio-x da desigualdade cultural: cruza dados oficiais de "
             "população, renda e equipamentos culturais nos 184 municípios "
             "pra mostrar onde a cultura está concentrada e onde ela quase "
             "não chega. Feito pra quem decide política pública."
         ),
-        cor=COR_GESTOR,
-        cor_clara=COR_GESTOR_CLARO,
-    ),
-    dict(
-        modo=MODOS[1],
-        icone="🗳️",
-        titulo="Demanda Cidadã",
-        texto=(
+        "cor": COR_GESTOR,
+        "cor_clara": COR_GESTOR_CLARO,
+    },
+    {
+        "modo": MODOS[1],
+        "icone": "🗳️",
+        "titulo": "Demanda Cidadã",
+        "texto": (
             "A voz de quem mora lá: escolha seu município, veja o que já "
             "existe e registre o que mais falta. Seu pedido vira contagem "
             "pública e pesa de verdade no ranking de prioridades."
         ),
-        cor=COR_DEMANDA,
-        cor_clara=COR_DEMANDA_CLARO,
-    ),
-    dict(
-        modo=MODOS[2],
-        icone="💰",
-        titulo="Simulador & Transparência",
-        texto=(
+        "cor": COR_DEMANDA,
+        "cor_clara": COR_DEMANDA_CLARO,
+    },
+    {
+        "modo": MODOS[2],
+        "icone": "💰",
+        "titulo": "Simulador & Transparência",
+        "texto": (
             "Simule o impacto de instalar um museu, teatro ou cinema antes "
             "de construir — e gere cards prontos pra baixar e cobrar "
             "publicamente investimento nos municípios mais esquecidos."
         ),
-        cor=COR_SIMULADOR,
-        cor_clara=COR_SIMULADOR_CLARO,
-    ),
+        "cor": COR_SIMULADOR,
+        "cor_clara": COR_SIMULADOR_CLARO,
+    },
 ]
 
 hero_cols = st.columns(3)
@@ -358,79 +356,75 @@ if st.session_state.modo_app == MODOS[0]:
         )
 
         linha1_a, linha1_b = st.columns(2)
-        with linha1_a:
-            with st.container(border=True):
-                st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
-                st.subheader("🗺️ Mapa do Ceará")
-                st.plotly_chart(
-                    mapa_municipios(df_f, altura=280),
-                    use_container_width=True,
-                    config={"displayModeBar": False},
-                )
-                st.button(
-                    "Ver página completa →",
-                    key="btn_mapa",
-                    on_click=ir_para,
-                    args=("🗺️ Mapa do Ceará",),
-                )
+        with linha1_a, st.container(border=True):
+            st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
+            st.subheader("🗺️ Mapa do Ceará")
+            st.plotly_chart(
+                mapa_municipios(df_f, altura=280),
+                use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            st.button(
+                "Ver página completa →",
+                key="btn_mapa",
+                on_click=ir_para,
+                args=("🗺️ Mapa do Ceará",),
+            )
 
-        with linha1_b:
-            with st.container(border=True):
-                st.markdown(barra_secao("#F2A93B"), unsafe_allow_html=True)
-                st.subheader("🏛️ Presença de Equipamentos")
-                st.plotly_chart(
-                    grafico_presenca_equipamentos(df_f, altura=260),
-                    use_container_width=True,
-                    config={"displayModeBar": False},
-                )
-                st.button(
-                    "Ver página completa →",
-                    key="btn_presenca",
-                    on_click=ir_para,
-                    args=("🏛️ Presença de Equipamentos",),
-                )
+        with linha1_b, st.container(border=True):
+            st.markdown(barra_secao("#F2A93B"), unsafe_allow_html=True)
+            st.subheader("🏛️ Presença de Equipamentos")
+            st.plotly_chart(
+                grafico_presenca_equipamentos(df_f, altura=260),
+                use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            st.button(
+                "Ver página completa →",
+                key="btn_presenca",
+                on_click=ir_para,
+                args=("🏛️ Presença de Equipamentos",),
+            )
 
         linha2_a, linha2_b = st.columns(2)
-        with linha2_a:
-            with st.container(border=True):
-                st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
-                st.subheader("📈 Equidade por Mesorregião")
-                st.plotly_chart(
-                    grafico_equidade_por_mesorregiao(df_f, altura=280),
-                    use_container_width=True,
-                    config={"displayModeBar": False},
-                )
-                st.button(
-                    "Ver página completa →",
-                    key="btn_equidade",
-                    on_click=ir_para,
-                    args=("📈 Equidade por Mesorregião",),
-                )
+        with linha2_a, st.container(border=True):
+            st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
+            st.subheader("📈 Equidade por Mesorregião")
+            st.plotly_chart(
+                grafico_equidade_por_mesorregiao(df_f, altura=280),
+                use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            st.button(
+                "Ver página completa →",
+                key="btn_equidade",
+                on_click=ir_para,
+                args=("📈 Equidade por Mesorregião",),
+            )
 
-        with linha2_b:
-            with st.container(border=True):
-                st.markdown(barra_secao("#8C1C13"), unsafe_allow_html=True)
-                st.subheader("🚩 Municípios Prioritários")
-                tabela_preview = montar_tabela_prioritarios(df_f, n=5)
-                st.dataframe(
-                    tabela_preview.style.set_properties(**estilo_texto_tabela())
-                    .apply(destacar_coluna, subset=["Índice de Prioridade"])
-                    .format(
-                        {
-                            "Índice de Prioridade": "{:.2f}",
-                            "Renda per capita (R$)": "{:.2f}",
-                        }
-                    ),
-                    use_container_width=True,
-                    hide_index=True,
-                    height=245,
-                )
-                st.button(
-                    "Ver página completa →",
-                    key="btn_prioritarios",
-                    on_click=ir_para,
-                    args=("🚩 Municípios Prioritários",),
-                )
+        with linha2_b, st.container(border=True):
+            st.markdown(barra_secao("#8C1C13"), unsafe_allow_html=True)
+            st.subheader("🚩 Municípios Prioritários")
+            tabela_preview = montar_tabela_prioritarios(df_f, n=5)
+            st.dataframe(
+                tabela_preview.style.set_properties(**estilo_texto_tabela())
+                .apply(destacar_coluna, subset=["Índice de Prioridade"])
+                .format(
+                    {
+                        "Índice de Prioridade": "{:.2f}",
+                        "Renda per capita (R$)": "{:.2f}",
+                    }
+                ),
+                use_container_width=True,
+                hide_index=True,
+                height=245,
+            )
+            st.button(
+                "Ver página completa →",
+                key="btn_prioritarios",
+                on_click=ir_para,
+                args=("🚩 Municípios Prioritários",),
+            )
 
     elif pagina_atual == "🗺️ Mapa do Ceará":
         st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)

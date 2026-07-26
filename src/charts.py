@@ -104,19 +104,19 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
 
     fig.update_layout(
         mapbox_style="open-street-map",
-        mapbox=dict(center=_CEARA_CENTRO, zoom=_CEARA_ZOOM),
+        mapbox={"center": _CEARA_CENTRO, "zoom": _CEARA_ZOOM},
         height=altura,
-        margin=dict(t=10, l=0, r=0, b=0),
-        coloraxis=dict(
-            colorscale=NORDESTE_SEQUENCIAL,
-            cmin=df["renda_per_capita"].min(),
-            cmax=df["renda_per_capita"].max(),
-            colorbar=dict(
-                title=dict(text="Renda per<br>capita (R$)", font=dict(color=TEXTO_ESCURO)),
-                tickfont=dict(color=TEXTO_ESCURO),
-            ),
-        ),
-        font=dict(color=TEXTO_ESCURO, size=13),
+        margin={"t": 10, "l": 0, "r": 0, "b": 0},
+        coloraxis={
+            "colorscale": NORDESTE_SEQUENCIAL,
+            "cmin": df["renda_per_capita"].min(),
+            "cmax": df["renda_per_capita"].max(),
+            "colorbar": {
+                "title": {"text": "Renda per<br>capita (R$)", "font": {"color": TEXTO_ESCURO}},
+                "tickfont": {"color": TEXTO_ESCURO},
+            },
+        },
+        font={"color": TEXTO_ESCURO, "size": 13},
     )
     return fig
 
@@ -182,10 +182,10 @@ def mapa_simulador(df: pd.DataFrame, coluna_equipamento: str, altura: int = 600)
 
     fig.update_layout(
         mapbox_style="open-street-map",
-        mapbox=dict(center=_CEARA_CENTRO, zoom=_CEARA_ZOOM),
+        mapbox={"center": _CEARA_CENTRO, "zoom": _CEARA_ZOOM},
         height=altura,
-        margin=dict(t=10, l=0, r=0, b=0),
-        legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0),
+        margin={"t": 10, "l": 0, "r": 0, "b": 0},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.01, "xanchor": "left", "x": 0},
         clickmode="event+select",
     )
     aplicar_texto_escuro(fig)
@@ -209,7 +209,7 @@ def grafico_renda_x_equipamentos(df: pd.DataFrame, altura: int = 420):
         opacity=0.8,
         color_discrete_sequence=NORDESTE_DISCRETA,
     )
-    fig.update_layout(yaxis=dict(dtick=1), height=altura, margin=dict(t=10))
+    fig.update_layout(yaxis={"dtick": 1}, height=altura, margin={"t": 10})
     aplicar_texto_escuro(fig)
     return fig
 
@@ -236,14 +236,14 @@ def grafico_presenca_equipamentos(df: pd.DataFrame, altura: int = 420):
     )
     fig.update_traces(
         textposition="outside",
-        textfont=dict(color=TEXTO_ESCURO, size=13),
+        textfont={"color": TEXTO_ESCURO, "size": 13},
         cliponaxis=False,
     )
     fig.update_layout(
         coloraxis_showscale=False,
         height=altura,
-        margin=dict(t=10),
-        xaxis=dict(range=[0, 112]),
+        margin={"t": 10},
+        xaxis={"range": [0, 112]},
     )
     aplicar_texto_escuro(fig)
     return fig
@@ -280,10 +280,10 @@ def grafico_equidade_por_mesorregiao(df: pd.DataFrame, altura: int = 420):
     )
     fig.update_traces(
         textposition="outside",
-        textfont=dict(color=TEXTO_ESCURO, size=13),
+        textfont={"color": TEXTO_ESCURO, "size": 13},
         cliponaxis=False,
     )
     fig.update_xaxes(tickangle=-25)
-    fig.update_layout(height=altura, margin=dict(t=10))
+    fig.update_layout(height=altura, margin={"t": 10})
     aplicar_texto_escuro(fig)
     return fig

@@ -2,7 +2,12 @@
 name = "radar-cultural-ce"
 version = "0.1.0"
 description = "Radar Cultural — Squad ZeroKai — Desafio dos Dados VIVO 2026, Etapa 2"
+readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+    { name = "Squad ZeroKai" },
+]
+license = "MIT"
 dependencies = [
     "streamlit>=1.37",
     "pandas>=2.0",

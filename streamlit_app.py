@@ -55,7 +55,21 @@ from src.simulador import (
     calcular_simulacao,
 )
 from src.transparencia import gerar_card_municipio, montar_ranking_publico
-from src.theme import CSS_CUSTOMIZADO, destacar_coluna, estilo_texto_tabela
+from src.theme import (
+    CSS_CUSTOMIZADO,
+    COR_DEMANDA,
+    COR_DEMANDA_CLARO,
+    COR_GESTOR,
+    COR_GESTOR_CLARO,
+    COR_SIMULADOR,
+    COR_SIMULADOR_CLARO,
+    barra_secao,
+    cabecalho_app,
+    cartao_hero,
+    destacar_coluna,
+    estilo_texto_tabela,
+    rodape_app,
+)
 
 st.set_page_config(
     page_title="Cultura Ceará — ZeroKai",
@@ -85,20 +99,70 @@ def ir_para_modo(modo: str):
     st.session_state.modo_app = modo
 
 
-st.title("🎭 Cultura Ceará")
+st.markdown(cabecalho_app(), unsafe_allow_html=True)
 st.markdown(
-    "##### Squad ZeroKai · Desafio dos Dados VIVO 2026 · ODS 4, 10 e 11"
+    "Três jeitos de olhar pra um mesmo problema: **quem no Ceará tem acesso "
+    "a cultura perto de casa — e quem não tem.** Escolha por onde começar 👇"
 )
 
-modo_cols = st.columns(3)
-for col, modo in zip(modo_cols, MODOS):
+CARDS_HERO = [
+    dict(
+        modo=MODOS[0],
+        icone="👨‍💼",
+        titulo="Painel do Gestor",
+        texto=(
+            "O raio-x da desigualdade cultural: cruza dados oficiais de "
+            "população, renda e equipamentos culturais nos 184 municípios "
+            "pra mostrar onde a cultura está concentrada e onde ela quase "
+            "não chega. Feito pra quem decide política pública."
+        ),
+        cor=COR_GESTOR,
+        cor_clara=COR_GESTOR_CLARO,
+    ),
+    dict(
+        modo=MODOS[1],
+        icone="🗳️",
+        titulo="Demanda Cidadã",
+        texto=(
+            "A voz de quem mora lá: escolha seu município, veja o que já "
+            "existe e registre o que mais falta. Seu pedido vira contagem "
+            "pública e pesa de verdade no ranking de prioridades."
+        ),
+        cor=COR_DEMANDA,
+        cor_clara=COR_DEMANDA_CLARO,
+    ),
+    dict(
+        modo=MODOS[2],
+        icone="💰",
+        titulo="Simulador & Transparência",
+        texto=(
+            "Simule o impacto de instalar um museu, teatro ou cinema antes "
+            "de construir — e gere cards prontos pra baixar e cobrar "
+            "publicamente investimento nos municípios mais esquecidos."
+        ),
+        cor=COR_SIMULADOR,
+        cor_clara=COR_SIMULADOR_CLARO,
+    ),
+]
+
+hero_cols = st.columns(3)
+for col, card in zip(hero_cols, CARDS_HERO):
     with col:
+        st.markdown(
+            cartao_hero(
+                card["icone"], card["titulo"], card["texto"],
+                card["cor"], card["cor_clara"],
+            ),
+            unsafe_allow_html=True,
+        )
+        esta_aqui = st.session_state.modo_app == card["modo"]
         st.button(
-            modo,
+            "✓ Você está aqui" if esta_aqui else f"Abrir {card['titulo']} →",
+            key=f"hero_btn_{card['titulo']}",
             use_container_width=True,
-            type="primary" if st.session_state.modo_app == modo else "secondary",
+            type="primary" if esta_aqui else "secondary",
             on_click=ir_para_modo,
-            args=(modo,),
+            args=(card["modo"],),
         )
 
 st.divider()
@@ -121,6 +185,7 @@ if st.session_state.modo_app == MODOS[0]:
     def ir_para(pagina: str):
         st.session_state.pagina = pagina
 
+    st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
     with st.expander("ℹ️ Sobre os dados exibidos"):
         st.markdown(
             "- **Equipamentos culturais** (museu, teatro/sala de espetáculo, "
@@ -240,6 +305,7 @@ if st.session_state.modo_app == MODOS[0]:
         linha1_a, linha1_b = st.columns(2)
         with linha1_a:
             with st.container(border=True):
+                st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
                 st.subheader("🗺️ Mapa do Ceará")
                 st.plotly_chart(
                     mapa_municipios(df_f, altura=280),
@@ -255,6 +321,7 @@ if st.session_state.modo_app == MODOS[0]:
 
         with linha1_b:
             with st.container(border=True):
+                st.markdown(barra_secao("#F2A93B"), unsafe_allow_html=True)
                 st.subheader("🏛️ Presença de Equipamentos")
                 st.plotly_chart(
                     grafico_presenca_equipamentos(df_f, altura=260),
@@ -271,6 +338,7 @@ if st.session_state.modo_app == MODOS[0]:
         linha2_a, linha2_b = st.columns(2)
         with linha2_a:
             with st.container(border=True):
+                st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
                 st.subheader("📈 Equidade por Mesorregião")
                 st.plotly_chart(
                     grafico_equidade_por_mesorregiao(df_f, altura=280),
@@ -286,6 +354,7 @@ if st.session_state.modo_app == MODOS[0]:
 
         with linha2_b:
             with st.container(border=True):
+                st.markdown(barra_secao("#8C1C13"), unsafe_allow_html=True)
                 st.subheader("🚩 Municípios Prioritários")
                 tabela_preview = montar_tabela_prioritarios(df_f, n=5)
                 st.dataframe(
@@ -465,6 +534,7 @@ if st.session_state.modo_app == MODOS[0]:
 # MODO 2 — DEMANDA CIDADÃ
 # ========================================================================
 elif st.session_state.modo_app == MODOS[1]:
+    st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
     st.markdown(
         "### O que falta de cultura na sua cidade? 🗳️\n"
         "Escolha seu município, veja o que já existe lá — e registre, "
@@ -581,6 +651,7 @@ elif st.session_state.modo_app == MODOS[1]:
 # MODO 3 — SIMULADOR DE INVESTIMENTO
 # ========================================================================
 else:
+    st.markdown(barra_secao(COR_SIMULADOR), unsafe_allow_html=True)
     st.markdown(
         "### Onde investir pra reduzir o deserto cultural? 💰\n"
         "Escolha um tipo de equipamento e um raio de atuação na barra "
@@ -790,3 +861,5 @@ else:
         "impacto, e o ranking do Painel de Transparência, usam dados "
         "reais do Radar Cultural."
     )
+
+st.markdown(rodape_app(), unsafe_allow_html=True)

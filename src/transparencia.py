@@ -17,6 +17,7 @@ descartado por depender de uma fonte externa difícil de integrar).
 from __future__ import annotations
 
 import io
+import os
 
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
@@ -67,10 +68,32 @@ def montar_ranking_publico(df: pd.DataFrame, n: int = 30) -> pd.DataFrame:
     )
 
 
+# Fonte Inter (variável, licença SIL Open Font License), embutida em
+# assets/fonts/ — a fonte padrão do Pillow (ImageFont.load_default) não
+# suporta acentuação completa, e "CEARÁ", "Índice", "É" saíam quebrados
+# no card gerado (ver assets/fonts/README.md para a fonte/licença).
+_CAMINHO_FONTE = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "assets",
+    "fonts",
+    "Inter-Variable.ttf",
+)
+
+
 def _fonte(tamanho: int, negrito: bool = False) -> ImageFont.FreeTypeFont:
-    # Fonte embutida do Pillow (>=10.1), escalável, sem depender de
-    # nenhum arquivo de fonte externo — funciona em qualquer ambiente
-    return ImageFont.load_default(size=tamanho)
+    """
+    Carrega a Inter no peso Bold ou Regular, no tamanho pedido. Se o
+    arquivo da fonte não for encontrado por algum motivo (ex.: alguém
+    esqueceu de copiar a pasta assets/ junto do projeto), cai de volta
+    pra fonte padrão do Pillow — o card continua funcionando, só sem
+    acentuação correta.
+    """
+    try:
+        fonte = ImageFont.truetype(_CAMINHO_FONTE, tamanho)
+        fonte.set_variation_by_name("Bold" if negrito else "Regular")
+        return fonte
+    except (OSError, ValueError):
+        return ImageFont.load_default(size=tamanho)
 
 
 def _texto_centralizado(draw, texto, y, fonte, cor, largura_img=_LARGURA):
@@ -81,15 +104,15 @@ def _texto_centralizado(draw, texto, y, fonte, cor, largura_img=_LARGURA):
     return bbox[3] - bbox[1]  # altura do texto desenhado
 
 
-def _ajustar_fonte_para_largura(draw, texto, largura_max, tamanho_inicial):
+def _ajustar_fonte_para_largura(draw, texto, largura_max, tamanho_inicial, negrito=False):
     tamanho = tamanho_inicial
     while tamanho > 28:
-        fonte = _fonte(tamanho)
+        fonte = _fonte(tamanho, negrito=negrito)
         bbox = draw.textbbox((0, 0), texto, font=fonte)
         if (bbox[2] - bbox[0]) <= largura_max:
             return fonte
         tamanho -= 4
-    return _fonte(28)
+    return _fonte(28, negrito=negrito)
 
 
 def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> bytes:
@@ -106,7 +129,9 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
 
     # Faixa do topo
     draw.rectangle([0, 0, _LARGURA, 190], fill=_TERRACOTA)
-    _texto_centralizado(draw, "RADAR CULTURAL · CEARÁ", 55, _fonte(38), _AREIA_CLARA)
+    _texto_centralizado(
+        draw, "RADAR CULTURAL · CEARÁ", 55, _fonte(38, negrito=True), _AREIA_CLARA
+    )
     _texto_centralizado(
         draw, "Painel de Transparência", 110, _fonte(30), _AREIA_CLARA
     )
@@ -118,13 +143,15 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
         [margem, 235, _LARGURA - margem, 320], radius=22, fill=_TERRACOTA_ESCURO
     )
     fonte_posicao = _ajustar_fonte_para_largura(
-        draw, texto_posicao, _LARGURA - 2 * margem - 40, 34
+        draw, texto_posicao, _LARGURA - 2 * margem - 40, 34, negrito=True
     )
     _texto_centralizado(draw, texto_posicao, 262, fonte_posicao, _AREIA_CLARA)
 
     # Nome do município
     nome = linha_ranking["Município"]
-    fonte_nome = _ajustar_fonte_para_largura(draw, nome, _LARGURA - 2 * margem, 86)
+    fonte_nome = _ajustar_fonte_para_largura(
+        draw, nome, _LARGURA - 2 * margem, 86, negrito=True
+    )
     _texto_centralizado(draw, nome, 365, fonte_nome, _TEXTO_ESCURO)
 
     # Mesorregião
@@ -156,7 +183,9 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
     ]
     for rotulo, valor in linhas_stats:
         draw.text((margem, y), rotulo, font=_fonte(26), fill="#6B4226")
-        draw.text((margem, y + 40), valor, font=_fonte(44), fill=_TEXTO_ESCURO)
+        draw.text(
+            (margem, y + 40), valor, font=_fonte(44, negrito=True), fill=_TEXTO_ESCURO
+        )
         y += 130
 
     # Rodapé

@@ -7,7 +7,7 @@ tabelas e no CSS customizado da interface.
 # Paleta qualitativa (uma cor por mesorregião nos gráficos de dispersão/legenda)
 NORDESTE_DISCRETA = [
     "#C1440E",  # terracota / barro
-    "#F2A93B",  # amareloj-sol
+    "#F2A93B",  # amarelo-sol
     "#1B7A8C",  # azul-azulejo
     "#4C6444",  # verde-cactos
     "#8C1C13",  # vermelho-tijolo
@@ -237,16 +237,32 @@ div[data-testid="stMetricLabel"] {
     font-weight: 700 !important;
 }
 
-/* Header — barra terracota cheia, contrasta com o fundo claro do app */
+/* Reduz o respiro padrão do Streamlit acima do conteúdo, pra o header
+   colado ficar bem rente ao topo da página */
+div[data-testid="stMainBlockContainer"],
+.block-container {
+    padding-top: 1.5rem !important;
+}
+
+/* Header — barra terracota cheia, contrasta com o fundo claro do app.
+   Full-bleed: "escapa" do container central do Streamlit e cobre toda
+   a largura da tela, de ponta a ponta. */
 .radar-header {
     background: #C1440E;
-    border-radius: 16px;
-    padding: 22px 28px;
+    border-radius: 0;
+    padding: 32px 6vw 26px 6vw;
     display: flex;
     align-items: center;
     gap: 18px;
-    margin-bottom: 4px;
     box-shadow: 0 4px 14px rgba(122, 46, 14, 0.28);
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: -1.5rem;
+    margin-bottom: 20px;
 }
 .radar-header-icone {
     font-size: 2.6rem;
@@ -265,16 +281,23 @@ div[data-testid="stMetricLabel"] {
     margin-top: 2px;
 }
 
-/* Footer — marrom bem escuro, contraste diferente do header de propósito */
+/* Footer — marrom bem escuro, contraste diferente do header de propósito.
+   Full-bleed igual ao header. */
 .radar-footer {
     background: #2C1B12;
-    border-radius: 16px;
-    padding: 26px 30px;
+    border-radius: 0;
+    padding: 30px 6vw;
     margin-top: 40px;
     display: flex;
     flex-wrap: wrap;
     gap: 30px;
     justify-content: space-between;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
 }
 .radar-footer-col {
     flex: 1;

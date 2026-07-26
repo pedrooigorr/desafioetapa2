@@ -9,10 +9,10 @@ authors = [
 ]
 license = "MIT"
 dependencies = [
-    "streamlit>=1.37",
-    "pandas>=2.0",
+    "streamlit>=1.60.0",
+    "pandas>=3.0.5",
     "plotly>=5.20",
-    "pillow>=10.1",
+    "pillow>=12.3.0",
 ]
 
 [dependency-groups]

@@ -1,10 +1,10 @@
 """
 Acessibilidade — controles e utilitários compartilhados pelos 3 modos do
-app: alto contraste, tamanho de texto, VLibras (Libras) e leitura em voz
-alta (Web Speech API do navegador, sem custo e sem precisar de internet
-extra).
+app: alto contraste, tamanho de texto e leitura em voz alta (Web Speech
+API do navegador, sem custo e sem precisar de internet extra).
 
-O painel de controles fica sempre no topo da sidebar, em qualquer modo.
+O painel de controles fica sempre no topo da página principal, em
+qualquer modo.
 """
 
 from __future__ import annotations
@@ -48,15 +48,7 @@ def renderizar_controles_topo():
                 key="a11y_tamanho_texto",
             )
         st.caption(
-            "O botão 🤟 no canto da tela abre o VLibras (tradutor de "
-            "Libras do governo federal). Cada painel também tem um "
-            "botão 🔊 pra ouvir o resumo em voz alta."
-        )
-        st.caption(
-            "Se o botão 🤟 não aparecer (alguns navegadores/ambientes "
-            "bloqueiam esse tipo de widget), o VLibras também tem uma "
-            "[extensão oficial de navegador](https://www.gov.br/governodigital/pt-br/vlibras) "
-            "que funciona em qualquer site, sem depender de nada aqui."
+            "Cada painel também tem um botão 🔊 pra ouvir o resumo em voz alta."
         )
 
 
@@ -95,7 +87,23 @@ div[data-testid="stMetricValue"] {
     background-color: #000000 !important;
     color: #FFFF00 !important;
 }
+/* A regra genérica "p, span, div {color: #000000}" acima também pega o
+   texto por dentro dos botões (o Streamlit envolve o texto do botão em
+   <div>/<p> aninhados) e "vencia" a cor pretendida do botão. Isso força
+   o texto interno do botão a sempre herdar a cor do próprio botão. */
+.stButton button p,
+.stButton button div,
+.stButton button span {
+    color: inherit !important;
+}
 a { color: #0000EE !important; text-decoration: underline !important; }
+
+/* Barra de ferramentas do Streamlit (Share, estrela, lápis, GitHub, ⋮) —
+   também vira preta no alto contraste, pra combinar com o resto da
+   página em vez de continuar na cor terracota do tema normal */
+header[data-testid="stHeader"] {
+    background: #000000 !important;
+}
 
 /* Reforça contraste/saturação dos gráficos Plotly — não muda as cores
    de cada categoria (isso exigiria mudar o Python), só intensifica */
@@ -110,75 +118,20 @@ def css_acessibilidade() -> str:
     """Monta o CSS a injetar com base nas preferências atuais da sessão."""
     partes = []
 
-    zoom = TAMANHOS_TEXTO[st.session_state.get("a11y_tamanho_texto", "Normal")]
-    if zoom != 1.0:
+    escala = TAMANHOS_TEXTO[st.session_state.get("a11y_tamanho_texto", "Normal")]
+    if escala != 1.0:
+        # font-size na raiz, não "zoom": a maioria dos textos do Streamlit
+        # (e os nossos, em src/theme.py) usa unidades relativas (rem), que
+        # escalam com isso — cresce só a tipografia, sem inflar junto
+        # imagens, ícones e espaçamentos como o "zoom" fazia.
         partes.append(
-            f'<style>[data-testid="stAppViewContainer"] {{ zoom: {zoom}; }}</style>'
+            f"<style>html {{ font-size: {escala * 100:.0f}% !important; }}</style>"
         )
 
     if st.session_state.get("a11y_alto_contraste", False):
         partes.append(CSS_ALTO_CONTRASTE)
 
     return "".join(partes)
-
-
-def widget_vlibras():
-    """
-    Injeta o widget oficial do governo federal (VLibras) — avatar 3D que
-    traduz o texto da página pra Libras. O Streamlit isola componentes
-    num iframe próprio, então o script precisa alcançar o documento PAI
-    (window.parent) pra aparecer flutuando sobre a página inteira, e não
-    só dentro da caixinha do componente. Roda só uma vez (checa se já
-    foi injetado antes de adicionar de novo).
-    """
-    components.html(
-        """
-        <script>
-        function _injetarVLibras(tentativa) {
-            try {
-                var doc = window.parent.document;
-                if (doc.getElementById('vlibras-injetado')) { return; }
-
-                var wrapper = doc.createElement('div');
-                wrapper.setAttribute('vw', '');
-                wrapper.className = 'enabled';
-                wrapper.id = 'vlibras-injetado';
-                wrapper.innerHTML =
-                    '<div vw-access-button class="active"></div>' +
-                    '<div vw-plugin-wrapper><div class="vw-plugin-top-wrapper">' +
-                    '</div></div>';
-                doc.body.appendChild(wrapper);
-
-                var script = doc.createElement('script');
-                script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
-                script.onload = function() {
-                    try {
-                        new doc.defaultView.VLibras.Widget('https://vlibras.gov.br/app');
-                        console.log('[VLibras] widget iniciado com sucesso');
-                    } catch (erroWidget) {
-                        console.error('[VLibras] script carregou mas o widget falhou ao iniciar:', erroWidget);
-                    }
-                };
-                script.onerror = function() {
-                    console.error('[VLibras] não foi possível carregar https://vlibras.gov.br/app/vlibras-plugin.js — provavelmente bloqueado pela rede ou por uma extensão do navegador');
-                };
-                doc.body.appendChild(script);
-            } catch (erroAcesso) {
-                console.error('[VLibras] não consegui acessar a página principal (window.parent) — tentativa ' + tentativa, erroAcesso);
-                // Em alguns ambientes (ex: preview embutido de editores), a
-                // página pai pode não estar pronta na primeira tentativa —
-                // tenta de novo uma vez, depois desiste silenciosamente.
-                if (tentativa < 2) {
-                    setTimeout(function() { _injetarVLibras(tentativa + 1); }, 800);
-                }
-            }
-        }
-        _injetarVLibras(1);
-        </script>
-        """,
-        height=0,
-        width=0,
-    )
 
 
 def _escapar_para_js(texto: str) -> str:
@@ -194,12 +147,28 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "🔊 Ouvir este resumo"):
     texto_js = _escapar_para_js(texto)
     components.html(
         f"""
-        <button id="btn-{key}" style="
-            background:#C1440E; color:#FFFDF8; border:none;
-            border-radius:8px; padding:8px 16px; font-weight:700;
-            font-size:14px; cursor:pointer; font-family:sans-serif;
+        <style>
+        .btn-ouvir-{key} {{
+            background:#FFFDF8;
+            color:#C1440E;
+            border:2px solid #C1440E;
+            border-radius:8px;
+            padding:6px 16px;
+            font-weight:700;
+            font-size:14px;
+            cursor:pointer;
+            font-family:sans-serif;
             width:100%;
-        ">{rotulo}</button>
+            height:38px;
+            box-sizing:border-box;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }}
+        .btn-ouvir-{key}:hover {{
+            background:#C1440E;
+            color:#FFFDF8;
+        }}
+        </style>
+        <button id="btn-{key}" class="btn-ouvir-{key}">{rotulo}</button>
         <script>
         document.getElementById('btn-{key}').addEventListener('click', function() {{
             window.speechSynthesis.cancel();
@@ -209,5 +178,5 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "🔊 Ouvir este resumo"):
         }});
         </script>
         """,
-        height=48,
+        height=42,
     )

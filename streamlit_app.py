@@ -28,7 +28,6 @@ from src.acessibilidade import (
     css_acessibilidade,
     inicializar_preferencias,
     renderizar_controles_topo,
-    widget_vlibras,
 )
 from src.charts import (
     grafico_equidade_por_mesorregiao,
@@ -101,11 +100,10 @@ inicializar_preferencias()
 df = carregar_dados()
 
 # ----------------------------------------------------------------------
-# CSS de acessibilidade + widgets globais (VLibras) — os controles em si
-# aparecem logo abaixo do cabeçalho, mais adiante
+# CSS de acessibilidade — os controles em si aparecem logo abaixo do
+# cabeçalho, mais adiante
 # ----------------------------------------------------------------------
 st.markdown(css_acessibilidade(), unsafe_allow_html=True)
-widget_vlibras()
 
 # ----------------------------------------------------------------------
 # Cabeçalho + seletor de modo (as três features do projeto)

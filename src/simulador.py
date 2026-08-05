@@ -29,10 +29,7 @@ TIPOS_EQUIPAMENTO = {
 def calcular_simulacao(
     df: pd.DataFrame, municipio_alvo: str, coluna_equipamento: str, raio_km: float
 ) -> dict:
-    """
-    Simula o impacto de instalar o equipamento `coluna_equipamento` no
-    município `municipio_alvo`, com um raio de atuação de `raio_km`.
-    """
+    
     alvo = df.loc[df["municipio"] == municipio_alvo].iloc[0]
     mesorregiao = alvo["mesorregiao"]
 

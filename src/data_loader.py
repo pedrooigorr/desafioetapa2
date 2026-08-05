@@ -71,7 +71,7 @@ def montar_tabela_prioritarios(df: pd.DataFrame, n: int = 15) -> pd.DataFrame:
             "municipio": "Município",
             "mesorregiao": "Mesorregião",
             "populacao": "População",
-            "renda_per_capita": "Renda per capita (R$)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
             "n_equipamentos": "Nº equipamentos",
             "indice_prioridade": "Índice de Prioridade",
         }

@@ -281,19 +281,15 @@ div[data-testid="stMainBlockContainer"],
    Full-bleed: "escapa" do container central do Streamlit e cobre toda
    a largura da tela, de ponta a ponta. */
 .radar-header {
-    background: #C1440E;
+    background: #C1440E !important;
     border-radius: 0;
     padding: 32px 6vw 26px 6vw;
     display: flex;
     align-items: center;
     gap: 18px;
     box-shadow: 0 4px 14px rgba(122, 46, 14, 0.28);
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
+    width: auto;
+    margin-inline: calc(50% - 50vw);
     margin-bottom: 20px;
 }
 .radar-header-icone {
@@ -301,13 +297,13 @@ div[data-testid="stMainBlockContainer"],
     line-height: 1;
 }
 .radar-header-titulo {
-    color: #FFFDF8;
+    color: #FFFDF8 !important;
     font-size: 2rem;
     font-weight: 800;
     line-height: 1.15;
 }
 .radar-header-subtitulo {
-    color: #FBEBD4;
+    color: #FBEBD4 !important;
     font-size: 0.95rem;
     font-weight: 700;
     margin-top: 2px;
@@ -316,7 +312,7 @@ div[data-testid="stMainBlockContainer"],
 /* Footer — marrom bem escuro, contraste diferente do header de propósito.
    Full-bleed igual ao header. */
 .radar-footer {
-    background: #2C1B12;
+    background: #2C1B12 !important;
     border-radius: 0;
     padding: 30px 6vw;
     margin-top: 40px;
@@ -324,25 +320,21 @@ div[data-testid="stMainBlockContainer"],
     flex-wrap: wrap;
     gap: 30px;
     justify-content: space-between;
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
+    width: auto;
+    margin-inline: calc(50% - 50vw);
 }
 .radar-footer-col {
     flex: 1;
     min-width: 200px;
 }
 .radar-footer-titulo {
-    color: #F2A93B;
+    color: #F2A93B !important;
     font-weight: 800;
     font-size: 0.95rem;
     margin-bottom: 6px;
 }
 .radar-footer-texto {
-    color: #E8DFD5;
+    color: #E8DFD5 !important;
     font-size: 0.85rem;
     line-height: 1.6;
 }

@@ -93,7 +93,7 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
         color_continuous_scale=NORDESTE_SEQUENCIAL,
         size_max=27,
         labels={
-            "renda_per_capita": "Renda per capita (R$)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
             "mesorregiao": "Mesorregião",
             "n_equipamentos": "Nº de equipamentos",
             "populacao": "População",
@@ -202,7 +202,7 @@ def grafico_renda_x_equipamentos(df: pd.DataFrame, altura: int = 420):
         color="mesorregiao",
         hover_name="municipio",
         labels={
-            "renda_per_capita": "Renda per capita (R$)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
             "n_equipamentos": "Nº de equipamentos culturais",
             "mesorregiao": "Mesorregião",
         },
@@ -283,6 +283,12 @@ def grafico_equidade_por_mesorregiao(df: pd.DataFrame, altura: int = 420):
         textfont={"color": TEXTO_ESCURO, "size": 13},
         cliponaxis=False,
     )
+    # Sem isso, o hover mostra a renda média com todas as casas decimais
+    # do float bruto (ex: 267.6351086956522) em vez de "267.64"
+    for trace in fig.data:
+        trace.hovertemplate = trace.hovertemplate.replace(
+            "%{marker.color}", "%{marker.color:.2f}"
+        )
     fig.update_xaxes(tickangle=-25)
     fig.update_layout(height=altura, margin={"t": 10})
     aplicar_texto_escuro(fig)

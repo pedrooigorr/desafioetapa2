@@ -44,6 +44,20 @@ CATEGORIAS_SIMULAVEIS = {
 def inicializar_pedidos():
     if "pedidos" not in st.session_state:
         st.session_state.pedidos = {}
+    if "municipios_votados" not in st.session_state:
+        # Guarda em quais municípios esta sessão (este navegador) já
+        # registrou um pedido — sem isso, clicar várias vezes em
+        # "Registrar meu pedido" soma um voto a cada clique, sem limite
+        st.session_state.municipios_votados = set()
+
+
+def ja_votou_no_municipio(municipio: str) -> bool:
+    """Essa sessão já registrou um pedido pra esse município?"""
+    return municipio in st.session_state.get("municipios_votados", set())
+
+
+def marcar_como_votado(municipio: str):
+    st.session_state.setdefault("municipios_votados", set()).add(municipio)
 
 
 def categorias_existentes(df, municipio: str) -> list[str]:
@@ -63,6 +77,7 @@ def categorias_faltantes(df, municipio: str) -> list[str]:
 def registrar_pedido(municipio: str, categoria: str):
     pedidos_municipio = st.session_state.pedidos.setdefault(municipio, {})
     pedidos_municipio[categoria] = pedidos_municipio.get(categoria, 0) + 1
+    marcar_como_votado(municipio)
 
 
 def pedidos_do_municipio(municipio: str) -> dict:

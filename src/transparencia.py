@@ -61,7 +61,7 @@ def montar_ranking_publico(df: pd.DataFrame, n: int = 30) -> pd.DataFrame:
             "municipio": "Município",
             "mesorregiao": "Mesorregião",
             "populacao": "População",
-            "renda_per_capita": "Renda per capita (R$)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
             "n_equipamentos_raros": "Equipamentos (de 3)",
             "indice_prioridade": "Índice de Prioridade",
         }
@@ -171,8 +171,8 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
     linhas_stats = [
         ("POPULAÇÃO", f"{int(linha_ranking['População']):,}".replace(",", ".")),
         (
-            "RENDA PER CAPITA",
-            f"R$ {linha_ranking['Renda per capita (R$)']:.2f}".replace(".", ","),
+            "RENDA PER CAPITA (CENSO 2010)",
+            f"R$ {linha_ranking['Renda per capita (R$, Censo 2010)']:.2f}".replace(".", ","),
         ),
         (
             "EQUIPAMENTOS CULTURAIS",

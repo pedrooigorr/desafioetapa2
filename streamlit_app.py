@@ -42,6 +42,7 @@ from src.demanda import (
     categorias_existentes,
     categorias_faltantes,
     inicializar_pedidos,
+    ja_votou_no_municipio,
     pedidos_do_municipio,
     peso_demanda,
     ranking_pedidos_ceara,
@@ -194,7 +195,16 @@ if st.session_state.modo_app == MODOS[0]:
             "Como as duas fontes têm anos-base diferentes, os números "
             "absolutos de população podem estar desatualizados, mas o "
             "**padrão de desigualdade** entre municípios se mantém coerente. "
-            "Ver `data/README.md` para detalhes de como as bases foram cruzadas."
+            "Ver `data/README.md` para detalhes de como as bases foram cruzadas.\n\n"
+            "⚠️ **Atenção, não confundir:** a 'Renda per capita' usada aqui é a "
+            "**renda domiciliar** — quanto cada pessoa recebe, em média, "
+            "somando a renda de todo mundo em casa (Censo 2010). É **diferente** "
+            "do **PIB per capita** que aparece no IBGE Cidades (todo o "
+            "PIB do município — inclusive gastos públicos, agropecuária, "
+            "indústria — dividido pela população, ano mais recente). São "
+            "métricas distintas; não é incomum um município ter PIB per "
+            "capita relativamente alto e renda domiciliar baixa, quando boa "
+            "parte da economia local vem da administração pública."
         )
 
     # --------------------------------------------------------------
@@ -412,7 +422,7 @@ if st.session_state.modo_app == MODOS[0]:
                 .format(
                     {
                         "Índice de Prioridade": "{:.2f}",
-                        "Renda per capita (R$)": "{:.2f}",
+                        "Renda per capita (R$, Censo 2010)": "{:.2f}",
                     }
                 ),
                 use_container_width=True,
@@ -543,7 +553,7 @@ if st.session_state.modo_app == MODOS[0]:
             .format(
                 {
                     "Índice de Prioridade": "{:.2f}",
-                    "Renda per capita (R$)": "{:.2f}",
+                    "Renda per capita (R$, Censo 2010)": "{:.2f}",
                     "Índice Ajustado (c/ demanda)": "{:.2f}",
                 }
             ),
@@ -619,25 +629,35 @@ elif st.session_state.modo_app == MODOS[1]:
     st.divider()
 
     st.markdown(f"##### O que você mais gostaria de ver em {municipio_cidadao}?")
-    st.caption(
-        "As opções abaixo são só o que falta — incluindo tipos que a "
-        "gente não tem como confirmar se existem hoje (Centro Cultural, "
-        "Oficina Itinerante), mas que valem como pedido de qualquer jeito."
-    )
-    opcoes_faltantes = categorias_faltantes(df, municipio_cidadao)
-    categoria_escolhida = st.radio(
-        "Escolha uma opção", opcoes_faltantes, label_visibility="collapsed"
-    )
 
-    col_botao, _ = st.columns([1, 3])
-    with col_botao:
-        se_registrou = st.button(
-            "🗳️ Registrar meu pedido", type="primary", use_container_width=True
+    if ja_votou_no_municipio(municipio_cidadao):
+        st.info(
+            f"✅ Você já registrou um pedido para **{municipio_cidadao}** "
+            "nesta sessão — obrigado! Escolha outro município acima pra "
+            "votar de novo, ou recarregue a página pra reiniciar."
         )
-    if se_registrou:
-        registrar_pedido(municipio_cidadao, categoria_escolhida)
-        st.success(f"Pedido registrado: {categoria_escolhida} em {municipio_cidadao}!")
-        st.rerun()
+    else:
+        st.caption(
+            "As opções abaixo são só o que falta — incluindo tipos que a "
+            "gente não tem como confirmar se existem hoje (Centro Cultural, "
+            "Oficina Itinerante), mas que valem como pedido de qualquer jeito."
+        )
+        opcoes_faltantes = categorias_faltantes(df, municipio_cidadao)
+        categoria_escolhida = st.radio(
+            "Escolha uma opção", opcoes_faltantes, label_visibility="collapsed"
+        )
+
+        col_botao, _ = st.columns([1, 3])
+        with col_botao:
+            se_registrou = st.button(
+                "🗳️ Registrar meu pedido", type="primary", use_container_width=True
+            )
+        if se_registrou:
+            registrar_pedido(municipio_cidadao, categoria_escolhida)
+            st.success(
+                f"Pedido registrado: {categoria_escolhida} em {municipio_cidadao}!"
+            )
+            st.rerun()
 
     st.divider()
 
@@ -858,7 +878,7 @@ else:
         .format(
             {
                 "Índice de Prioridade": "{:.2f}",
-                "Renda per capita (R$)": "{:.2f}",
+                "Renda per capita (R$, Censo 2010)": "{:.2f}",
             }
         ),
         use_container_width=True,
@@ -893,7 +913,7 @@ else:
             f"{len(ranking_publico)} analisados).\n\n"
             f"- Mesorregião: {linha_escolhida['Mesorregião']}\n"
             f"- População: {int(linha_escolhida['População']):,}".replace(",", ".")
-            + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$)']:.2f}\n"
+            + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$, Censo 2010)']:.2f}\n"
             f"- Equipamentos culturais (museu/teatro/cinema): "
             f"{int(linha_escolhida['Equipamentos (de 3)'])} de 3\n"
             f"- Índice de Prioridade: {linha_escolhida['Índice de Prioridade']:.2f}"

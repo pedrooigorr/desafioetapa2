@@ -52,6 +52,12 @@ def renderizar_controles_topo():
             "Libras do governo federal). Cada painel também tem um "
             "botão 🔊 pra ouvir o resumo em voz alta."
         )
+        st.caption(
+            "Se o botão 🤟 não aparecer (alguns navegadores/ambientes "
+            "bloqueiam esse tipo de widget), o VLibras também tem uma "
+            "[extensão oficial de navegador](https://www.gov.br/governodigital/pt-br/vlibras) "
+            "que funciona em qualquer site, sem depender de nada aqui."
+        )
 
 
 CSS_ALTO_CONTRASTE = """
@@ -128,27 +134,46 @@ def widget_vlibras():
     components.html(
         """
         <script>
-        (function() {
-            var doc = window.parent.document;
-            if (doc.getElementById('vlibras-injetado')) { return; }
+        function _injetarVLibras(tentativa) {
+            try {
+                var doc = window.parent.document;
+                if (doc.getElementById('vlibras-injetado')) { return; }
 
-            var wrapper = doc.createElement('div');
-            wrapper.setAttribute('vw', '');
-            wrapper.className = 'enabled';
-            wrapper.id = 'vlibras-injetado';
-            wrapper.innerHTML =
-                '<div vw-access-button class="active"></div>' +
-                '<div vw-plugin-wrapper><div class="vw-plugin-top-wrapper">' +
-                '</div></div>';
-            doc.body.appendChild(wrapper);
+                var wrapper = doc.createElement('div');
+                wrapper.setAttribute('vw', '');
+                wrapper.className = 'enabled';
+                wrapper.id = 'vlibras-injetado';
+                wrapper.innerHTML =
+                    '<div vw-access-button class="active"></div>' +
+                    '<div vw-plugin-wrapper><div class="vw-plugin-top-wrapper">' +
+                    '</div></div>';
+                doc.body.appendChild(wrapper);
 
-            var script = doc.createElement('script');
-            script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
-            script.onload = function() {
-                new doc.defaultView.VLibras.Widget('https://vlibras.gov.br/app');
-            };
-            doc.body.appendChild(script);
-        })();
+                var script = doc.createElement('script');
+                script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+                script.onload = function() {
+                    try {
+                        new doc.defaultView.VLibras.Widget('https://vlibras.gov.br/app');
+                        console.log('[VLibras] widget iniciado com sucesso');
+                    } catch (erroWidget) {
+                        console.error('[VLibras] script carregou mas o widget falhou ao iniciar:', erroWidget);
+                    }
+                };
+                script.onerror = function() {
+                    console.error('[VLibras] não foi possível carregar https://vlibras.gov.br/app/vlibras-plugin.js — provavelmente bloqueado pela rede ou por uma extensão do navegador');
+                };
+                doc.body.appendChild(script);
+            } catch (erroAcesso) {
+                console.error('[VLibras] não consegui acessar a página principal (window.parent) — tentativa ' + tentativa, erroAcesso);
+                // Em alguns ambientes (ex: preview embutido de editores), a
+                // página pai pode não estar pronta na primeira tentativa —
+                // tenta de novo uma vez, depois desiste silenciosamente.
+                if (tentativa < 2) {
+                    setTimeout(function() { _injetarVLibras(tentativa + 1); }, 800);
+                }
+            }
+        }
+        _injetarVLibras(1);
         </script>
         """,
         height=0,

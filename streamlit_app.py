@@ -23,6 +23,13 @@ painel de transparência em src/transparencia.py.
 import pandas as pd
 import streamlit as st
 
+from src.acessibilidade import (
+    botao_ouvir,
+    css_acessibilidade,
+    inicializar_preferencias,
+    renderizar_controles_topo,
+    widget_vlibras,
+)
 from src.charts import (
     grafico_equidade_por_mesorregiao,
     grafico_presenca_equipamentos,
@@ -48,6 +55,16 @@ from src.demanda import (
     ranking_pedidos_ceara,
     registrar_pedido,
     total_pedidos,
+)
+from src.resumos import (
+    resumo_demanda_cidada,
+    resumo_equidade_mesorregiao,
+    resumo_mapa,
+    resumo_municipios_prioritarios,
+    resumo_presenca_equipamentos,
+    resumo_simulador,
+    resumo_transparencia,
+    resumo_visao_geral,
 )
 from src.simulador import (
     TIPOS_EQUIPAMENTO,
@@ -79,8 +96,16 @@ st.set_page_config(
 st.markdown(CSS_CUSTOMIZADO, unsafe_allow_html=True)
 
 inicializar_pedidos()
+inicializar_preferencias()
 
 df = carregar_dados()
+
+# ----------------------------------------------------------------------
+# CSS de acessibilidade + widgets globais (VLibras) — os controles em si
+# aparecem logo abaixo do cabeçalho, mais adiante
+# ----------------------------------------------------------------------
+st.markdown(css_acessibilidade(), unsafe_allow_html=True)
+widget_vlibras()
 
 # ----------------------------------------------------------------------
 # Cabeçalho + seletor de modo (as três features do projeto)
@@ -98,11 +123,22 @@ def ir_para_modo(modo: str):
     st.session_state.modo_app = modo
 
 
+def _render_resumo(texto: str, key: str):
+    """Resumo de 1 frase + botão de ouvir — usado no topo de cada painel
+    e como resumo automático de cada gráfico principal (acessibilidade)."""
+    col_texto, col_botao = st.columns([5, 1])
+    with col_texto:
+        st.info(texto, icon="💬")
+    with col_botao:
+        botao_ouvir(texto, key=key)
+
+
 st.markdown(cabecalho_app(), unsafe_allow_html=True)
 st.markdown(
     "Três jeitos de olhar pra um mesmo problema: **quem no Ceará tem acesso "
     "a cultura perto de casa — e quem não tem.** Escolha por onde começar 👇"
 )
+renderizar_controles_topo()
 
 CARDS_HERO = [
     {
@@ -155,14 +191,22 @@ for col, card in zip(hero_cols, CARDS_HERO):
             unsafe_allow_html=True,
         )
         esta_aqui = st.session_state.modo_app == card["modo"]
-        st.button(
-            "✓ Você está aqui" if esta_aqui else f"Abrir {card['titulo']} →",
-            key=f"hero_btn_{card['titulo']}",
-            use_container_width=True,
-            type="primary" if esta_aqui else "secondary",
-            on_click=ir_para_modo,
-            args=(card["modo"],),
-        )
+        col_btn, col_ouvir = st.columns([5, 1])
+        with col_btn:
+            st.button(
+                "✓ Você está aqui" if esta_aqui else f"Abrir {card['titulo']} →",
+                key=f"hero_btn_{card['titulo']}",
+                use_container_width=True,
+                type="primary" if esta_aqui else "secondary",
+                on_click=ir_para_modo,
+                args=(card["modo"],),
+            )
+        with col_ouvir:
+            botao_ouvir(
+                f"{card['titulo']}. {card['texto']}",
+                key=f"hero_ouvir_{card['titulo']}",
+                rotulo="🔊",
+            )
 
 st.divider()
 
@@ -364,6 +408,7 @@ if st.session_state.modo_app == MODOS[0]:
             "navbar acima para abrir a visão completa e maior de cada uma — "
             "lá você também encontra a explicação de como cada uma foi feita."
         )
+        _render_resumo(resumo_visao_geral(df_f), key="resumo_visao_geral")
 
         linha1_a, linha1_b = st.columns(2)
         with linha1_a, st.container(border=True):
@@ -444,6 +489,7 @@ if st.session_state.modo_app == MODOS[0]:
             "indica a renda per capita. Passe o mouse para ver detalhes, "
             "incluindo o número de equipamentos culturais."
         )
+        _render_resumo(resumo_mapa(df_f), key="resumo_mapa")
         st.plotly_chart(mapa_municipios(df_f, altura=680), use_container_width=True)
 
         with st.expander("🔍 Como esse mapa foi feito"):
@@ -472,6 +518,7 @@ if st.session_state.modo_app == MODOS[0]:
             "% dos municípios filtrados que possuem cada tipo de equipamento "
             "cultural."
         )
+        _render_resumo(resumo_presenca_equipamentos(df_f), key="resumo_presenca")
         st.plotly_chart(
             grafico_presenca_equipamentos(df_f, altura=680), use_container_width=True
         )
@@ -497,6 +544,7 @@ if st.session_state.modo_app == MODOS[0]:
             "% de municípios sem museu, teatro ou cinema em cada mesorregião — "
             "a cor mostra a renda média per capita da região."
         )
+        _render_resumo(resumo_equidade_mesorregiao(df_f), key="resumo_equidade")
         st.plotly_chart(
             grafico_equidade_por_mesorregiao(df_f, altura=680), use_container_width=True
         )
@@ -527,6 +575,7 @@ if st.session_state.modo_app == MODOS[0]:
             "teatro ou cinema com baixa renda per capita — quanto maior, mais "
             "urgente a atenção."
         )
+        _render_resumo(resumo_municipios_prioritarios(df_f), key="resumo_prioritarios")
         n_linhas = st.slider(
             "Quantos municípios mostrar",
             min_value=10,
@@ -605,6 +654,7 @@ elif st.session_state.modo_app == MODOS[1]:
         "entra numa contagem pública e ajuda a apontar pra onde o "
         "investimento deveria ir."
     )
+    _render_resumo(resumo_demanda_cidada(), key="resumo_demanda")
 
     municipio_cidadao = st.selectbox(
         "📍 Meu município", sorted(df["municipio"].unique())
@@ -737,6 +787,7 @@ else:
         "calcula quantas pessoas passariam a ter acesso cultural e o "
         "quanto isso reduz o déficit da mesorregião."
     )
+    _render_resumo(resumo_simulador(), key="resumo_simulador")
 
     col_tipo, col_raio = st.columns([1.3, 1])
     with col_tipo:
@@ -872,6 +923,7 @@ else:
     )
 
     ranking_publico = montar_ranking_publico(df, n=30)
+    _render_resumo(resumo_transparencia(ranking_publico), key="resumo_transparencia")
     st.dataframe(
         ranking_publico.style.set_properties(**estilo_texto_tabela())
         .apply(destacar_coluna, subset=["Índice de Prioridade"])

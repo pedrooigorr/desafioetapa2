@@ -1,11 +1,10 @@
 """
-Cultura Ceará — Squad ZeroKai
+Radar Cultural — Squad ZeroKai
 Desafio dos Dados VIVO 2026 — Etapa 2
 
 Três features num só app:
-  - Painel do Gestor (Radar Cultural): equidade no acesso a equipamentos
-    culturais nos 184 municípios do Ceará. Fala com quem decide política
-    pública.
+  - Painel do Gestor: equidade no acesso a equipamentos culturais nos
+    184 municípios do Ceará. Fala com quem decide política pública.
   - Demanda Cidadã: o cidadão escolhe seu município, vê o que já existe
     e registra o que mais gostaria de ver entre o que falta — vira
     contador público, peso no Índice de Prioridade e sugestão no
@@ -87,8 +86,7 @@ from src.theme import (
 from src.transparencia import gerar_card_municipio, montar_ranking_publico
 
 st.set_page_config(
-    page_title="Cultura Ceará — ZeroKai",
-    page_icon="🎭",
+    page_title="Radar Cultural — ZeroKai",
     layout="wide",
 )
 
@@ -109,9 +107,9 @@ st.markdown(css_acessibilidade(), unsafe_allow_html=True)
 # Cabeçalho + seletor de modo (as três features do projeto)
 # ----------------------------------------------------------------------
 MODOS = [
-    "👨‍💼 Painel do Gestor",
-    "🗳️ Demanda Cidadã",
-    "💰 Simulador & Transparência",
+    "Painel do Gestor",
+    "Demanda Cidadã",
+    "Simulador & Transparência",
 ]
 if "modo_app" not in st.session_state:
     st.session_state.modo_app = MODOS[0]
@@ -126,7 +124,7 @@ def _render_resumo(texto: str, key: str):
     e como resumo automático de cada gráfico principal (acessibilidade)."""
     col_texto, col_botao = st.columns([5, 1])
     with col_texto:
-        st.info(texto, icon="💬")
+        st.info(texto)
     with col_botao:
         botao_ouvir(texto, key=key)
 
@@ -134,14 +132,13 @@ def _render_resumo(texto: str, key: str):
 st.markdown(cabecalho_app(), unsafe_allow_html=True)
 st.markdown(
     "Três jeitos de olhar pra um mesmo problema: **quem no Ceará tem acesso "
-    "a cultura perto de casa — e quem não tem.** Escolha por onde começar 👇"
+    "a cultura perto de casa — e quem não tem.** Escolha por onde começar"
 )
 renderizar_controles_topo()
 
 CARDS_HERO = [
     {
         "modo": MODOS[0],
-        "icone": "👨‍💼",
         "titulo": "Painel do Gestor",
         "texto": (
             "O raio-x da desigualdade cultural: cruza dados oficiais de "
@@ -154,7 +151,6 @@ CARDS_HERO = [
     },
     {
         "modo": MODOS[1],
-        "icone": "🗳️",
         "titulo": "Demanda Cidadã",
         "texto": (
             "A voz de quem mora lá: escolha seu município, veja o que já "
@@ -166,7 +162,6 @@ CARDS_HERO = [
     },
     {
         "modo": MODOS[2],
-        "icone": "💰",
         "titulo": "Simulador & Transparência",
         "texto": (
             "Simule o impacto de instalar um museu, teatro ou cinema antes "
@@ -183,8 +178,7 @@ for col, card in zip(hero_cols, CARDS_HERO):
     with col:
         st.markdown(
             cartao_hero(
-                card["icone"], card["titulo"], card["texto"],
-                card["cor"], card["cor_clara"],
+                card["titulo"], card["texto"], card["cor"], card["cor_clara"],
             ),
             unsafe_allow_html=True,
         )
@@ -203,7 +197,7 @@ for col, card in zip(hero_cols, CARDS_HERO):
             botao_ouvir(
                 f"{card['titulo']}. {card['texto']}",
                 key=f"hero_ouvir_{card['titulo']}",
-                rotulo="🔊",
+                rotulo="Ouvir",
             )
 
 st.divider()
@@ -213,11 +207,11 @@ st.divider()
 # ========================================================================
 if st.session_state.modo_app == MODOS[0]:
     PAGINAS = [
-        "📊 Visão Geral",
-        "🗺️ Mapa do Ceará",
-        "🏛️ Presença de Equipamentos",
-        "📈 Equidade por Mesorregião",
-        "🚩 Municípios Prioritários",
+        "Visão Geral",
+        "Mapa do Ceará",
+        "Presença de Equipamentos",
+        "Equidade por Mesorregião",
+        "Municípios Prioritários",
     ]
 
     if "pagina" not in st.session_state:
@@ -227,7 +221,7 @@ if st.session_state.modo_app == MODOS[0]:
         st.session_state.pagina = pagina
 
     st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
-    with st.expander("ℹ️ Sobre os dados exibidos"):
+    with st.expander("Sobre os dados exibidos"):
         st.markdown(
             "- **Equipamentos culturais** (museu, teatro/sala de espetáculo, "
             "cinema, biblioteca): IBGE, Pesquisa de Informações Básicas "
@@ -238,7 +232,7 @@ if st.session_state.modo_app == MODOS[0]:
             "absolutos de população podem estar desatualizados, mas o "
             "**padrão de desigualdade** entre municípios se mantém coerente. "
             "Ver `data/README.md` para detalhes de como as bases foram cruzadas.\n\n"
-            "⚠️ **Atenção, não confundir:** a 'Renda per capita' usada aqui é a "
+            "**Atenção, não confundir:** a 'Renda per capita' usada aqui é a "
             "**renda domiciliar** — quanto cada pessoa recebe, em média, "
             "somando a renda de todo mundo em casa (Censo 2010). É **diferente** "
             "do **PIB per capita** que aparece no IBGE Cidades (todo o "
@@ -279,7 +273,7 @@ if st.session_state.modo_app == MODOS[0]:
         st.session_state.filtro_equip = []
 
     n_ativos = _n_filtros_ativos_gestor()
-    rotulo_filtros = "🔎 Filtros" + (
+    rotulo_filtros = "Filtros" + (
         f" · {n_ativos} ativo{'s' if n_ativos != 1 else ''}" if n_ativos else ""
     )
 
@@ -289,13 +283,13 @@ if st.session_state.modo_app == MODOS[0]:
             st.caption("Ajuste o recorte de municípios usado em todos os gráficos abaixo.")
         with col_limpar:
             st.button(
-                "🧹 Limpar filtros",
+                "Limpar filtros",
                 on_click=_limpar_filtros_gestor,
                 use_container_width=True,
                 disabled=n_ativos == 0,
             )
 
-        st.markdown("**📍 Localização**")
+        st.markdown("**Localização**")
         col_meso, col_fortaleza = st.columns([3, 1])
         with col_meso:
             mesorregioes_sel = st.pills(
@@ -314,7 +308,7 @@ if st.session_state.modo_app == MODOS[0]:
                 "equipamentos — marque para ver só o padrão do interior",
             )
 
-        st.markdown("**👥 População**")
+        st.markdown("**População**")
         faixa_pop = st.slider(
             "Faixa de população",
             pop_min,
@@ -324,7 +318,7 @@ if st.session_state.modo_app == MODOS[0]:
             label_visibility="collapsed",
         )
 
-        st.markdown("**🏛️ Equipamentos**")
+        st.markdown("**Equipamentos**")
         equip_filtro = st.pills(
             "Mostrar apenas municípios SEM:",
             options=list(EQUIPAMENTOS.values()),
@@ -385,9 +379,9 @@ if st.session_state.modo_app == MODOS[0]:
     # --------------------------------------------------------------
     pagina_atual = st.session_state.pagina
 
-    if pagina_atual == "📊 Visão Geral":
+    if pagina_atual == "Visão Geral":
         st.markdown(
-            "### Bem-vindo(a) ao Radar Cultural! 👋\n"
+            "### Bem-vindo(a) ao Radar Cultural!\n"
             "Este painel nasceu de uma pergunta simples: **quem no Ceará tem "
             "acesso a museu, teatro ou cinema perto de casa — e quem não tem?** "
             "Cruzamos dados oficiais de população, renda e equipamentos "
@@ -411,7 +405,7 @@ if st.session_state.modo_app == MODOS[0]:
         linha1_a, linha1_b = st.columns(2)
         with linha1_a, st.container(border=True):
             st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
-            st.subheader("🗺️ Mapa do Ceará")
+            st.subheader("Mapa do Ceará")
             st.plotly_chart(
                 mapa_municipios(df_f, altura=280),
                 use_container_width=True,
@@ -421,12 +415,12 @@ if st.session_state.modo_app == MODOS[0]:
                 "Ver página completa →",
                 key="btn_mapa",
                 on_click=ir_para,
-                args=("🗺️ Mapa do Ceará",),
+                args=("Mapa do Ceará",),
             )
 
         with linha1_b, st.container(border=True):
             st.markdown(barra_secao("#F2A93B"), unsafe_allow_html=True)
-            st.subheader("🏛️ Presença de Equipamentos")
+            st.subheader("Presença de Equipamentos")
             st.plotly_chart(
                 grafico_presenca_equipamentos(df_f, altura=260),
                 use_container_width=True,
@@ -436,13 +430,13 @@ if st.session_state.modo_app == MODOS[0]:
                 "Ver página completa →",
                 key="btn_presenca",
                 on_click=ir_para,
-                args=("🏛️ Presença de Equipamentos",),
+                args=("Presença de Equipamentos",),
             )
 
         linha2_a, linha2_b = st.columns(2)
         with linha2_a, st.container(border=True):
             st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
-            st.subheader("📈 Equidade por Mesorregião")
+            st.subheader("Equidade por Mesorregião")
             st.plotly_chart(
                 grafico_equidade_por_mesorregiao(df_f, altura=280),
                 use_container_width=True,
@@ -452,12 +446,12 @@ if st.session_state.modo_app == MODOS[0]:
                 "Ver página completa →",
                 key="btn_equidade",
                 on_click=ir_para,
-                args=("📈 Equidade por Mesorregião",),
+                args=("Equidade por Mesorregião",),
             )
 
         with linha2_b, st.container(border=True):
             st.markdown(barra_secao("#8C1C13"), unsafe_allow_html=True)
-            st.subheader("🚩 Municípios Prioritários")
+            st.subheader("Municípios Prioritários")
             tabela_preview = montar_tabela_prioritarios(df_f, n=5)
             st.dataframe(
                 tabela_preview.style.set_properties(**estilo_texto_tabela())
@@ -476,12 +470,12 @@ if st.session_state.modo_app == MODOS[0]:
                 "Ver página completa →",
                 key="btn_prioritarios",
                 on_click=ir_para,
-                args=("🚩 Municípios Prioritários",),
+                args=("Municípios Prioritários",),
             )
 
-    elif pagina_atual == "🗺️ Mapa do Ceará":
+    elif pagina_atual == "Mapa do Ceará":
         st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
-        st.subheader("🗺️ Mapa do Ceará — renda e população por município")
+        st.subheader("Mapa do Ceará — renda e população por município")
         st.caption(
             "Cada ponto é um município — o tamanho indica a população e a cor "
             "indica a renda per capita. Passe o mouse para ver detalhes, "
@@ -490,7 +484,7 @@ if st.session_state.modo_app == MODOS[0]:
         _render_resumo(resumo_mapa(df_f), key="resumo_mapa")
         st.plotly_chart(mapa_municipios(df_f, altura=680), use_container_width=True)
 
-        with st.expander("🔍 Como esse mapa foi feito"):
+        with st.expander("Como esse mapa foi feito"):
             st.markdown(
                 "1. Pegamos o **contorno oficial do Ceará** (fronteira do "
                 "estado) e as coordenadas (latitude/longitude) dos 184 "
@@ -509,9 +503,9 @@ if st.session_state.modo_app == MODOS[0]:
                 "se afasta para o interior/sertão."
             )
 
-    elif pagina_atual == "🏛️ Presença de Equipamentos":
+    elif pagina_atual == "Presença de Equipamentos":
         st.markdown(barra_secao("#F2A93B"), unsafe_allow_html=True)
-        st.subheader("🏛️ Presença de cada equipamento cultural")
+        st.subheader("Presença de cada equipamento cultural")
         st.caption(
             "% dos municípios filtrados que possuem cada tipo de equipamento "
             "cultural."
@@ -521,7 +515,7 @@ if st.session_state.modo_app == MODOS[0]:
             grafico_presenca_equipamentos(df_f, altura=680), use_container_width=True
         )
 
-        with st.expander("🔍 Como esse gráfico foi feito"):
+        with st.expander("Como esse gráfico foi feito"):
             st.markdown(
                 "Para cada um dos 4 equipamentos (museu, teatro/sala de "
                 "espetáculo, cinema e biblioteca), calculamos:\n\n"
@@ -535,9 +529,9 @@ if st.session_state.modo_app == MODOS[0]:
                 "quem tem acesso cultural de quem não tem."
             )
 
-    elif pagina_atual == "📈 Equidade por Mesorregião":
+    elif pagina_atual == "Equidade por Mesorregião":
         st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
-        st.subheader("🗺️ Equidade cultural por Mesorregião")
+        st.subheader("Equidade cultural por Mesorregião")
         st.caption(
             "% de municípios sem museu, teatro ou cinema em cada mesorregião — "
             "a cor mostra a renda média per capita da região."
@@ -547,7 +541,7 @@ if st.session_state.modo_app == MODOS[0]:
             grafico_equidade_por_mesorregiao(df_f, altura=680), use_container_width=True
         )
 
-        with st.expander("🔍 Como esse gráfico foi feito"):
+        with st.expander("Como esse gráfico foi feito"):
             st.markdown(
                 "1. Agrupamos os municípios filtrados pelas suas 7 "
                 "**mesorregiões** oficiais do IBGE (Metropolitana de "
@@ -565,9 +559,9 @@ if st.session_state.modo_app == MODOS[0]:
                 "duplo de menos renda e menos acesso cultural."
             )
 
-    elif pagina_atual == "🚩 Municípios Prioritários":
+    elif pagina_atual == "Municípios Prioritários":
         st.markdown(barra_secao("#8C1C13"), unsafe_allow_html=True)
-        st.subheader("🚩 Municípios prioritários (baixa renda + pouco acesso)")
+        st.subheader("Municípios prioritários (baixa renda + pouco acesso)")
         st.caption(
             "Ranking pelo Índice de Prioridade: combina ausência de museu, "
             "teatro ou cinema com baixa renda per capita — quanto maior, mais "
@@ -590,8 +584,8 @@ if st.session_state.modo_app == MODOS[0]:
 
         if tabela_completa["Pedidos da população"].sum() > 0:
             st.caption(
-                "💡 As colunas **Pedidos da população** e **Índice Ajustado** "
-                "vêm dos pedidos registrados em '🗳️ Demanda Cidadã' nesta sessão."
+                "As colunas **Pedidos da população** e **Índice Ajustado** "
+                "vêm dos pedidos registrados em 'Demanda Cidadã' nesta sessão."
             )
 
         st.dataframe(
@@ -609,7 +603,7 @@ if st.session_state.modo_app == MODOS[0]:
             height=650,
         )
 
-        with st.expander("🔍 Como esse ranking foi feito"):
+        with st.expander("Como esse ranking foi feito"):
             st.markdown(
                 "Criamos o **Índice de Prioridade** para combinar, num só "
                 "número, dois fatores que juntos indicam urgência de "
@@ -628,7 +622,7 @@ if st.session_state.modo_app == MODOS[0]:
                 "**merece atenção prioritária**.\n\n"
                 "O **Índice Ajustado** soma a esse índice um peso pequeno e "
                 "suave (raiz quadrada do total de pedidos, ×0,05) vindo dos "
-                "pedidos registrados em '🗳️ Demanda Cidadã' — assim a "
+                "pedidos registrados em 'Demanda Cidadã' — assim a "
                 "demanda real da população também conta, sem sozinha virar "
                 "o ranking de cabeça pra baixo."
             )
@@ -646,7 +640,7 @@ if st.session_state.modo_app == MODOS[0]:
 elif st.session_state.modo_app == MODOS[1]:
     st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
     st.markdown(
-        "### O que falta de cultura na sua cidade? 🗳️\n"
+        "### O que falta de cultura na sua cidade?\n"
         "Escolha seu município, veja o que já existe lá — e registre, "
         "entre o que falta, o que você mais gostaria de ver. Seu pedido "
         "entra numa contagem pública e ajuda a apontar pra onde o "
@@ -655,7 +649,7 @@ elif st.session_state.modo_app == MODOS[1]:
     _render_resumo(resumo_demanda_cidada(), key="resumo_demanda")
 
     municipio_cidadao = st.selectbox(
-        "📍 Meu município", sorted(df["municipio"].unique())
+        "Meu município", sorted(df["municipio"].unique())
     )
     linha_municipio = df.loc[df["municipio"] == municipio_cidadao].iloc[0]
 
@@ -680,7 +674,7 @@ elif st.session_state.modo_app == MODOS[1]:
 
     if ja_votou_no_municipio(municipio_cidadao):
         st.info(
-            f"✅ Você já registrou um pedido para **{municipio_cidadao}** "
+            f"Você já registrou um pedido para **{municipio_cidadao}** "
             "nesta sessão — obrigado! Escolha outro município acima pra "
             "votar de novo, ou recarregue a página pra reiniciar."
         )
@@ -698,7 +692,7 @@ elif st.session_state.modo_app == MODOS[1]:
         col_botao, _ = st.columns([1, 3])
         with col_botao:
             se_registrou = st.button(
-                "🗳️ Registrar meu pedido", type="primary", use_container_width=True
+                "Registrar meu pedido", type="primary", use_container_width=True
             )
         if se_registrou:
             registrar_pedido(municipio_cidadao, categoria_escolhida)
@@ -717,7 +711,7 @@ elif st.session_state.modo_app == MODOS[1]:
 
     if total_local > 0:
         st.markdown(
-            f"### 📣 {votos_top} pessoa{'s' if votos_top != 1 else ''} em "
+            f"### {votos_top} pessoa{'s' if votos_top != 1 else ''} em "
             f"**{municipio_cidadao}** pede{'m' if votos_top != 1 else ''} "
             f"**{categoria_top}**"
         )
@@ -736,7 +730,7 @@ elif st.session_state.modo_app == MODOS[1]:
             "nesta sessão. Seja o primeiro!"
         )
 
-    st.markdown("##### 📊 O que o Ceará está pedindo")
+    st.markdown("##### O que o Ceará está pedindo")
     ranking_geral = ranking_pedidos_ceara()
     if ranking_geral:
         st.dataframe(
@@ -756,12 +750,12 @@ elif st.session_state.modo_app == MODOS[1]:
     else:
         st.caption("Nenhum pedido registrado ainda em nenhum município.")
 
-    with st.expander("🔍 Como esse pedido se conecta com o resto do app"):
+    with st.expander("Como esse pedido se conecta com o resto do app"):
         st.markdown(
             "1. **Índice de Prioridade** (Painel do Gestor): cada pedido "
             "adiciona um peso pequeno e suave (raiz quadrada do total de "
             "pedidos) ao índice do município — dá pra ver a versão "
-            "ajustada na página '🚩 Municípios Prioritários'.\n"
+            "ajustada na página 'Municípios Prioritários'.\n"
             "2. **Simulador de Investimento**: ao clicar num município que "
             "já tem pedidos registrados, o simulador sugere automaticamente "
             "simular o tipo de equipamento mais pedido pela população "
@@ -779,7 +773,7 @@ elif st.session_state.modo_app == MODOS[1]:
 else:
     st.markdown(barra_secao(COR_SIMULADOR), unsafe_allow_html=True)
     st.markdown(
-        "### Onde investir pra reduzir o deserto cultural? 💰\n"
+        "### Onde investir pra reduzir o deserto cultural?\n"
         "Escolha um tipo de equipamento e um raio de atuação na barra "
         "lateral, depois **clique num município no mapa** — o sistema "
         "calcula quantas pessoas passariam a ter acesso cultural e o "
@@ -808,7 +802,7 @@ else:
         )
 
     st.caption(
-        f"🟢 verde = município já tem {tipo_label.lower()} · 🔴 terracota = "
+        f"verde = município já tem {tipo_label.lower()} · terracota = "
         "deserto cultural para esse equipamento. Clique num ponto do mapa."
     )
 
@@ -834,10 +828,10 @@ else:
                 col_sugestao, col_botao = st.columns([3, 1])
                 with col_sugestao:
                     st.info(
-                        f"💡 A população de **{municipio_clicado}** pediu "
+                        f"A população de **{municipio_clicado}** pediu "
                         f"**{categoria_pedida}** ({votos_pedidos} "
                         f"pedido{'s' if votos_pedidos != 1 else ''}) em "
-                        "'🗳️ Demanda Cidadã' — quer simular isso?"
+                        "'Demanda Cidadã' — quer simular isso?"
                     )
                 with col_botao:
                     if st.button(
@@ -847,8 +841,8 @@ else:
                         st.rerun()
         elif categoria_pedida:
             st.caption(
-                f"ℹ️ A população de {municipio_clicado} pediu mais "
-                f"'{categoria_pedida}' em '🗳️ Demanda Cidadã', mas esse "
+                f"A população de {municipio_clicado} pediu mais "
+                f"'{categoria_pedida}' em 'Demanda Cidadã', mas esse "
                 "tipo ainda não é simulável nesta versão (só museu, "
                 "teatro e cinema)."
             )
@@ -858,7 +852,7 @@ else:
     if municipio_clicado:
         resultado = calcular_simulacao(df, municipio_clicado, coluna_equipamento, raio_km)
         with st.container(border=True):
-            st.subheader(f"📍 Simulação: {tipo_label} em {municipio_clicado}")
+            st.subheader(f"Simulação: {tipo_label} em {municipio_clicado}")
             populacao_fmt = f"{resultado['populacao_beneficiada']:,}".replace(",", ".")
             st.markdown(
                 f"Se um(a) **{tipo_label.lower()}** fosse instalado(a) em "
@@ -884,9 +878,9 @@ else:
                     + ", ".join(resultado["municipios_beneficiados"])
                 )
     else:
-        st.info("👆 Clique em um ponto do mapa para rodar a simulação.")
+        st.info("Clique em um ponto do mapa para rodar a simulação.")
 
-    with st.expander("🔍 Como essa simulação é calculada"):
+    with st.expander("Como essa simulação é calculada"):
         st.markdown(
             "1. Ao clicar num município, calculamos a **distância real** "
             "(fórmula de haversine, mesma usada no Feed Cultural) entre "
@@ -907,7 +901,7 @@ else:
     # --------------------------------------------------------------
     # Painel de Transparência do Gestor
     # --------------------------------------------------------------
-    st.subheader("📣 Painel de Transparência do Gestor")
+    st.subheader("Painel de Transparência do Gestor")
     st.markdown(
         "A versão **pública** do Índice de Prioridade: um ranking de fácil "
         "leitura de quais municípios têm o maior deserto cultural do "
@@ -936,7 +930,7 @@ else:
         height=420,
     )
 
-    st.markdown("##### 🖼️ Gerar card pra compartilhar")
+    st.markdown("##### Gerar card pra compartilhar")
     municipio_card = st.selectbox(
         "Escolha um município do ranking acima",
         ranking_publico["Município"].tolist(),
@@ -950,7 +944,7 @@ else:
         card_png = gerar_card_municipio(linha_escolhida, len(ranking_publico))
         st.image(card_png, width=320)
         st.download_button(
-            "📥 Baixar card (PNG)",
+            "Baixar card (PNG)",
             data=card_png,
             file_name=f"radar_cultural_{municipio_card.lower().replace(' ', '_')}.png",
             mime="image/png",
@@ -974,11 +968,11 @@ else:
             "vereador possa baixar e cobrar publicamente."
         )
 
-    with st.expander("🔍 Como esse ranking foi feito"):
+    with st.expander("Como esse ranking foi feito"):
         st.markdown(
             "Usa exatamente o mesmo **Índice de Prioridade** calculado no "
             "Radar Cultural (ver a explicação completa na página "
-            "'🚩 Municípios Prioritários' do Painel do Gestor) — nenhum "
+            "'Municípios Prioritários' do Painel do Gestor) — nenhum "
             "dado novo ou estimado entra aqui. A diferença é só de "
             "**formato**: em vez de uma tabela técnica, um card visual "
             "pensado pra circular fora do ambiente de gestão — em redes "

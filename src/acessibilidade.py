@@ -32,7 +32,7 @@ def renderizar_controles_topo():
     conseguir clicar nele — colocando aqui, o controle sempre aparece
     sem precisar abrir nada.
     """
-    with st.expander("♿ Acessibilidade", expanded=False):
+    with st.expander("Acessibilidade", expanded=False):
         col1, col2 = st.columns(2)
         with col1:
             st.checkbox(
@@ -48,7 +48,7 @@ def renderizar_controles_topo():
                 key="a11y_tamanho_texto",
             )
         st.caption(
-            "Cada painel também tem um botão 🔊 pra ouvir o resumo em voz alta."
+            "Cada painel também tem um botão pra ouvir o resumo em voz alta."
         )
 
 
@@ -138,7 +138,7 @@ def _escapar_para_js(texto: str) -> str:
     return texto.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
 
-def botao_ouvir(texto: str, key: str, rotulo: str = "🔊 Ouvir este resumo"):
+def botao_ouvir(texto: str, key: str, rotulo: str = "Ouvir este resumo"):
     """
     Botão que lê `texto` em voz alta com a Web Speech API do navegador —
     nativa, sem custo, sem precisar de internet extra nem API paga.
@@ -148,6 +148,16 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "🔊 Ouvir este resumo"):
     components.html(
         f"""
         <style>
+        /* Sem isso, o <body> padrão do iframe do componente tem uma margem
+           própria (tipicamente 8px) que empurra o botão pra baixo e o
+           desalinha verticalmente da caixa de resumo ao lado — zerando a
+           margem, o botão ocupa a altura inteira do iframe (height=44 no
+           components.html abaixo) e fica centralizado de verdade. */
+        html, body {{
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }}
         .btn-ouvir-{key} {{
             background:#FFFDF8;
             color:#C1440E;
@@ -159,7 +169,7 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "🔊 Ouvir este resumo"):
             cursor:pointer;
             font-family:sans-serif;
             width:100%;
-            height:38px;
+            height:100%;
             box-sizing:border-box;
             transition: background-color 0.15s ease, color 0.15s ease;
         }}
@@ -178,5 +188,5 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "🔊 Ouvir este resumo"):
         }});
         </script>
         """,
-        height=42,
+        height=44,
     )

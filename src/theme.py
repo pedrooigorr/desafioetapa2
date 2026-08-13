@@ -40,9 +40,8 @@ def cabecalho_app() -> str:
     """
     return (
         '<div class="radar-header">'
-        '<span class="radar-header-icone">🎭</span>'
         "<div>"
-        '<div class="radar-header-titulo">Cultura Ceará</div>'
+        '<div class="radar-header-titulo">Radar Cultural</div>'
         '<div class="radar-header-subtitulo">Squad ZeroKai · Desafio dos '
         "Dados VIVO 2026 · ODS 4, 10 e 11</div>"
         "</div>"
@@ -60,7 +59,7 @@ def rodape_app() -> str:
     return (
         '<div class="radar-footer">'
         '<div class="radar-footer-col">'
-        '<div class="radar-footer-titulo">🎭 Cultura Ceará</div>'
+        '<div class="radar-footer-titulo">Radar Cultural</div>'
         '<div class="radar-footer-texto">Squad ZeroKai · Desafio dos Dados '
         "VIVO 2026 — protótipo de código aberto.</div>"
         "</div>"
@@ -141,17 +140,16 @@ def aplicar_texto_escuro(fig, tamanho_fonte: int = 13):
     return fig
 
 
-def cartao_hero(icone: str, titulo: str, texto: str, cor: str, cor_clara: str) -> str:
+def cartao_hero(titulo: str, texto: str, cor: str, cor_clara: str) -> str:
     """
     Monta o HTML de um card de apresentação (hero) pra tela inicial —
-    ícone grande, título e um parágrafo curto explicando a feature, com
-    cor própria por seção. Usar com st.markdown(..., unsafe_allow_html=True),
+    título e um parágrafo curto explicando a feature, com cor própria
+    por seção. Usar com st.markdown(..., unsafe_allow_html=True),
     seguido do st.button real que leva até a feature.
     """
     return (
         f'<div class="radar-hero-card" '
         f'style="border-top-color:{cor}; background:{cor_clara};">'
-        f'<div class="radar-hero-icone">{icone}</div>'
         f'<div class="radar-hero-titulo" style="color:{cor};">{titulo}</div>'
         f'<div class="radar-hero-texto">{texto}</div>'
         f"</div>"
@@ -192,10 +190,6 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     box-shadow: 0 3px 10px rgba(26, 15, 8, 0.10);
     margin-bottom: 10px;
 }
-.radar-hero-icone {
-    font-size: 2.1rem;
-    margin-bottom: 6px;
-}
 .radar-hero-titulo {
     font-size: 1.15rem;
     font-weight: 800;
@@ -235,6 +229,20 @@ div[data-testid="stMetricLabel"] {
 /* Botões da navbar */
 .stButton button {
     font-weight: 700 !important;
+}
+
+/* Alinhamento vertical do botão "Ouvir" (componente em iframe, usado em
+   src/acessibilidade.py) com o elemento ao lado dele na mesma linha de
+   colunas — seja a caixa de resumo (st.info) ou o botão "Abrir X" dos
+   cards da tela inicial. Por padrão um <iframe> é "display: inline",
+   o que sozinho já cria um pequeno espaço fantasma abaixo dele; center
+   nos garante que ele fique centralizado mesmo quando a linha inteira
+   é mais alta que o próprio iframe. */
+iframe {
+    display: block;
+}
+div[data-testid="stHorizontalBlock"]:has(iframe) {
+    align-items: center;
 }
 
 /* O Streamlit limita o conteúdo a uma coluna central e alguns dos
@@ -291,10 +299,6 @@ div[data-testid="stMainBlockContainer"],
     width: auto;
     margin-inline: calc(50% - 50vw);
     margin-bottom: 20px;
-}
-.radar-header-icone {
-    font-size: 2.6rem;
-    line-height: 1;
 }
 .radar-header-titulo {
     color: #FFFDF8 !important;

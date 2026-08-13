@@ -8,6 +8,8 @@ footer, cards de apresentação (hero), cards de KPI, chips de status e as
 tarjas coloridas que dão identidade a cada seção.
 """
 
+from src.icones import icone
+
 # Paleta qualitativa (uma cor por mesorregião nos gráficos de dispersão/legenda)
 NORDESTE_DISCRETA = [
     "#C1440E",  # terracota / barro
@@ -145,54 +147,101 @@ def aplicar_texto_escuro(fig, tamanho_fonte: int = 13):
     return fig
 
 
-def cartao_hero(titulo: str, texto: str, cor: str, cor_clara: str) -> str:
+def cartao_hero(icone_nome: str, titulo: str, texto: str, cor: str, cor_clara: str) -> str:
     """
     Monta o HTML de um card de apresentação (hero) pra tela inicial —
-    título e um parágrafo curto explicando a feature, com cor própria
-    por seção. Usar com st.markdown(..., unsafe_allow_html=True),
+    ícone (Lucide), título e um parágrafo curto explicando a feature, com
+    cor própria por seção. Usar com st.markdown(..., unsafe_allow_html=True),
     seguido do st.button real que leva até a feature.
     """
     return (
         f'<div class="radar-hero-card" '
         f'style="border-top-color:{cor}; background:{cor_clara};">'
+        f'<div class="radar-hero-icone" style="background:{cor};">'
+        f'{icone(icone_nome, cor="#FFFDF8", tamanho=20)}</div>'
         f'<div class="radar-hero-titulo" style="color:{cor};">{titulo}</div>'
         f'<div class="radar-hero-texto">{texto}</div>'
         f"</div>"
     )
 
 
-def cartao_kpi(rotulo: str, valor: str, cor: str, ajuda: str = "") -> str:
+def cartao_kpi(icone_nome: str, rotulo: str, valor: str, cor: str, ajuda: str = "") -> str:
     """
-    Card de KPI (número grande + rótulo), com tarja colorida no topo e
-    fundo areia — em vez do st.metric solto sobre o fundo da página.
-    `ajuda` vira tooltip nativo do navegador (atributo title).
+    Card de KPI (número grande + rótulo + ícone Lucide), com tarja
+    colorida no topo e fundo branco — em vez do st.metric solto sobre o
+    fundo da página. `ajuda` vira tooltip nativo do navegador (atributo
+    title).
     """
     title_attr = f' title="{ajuda}"' if ajuda else ""
     marca_ajuda = '<span class="radar-kpi-ajuda">?</span>' if ajuda else ""
     return (
         f'<div class="radar-kpi-card"{title_attr}>'
         f'<div class="radar-kpi-tarja" style="background:{cor};"></div>'
-        f'<div class="radar-kpi-rotulo">{rotulo}{marca_ajuda}</div>'
+        f'<div class="radar-kpi-cabecalho">'
+        f'{icone(icone_nome, cor=cor, tamanho=18)}'
+        f'<span class="radar-kpi-rotulo">{rotulo}{marca_ajuda}</span>'
+        f"</div>"
         f'<div class="radar-kpi-valor">{valor}</div>'
         f"</div>"
     )
 
 
+ICONE_EQUIPAMENTO = {
+    "Biblioteca": "book-open",
+    "Museu": "landmark",
+    "Teatro / Sala de espetáculo": "drama",
+    "Cinema": "clapperboard",
+}
+
+
 def chip_equipamento(nome: str, tem: bool) -> str:
     """
     Chip compacto de status de um equipamento cultural num município —
-    verde-cactos discreto pra "tem", terracota discreto pra "não tem".
-    Substitui os blocos grandes e saturados da Demanda Cidadã: comunica
-    o mesmo, sem dominar visualmente a página.
+    ícone do próprio equipamento (Lucide) em vez de um check/x genérico,
+    verde-cactos pra "tem" e terracota pra "não tem". Substitui os blocos
+    grandes e saturados da Demanda Cidadã: comunica o mesmo, sem dominar
+    visualmente a página.
     """
-    if tem:
-        cor, fundo, simbolo = "#4C6444", "#EAF0E4", "&#10003;"
-    else:
-        cor, fundo, simbolo = "#C1440E", "#FBEBD4", "&#10007;"
+    cor, fundo = ("#4C6444", "#EAF0E4") if tem else ("#C1440E", "#FBEBD4")
+    icone_nome = ICONE_EQUIPAMENTO.get(nome, "landmark")
     return (
         f'<div class="radar-chip" style="border-color:{cor}; background:{fundo};">'
-        f'<span class="radar-chip-simbolo" style="background:{cor};">{simbolo}</span>'
+        f'<span class="radar-chip-simbolo" style="background:{cor};">'
+        f'{icone(icone_nome, cor="#FFFDF8", tamanho=13)}</span>'
         f'<span class="radar-chip-nome" style="color:{cor};">{nome}</span>'
+        f"</div>"
+    )
+
+
+def estado_vazio(icone_nome: str, texto: str, cor: str = "#B8792A") -> str:
+    """
+    Bloco de estado vazio com ícone Lucide grande + texto — usado nos
+    dois pontos do app onde "nada aconteceu ainda" (Simulador antes do
+    clique no mapa, Demanda Cidadã antes do primeiro pedido) em vez de
+    só uma caixa de texto azul (st.info), que fica igual a qualquer
+    outro aviso do app e não comunica "está vazio por enquanto".
+    """
+    return (
+        f'<div class="radar-vazio">'
+        f'<div class="radar-vazio-icone" style="color:{cor};">'
+        f'{icone(icone_nome, cor="currentColor", tamanho=34)}</div>'
+        f'<div class="radar-vazio-texto">{texto}</div>'
+        f"</div>"
+    )
+
+
+def titulo_secao(icone_nome: str, texto: str, cor: str = "#C1440E") -> str:
+    """
+    Título de seção (equivalente a um st.subheader) com ícone Lucide ao
+    lado — st.subheader/st.header não aceitam ícone nesta versão do
+    Streamlit (só expander/button/download_button aceitam), daí este
+    componente HTML próprio pra manter a mesma hierarquia visual do
+    resto do app.
+    """
+    return (
+        f'<div class="radar-titulo-secao">'
+        f'<span style="color:{cor};">{icone(icone_nome, cor="currentColor", tamanho=22)}</span>'
+        f"<h3>{texto}</h3>"
         f"</div>"
     )
 
@@ -276,6 +325,15 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(26, 15, 8, 0.13);
 }
+.radar-hero-icone {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
 .radar-hero-titulo {
     font-size: 1.3rem;
     font-weight: 700;
@@ -312,6 +370,11 @@ div[data-testid="stHorizontalBlock"]:has(.radar-hero-card)
     width: 34px;
     border-radius: 3px;
     margin-bottom: 12px;
+}
+.radar-kpi-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
 }
 .radar-kpi-rotulo {
     font-size: 0.82rem;
@@ -360,16 +423,60 @@ div[data-testid="stHorizontalBlock"]:has(.radar-hero-card)
 }
 .radar-chip-simbolo {
     flex: 0 0 auto;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    color: #FFFDF8;
-    font-size: 0.75rem;
-    line-height: 22px;
-    text-align: center;
-    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .radar-chip-nome { line-height: 1.25; }
+
+/* ------------------------------------------------------------------
+   Estado vazio (Simulador antes do clique, Demanda Cidadã antes do
+   primeiro pedido) — ícone grande + texto centralizados, em vez de uma
+   caixa de aviso azul igual a qualquer outro st.info do app.
+   ------------------------------------------------------------------ */
+.radar-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 36px 24px;
+    background: #FBF5EC;
+    border: 1.5px dashed #E0CBB0;
+    border-radius: 16px;
+}
+.radar-vazio-icone {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(122, 46, 14, 0.08);
+}
+.radar-vazio-texto {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #6B4226;
+    max-width: 360px;
+    line-height: 1.5;
+}
+
+/* Título de seção com ícone (substitui st.subheader nos pontos em que
+   queremos um ícone Lucide ao lado — ver titulo_secao() em theme.py) */
+.radar-titulo-secao {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 2px 0;
+}
+.radar-titulo-secao h3 {
+    margin: 0 !important;
+}
 
 /* Tarja colorida no topo de cada painel/gráfico — dá identidade por seção */
 .radar-barra-secao {

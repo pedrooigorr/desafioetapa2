@@ -32,7 +32,7 @@ def renderizar_controles_topo():
     conseguir clicar nele — colocando aqui, o controle sempre aparece
     sem precisar abrir nada.
     """
-    with st.expander("Acessibilidade", expanded=False):
+    with st.expander("Acessibilidade", expanded=False, icon=":material/accessibility_new:"):
         col1, col2 = st.columns(2)
         with col1:
             st.checkbox(
@@ -106,17 +106,31 @@ header[data-testid="stHeader"] {
 }
 
 
-/* Elementos próprios do app no alto contraste: KPIs, chips, navbar e
-   expanders perdem os fundos areia e passam a preto/branco puros */
-.radar-kpi-card, .radar-hero-card, .radar-chip,
+/* Elementos próprios do app no alto contraste: KPIs, chips, cards do
+   hero, estado vazio, navbar e expanders perdem os fundos coloridos e
+   passam a preto/branco puros — os ícones (stroke=currentColor) seguem
+   a cor do texto automaticamente */
+.radar-kpi-card, .radar-hero-card, .radar-chip, .radar-vazio,
 div[data-testid="stExpander"] details,
 div[data-testid="stRadio"] div[role="radiogroup"] > label {
     background: #FFFFFF !important;
     border-color: #000000 !important;
 }
 .radar-kpi-valor, .radar-kpi-rotulo, .radar-hero-titulo,
-.radar-hero-texto, .radar-chip-nome {
+.radar-hero-texto, .radar-chip-nome, .radar-vazio-texto {
     color: #000000 !important;
+}
+.radar-hero-icone, .radar-chip-simbolo, .radar-vazio-icone {
+    background: #000000 !important;
+}
+.radar-hero-icone svg, .radar-chip-simbolo svg {
+    stroke: #FFFF00 !important;
+}
+.radar-vazio-icone svg {
+    stroke: #000000 !important;
+}
+.radar-kpi-cabecalho svg {
+    stroke: #000000 !important;
 }
 .radar-kpi-ajuda {
     background: #000000 !important;
@@ -220,10 +234,15 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "Ouvir este resumo"):
         }}
         </style>
         <button id="btn-{key}" class="btn-ouvir-{key}">
-          <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.8-1-3.3-2.5-4v8c1.5-.7
-                     2.5-2.2 2.5-4zM14 3.2v2.1c2.9.9 5 3.5 5 6.7s-2.1 5.8-5
-                     6.7v2.1c4-1 7-4.6 7-8.8s-3-7.8-7-8.8z"/>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4
+                     0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4
+                     1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11
+                     19.298z"/>
+            <path d="M16 9a5 5 0 0 1 0 6" />
+            <path d="M19.364 18.364a9 9 0 0 0 0-12.728" />
           </svg>
           <span>{rotulo}</span>
         </button>

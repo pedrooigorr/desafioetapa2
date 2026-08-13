@@ -1,4 +1,4 @@
-# 🎭 Cultura Ceará
+# 🎭 Radar Cultural
 
 **Quem no Ceará tem acesso a museu, teatro ou cinema perto de casa — e quem não tem?**
 
@@ -41,12 +41,12 @@ deserto cultural.
 ## 🗺️ Fontes dos dados
 
 - **IBGE** — MUNIC, Suplemento de Cultura 2014 (equipamentos culturais)
-- **Atlas Brasil** (PNUD/IPEA/FJP) — população e renda per capita, Censo 2010
+- **IBGE** — Censo Demográfico 2022 (população e renda per capita)
 
-Os detalhes de como as duas bases foram cruzadas, as decisões de
-tratamento de dados e um achado interessante (biblioteca existe em 100%
-dos municípios cearenses, por isso fica de fora do Índice de Prioridade)
-estão documentados em [`data/README.md`](data/README.md).
+Os detalhes de como as bases foram cruzadas, as decisões de tratamento de
+dados e um achado interessante (biblioteca existe em 100% dos municípios
+cearenses, por isso fica de fora do Índice de Prioridade) estão
+documentados em [`data/README.md`](data/README.md).
 
 ## 🛠️ Stack técnico
 
@@ -110,6 +110,7 @@ O app abre em `http://localhost:8501`.
 │   ├── data_loader.py          # Carregamento e cálculo do Índice de Prioridade
 │   ├── demanda.py               # Lógica da Demanda Cidadã
 │   ├── geo.py                   # Cálculo de distância (Haversine)
+│   ├── icones.py                 # Ícones SVG inline (Lucide)
 │   ├── mascara_fora_ceara.py   # Máscara visual do mapa
 │   ├── simulador.py             # Lógica do Simulador de Investimento
 │   ├── theme.py                  # Paleta de cores e CSS customizado

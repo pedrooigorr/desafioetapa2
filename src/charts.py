@@ -93,7 +93,7 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
         color_continuous_scale=NORDESTE_SEQUENCIAL,
         size_max=27,
         labels={
-            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2022)",
             "mesorregiao": "Mesorregião",
             "n_equipamentos": "Nº de equipamentos",
             "populacao": "População",
@@ -202,7 +202,7 @@ def grafico_renda_x_equipamentos(df: pd.DataFrame, altura: int = 420):
         color="mesorregiao",
         hover_name="municipio",
         labels={
-            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2022)",
             "n_equipamentos": "Nº de equipamentos culturais",
             "mesorregiao": "Mesorregião",
         },

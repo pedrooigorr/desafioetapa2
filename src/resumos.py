@@ -42,7 +42,7 @@ def resumo_mapa(df: pd.DataFrame) -> str:
     return (
         f"O mapa mostra {len(df)} municípios do Ceará. {sem_nenhum} "
         f"deles não têm museu, teatro nem cinema, e a renda per capita "
-        f"média desse grupo é de R$ {renda_media:.2f} (Censo 2010)."
+        f"média desse grupo é de R$ {renda_media:.2f} (Censo 2022)."
     )
 
 

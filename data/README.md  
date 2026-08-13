@@ -1,8 +1,8 @@
 # Sobre os dados
 
-O app já está rodando com os **dados reais** cruzados a partir de:
+O app roda com os **dados reais** cruzados a partir de:
 - IBGE — MUNIC, Suplemento de Cultura **2014** (equipamentos culturais)
-- Atlas Brasil (PNUD) — população e renda per capita, **Censo 2010**
+- IBGE — Censo Demográfico **2022** (população e renda per capita)
 
 O arquivo final está em `data/radar_cultural_ce.csv`, com os 184 municípios
 do Ceará e as colunas:
@@ -12,8 +12,8 @@ do Ceará e as colunas:
 | `municipio` | Nome do município |
 | `codigo_ibge` | Código IBGE de 7 dígitos |
 | `mesorregiao` | Uma das 7 mesorregiões do Ceará |
-| `populacao` | População (Censo 2010) |
-| `renda_per_capita` | Renda per capita em R$ (Censo 2010) |
+| `populacao` | População (Censo 2022, resultado do Universo — definitivo) |
+| `renda_per_capita` | Renda per capita em R$ (Censo 2022, resultado preliminar da amostra) |
 | `tem_museu` / `tem_teatro_sala_espetaculo` / `tem_cinema` / `tem_biblioteca` | Existência de cada equipamento (MUNIC 2014) |
 | `n_equipamentos` | Soma dos 4 equipamentos acima (0 a 4) |
 
@@ -29,19 +29,55 @@ dados.
 1. **MUNIC 2014**, aba "Equipamentos" (existência de museu/teatro/cinema/
    biblioteca) + aba "Variáveis externas" (nome do município), filtrado
    para código IBGE começando em `23` (Ceará) → 184 municípios.
-2. **Atlas Brasil**, filtrado para linhas com "(CE)" no nome → 184
-   municípios, cruzado com o passo 1 pelo nome do município normalizado
-   (sem acento, maiúsculo) — bateram 184/184, sem nenhuma linha perdida.
-3. **Mesorregião**: cruzada pelo código IBGE do município usando a
+2. **População (Censo 2022)** — tabela SIDRA **4714** ("População
+   Residente, Área territorial e Densidade demográfica"), variável
+   "População residente", nível município, todos os 5.570 municípios do
+   Brasil, filtrado pelo sufixo `(CE)` no nome → 184 municípios do Ceará.
+   É o resultado do **Universo** (definitivo, não é amostra).
+3. **Renda per capita (Censo 2022)** — tabela SIDRA **10295** ("Valor do
+   rendimento nominal médio mensal domiciliar per capita..."), mesmo
+   processo de filtro. É resultado **preliminar da amostra** — o IBGE
+   ainda não fechou as áreas de ponderação definitivas pra esse indicador,
+   mas é o dado municipal mais atual disponível hoje.
+4. **Correção de grafia**: dois municípios têm o nome escrito de forma
+   diferente entre a base do IBGE (Censo 2022) e a base já usada no
+   projeto (MUNIC 2014) — `Ereré`→`Ererê` e `Itapajé`→`Itapagé`. Foram
+   renomeados pra bater com o nome já usado no dataset, pra não perder o
+   cruzamento nesses dois municípios.
+5. **Mesorregião**: cruzada pelo código IBGE do município usando a
    classificação oficial de mesorregiões do IBGE (código de 4 dígitos:
    2 primeiros = UF, 2 seguintes = mesorregião).
 
-## Se quiserem atualizar para dados mais recentes
+Todos os cruzamentos bateram **184 de 184** municípios, sem nenhuma linha
+perdida em nenhuma das etapas.
 
-A MUNIC tem edições de Cultura mais novas (2018, 2021) que trazem dados mais
-atuais — e a Renda per capita 2022 (Censo) ainda não está disponível no
-Atlas Brasil, mas o IBGE SIDRA deve publicar em breve. Se baixarem essas
-versões mais novas, é só mandar aqui que refaço o cruzamento.
+## Por que Censo 2022 (e não Atlas Brasil/Censo 2010, como antes)
+
+A primeira versão do projeto usava o Atlas Brasil (PNUD/IPEA/FJP) pra
+população e renda, referente ao Censo **2010** — na época, o Censo 2022
+ainda não tinha os dados de renda per capita municipal disponíveis nesse
+formato. Isso mudou: o IBGE divulgou, em 2025, o módulo "Trabalho e
+Rendimento" do Censo 2022 com dados até o nível de município, incluindo
+renda per capita domiciliar — por isso migramos direto pra fonte
+oficial do IBGE, sem depender mais de um agregador terceiro.
+
+**Sobre a API do SIDRA:** ela existe (`apisidra.ibge.gov.br`) mas bloqueia
+acesso automatizado (robots.txt), então os dados foram baixados
+manualmente pela interface web do SIDRA (`sidra.ibge.gov.br/tabela/4714`
+e `sidra.ibge.gov.br/tabela/10295`), exportados em `.xlsx` e processados
+com pandas. Não precisou de nenhuma chave de API nem script complexo —
+só selecionar a variável certa, o ano (2022) e "Município" como unidade
+territorial, e baixar.
+
+## Se quiserem atualizar de novo no futuro
+
+- A MUNIC tem edições de Cultura mais novas que 2014 (2018, 2021) — se
+  saírem edições futuras, vale trocar a fonte de equipamentos culturais
+  também.
+- A renda per capita 2022 é **preliminar da amostra** — quando o IBGE
+  divulgar o resultado definitivo (com as áreas de ponderação fechadas),
+  vale atualizar de novo pela mesma tabela (10295) ou pela que a
+  substituir.
 
 ## Demanda Cidadã (substituiu o antigo "Cultura Perto de Mim")
 

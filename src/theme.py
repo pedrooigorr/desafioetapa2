@@ -73,7 +73,7 @@ def rodape_app() -> str:
         '<div class="radar-footer-col">'
         '<div class="radar-footer-titulo">Fontes dos dados</div>'
         '<div class="radar-footer-texto">IBGE — MUNIC, Suplemento de '
-        "Cultura 2014<br>Atlas Brasil (PNUD/IPEA/FJP) — Censo 2010</div>"
+        "Cultura 2014<br>IBGE — Censo Demográfico 2022</div>"
         "</div>"
         '<div class="radar-footer-col">'
         '<div class="radar-footer-titulo">ODS trabalhados</div>'

@@ -227,18 +227,23 @@ if st.session_state.modo_app == MODOS[0]:
             "- **Equipamentos culturais** (museu, teatro/sala de espetáculo, "
             "cinema, biblioteca): IBGE, Pesquisa de Informações Básicas "
             "Municipais (MUNIC), Suplemento de Cultura **2014**.\n"
-            "- **População e renda per capita**: Atlas Brasil (PNUD/IPEA/FJP), "
-            "referentes ao **Censo 2010**.\n\n"
-            "Como as duas fontes têm anos-base diferentes, os números "
-            "absolutos de população podem estar desatualizados, mas o "
-            "**padrão de desigualdade** entre municípios se mantém coerente. "
-            "Ver `data/README.md` para detalhes de como as bases foram cruzadas.\n\n"
+            "- **População**: IBGE, Censo Demográfico **2022** (resultado do "
+            "Universo, definitivo) — tabela SIDRA 4714.\n"
+            "- **Renda per capita**: IBGE, Censo Demográfico **2022** "
+            "(resultado preliminar da amostra — o IBGE ainda não fechou as "
+            "áreas de ponderação definitivas, mas já é o dado mais atual "
+            "disponível) — tabela SIDRA 10295.\n\n"
+            "Como a MUNIC é de 2014 e o resto é de 2022, os números "
+            "absolutos de equipamentos culturais podem estar desatualizados, "
+            "mas o **padrão de desigualdade** entre municípios se mantém "
+            "coerente. Ver `data/README.md` para detalhes de como as bases "
+            "foram cruzadas.\n\n"
             "**Atenção, não confundir:** a 'Renda per capita' usada aqui é a "
             "**renda domiciliar** — quanto cada pessoa recebe, em média, "
-            "somando a renda de todo mundo em casa (Censo 2010). É **diferente** "
-            "do **PIB per capita** que aparece no IBGE Cidades (todo o "
-            "PIB do município — inclusive gastos públicos, agropecuária, "
-            "indústria — dividido pela população, ano mais recente). São "
+            "somando a renda de todo mundo em casa (Censo 2022). É "
+            "**diferente** do **PIB per capita** que aparece no IBGE Cidades "
+            "(todo o PIB do município — inclusive gastos públicos, "
+            "agropecuária, indústria — dividido pela população). São "
             "métricas distintas; não é incomum um município ter PIB per "
             "capita relativamente alto e renda domiciliar baixa, quando boa "
             "parte da economia local vem da administração pública."
@@ -490,7 +495,7 @@ if st.session_state.modo_app == MODOS[0]:
                 .format(
                     {
                         "Índice de Prioridade": "{:.2f}",
-                        "Renda per capita (R$, Censo 2010)": "{:.2f}",
+                        "Renda per capita (R$, Censo 2022)": "{:.2f}",
                     }
                 ),
                 use_container_width=True,
@@ -625,7 +630,7 @@ if st.session_state.modo_app == MODOS[0]:
             .format(
                 {
                     "Índice de Prioridade": "{:.2f}",
-                    "Renda per capita (R$, Censo 2010)": "{:.2f}",
+                    "Renda per capita (R$, Censo 2022)": "{:.2f}",
                     "Índice Ajustado (c/ demanda)": "{:.2f}",
                 }
             ),
@@ -661,8 +666,8 @@ if st.session_state.modo_app == MODOS[0]:
     st.divider()
     st.caption(
         "Fontes: IBGE — Pesquisa de Informações Básicas Municipais (MUNIC), "
-        "Suplemento de Cultura 2014 · Atlas Brasil (PNUD/IPEA/FJP) — "
-        "população e renda per capita municipal, Censo 2010."
+        "Suplemento de Cultura 2014 · IBGE — Censo Demográfico 2022 "
+        "(população e renda per capita municipal)."
     )
 
 # ========================================================================
@@ -963,7 +968,7 @@ else:
         .format(
             {
                 "Índice de Prioridade": "{:.2f}",
-                "Renda per capita (R$, Censo 2010)": "{:.2f}",
+                "Renda per capita (R$, Censo 2022)": "{:.2f}",
             }
         ),
         use_container_width=True,
@@ -999,7 +1004,7 @@ else:
             f"{len(ranking_publico)} analisados).\n\n"
             f"- Mesorregião: {linha_escolhida['Mesorregião']}\n"
             f"- População: {int(linha_escolhida['População']):,}".replace(",", ".")
-            + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$, Censo 2010)']:.2f}\n"
+            + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$, Censo 2022)']:.2f}\n"
             f"- Equipamentos culturais (museu/teatro/cinema): "
             f"{int(linha_escolhida['Equipamentos (de 3)'])} de 3\n"
             f"- Índice de Prioridade: {linha_escolhida['Índice de Prioridade']:.2f}"

@@ -3,7 +3,7 @@ Carregamento e preparação dos dados do Radar Cultural.
 
 Fontes:
   - Equipamentos culturais: IBGE — MUNIC, Suplemento de Cultura 2014
-  - População e renda per capita: Atlas Brasil (PNUD), Censo 2010
+  - População e renda per capita: IBGE, Censo Demográfico 2022
 
 Ver data/README.md para detalhes de como as duas bases foram cruzadas.
 """
@@ -71,7 +71,7 @@ def montar_tabela_prioritarios(df: pd.DataFrame, n: int = 15) -> pd.DataFrame:
             "municipio": "Município",
             "mesorregiao": "Mesorregião",
             "populacao": "População",
-            "renda_per_capita": "Renda per capita (R$, Censo 2010)",
+            "renda_per_capita": "Renda per capita (R$, Censo 2022)",
             "n_equipamentos": "Nº equipamentos",
             "indice_prioridade": "Índice de Prioridade",
         }

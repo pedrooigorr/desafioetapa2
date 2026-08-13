@@ -105,6 +105,38 @@ header[data-testid="stHeader"] {
     background: #000000 !important;
 }
 
+
+/* Elementos próprios do app no alto contraste: KPIs, chips, navbar e
+   expanders perdem os fundos areia e passam a preto/branco puros */
+.radar-kpi-card, .radar-hero-card, .radar-chip,
+div[data-testid="stExpander"] details,
+div[data-testid="stRadio"] div[role="radiogroup"] > label {
+    background: #FFFFFF !important;
+    border-color: #000000 !important;
+}
+.radar-kpi-valor, .radar-kpi-rotulo, .radar-hero-titulo,
+.radar-hero-texto, .radar-chip-nome {
+    color: #000000 !important;
+}
+.radar-kpi-ajuda {
+    background: #000000 !important;
+    color: #FFFF00 !important;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-navbar)
+    + div[data-testid="stHorizontalBlock"] {
+    background: #FFFFFF !important;
+    border-color: #000000 !important;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-navbar)
+    + div[data-testid="stHorizontalBlock"] .stButton button[kind="primary"] {
+    background: #000000 !important;
+    color: #FFFF00 !important;
+}
+div[data-testid="stDataFrame"] thead tr th {
+    background: #000000 !important;
+    color: #FFFF00 !important;
+}
+
 /* Reforça contraste/saturação dos gráficos Plotly — não muda as cores
    de cada categoria (isso exigiria mudar o Python), só intensifica */
 .js-plotly-plot {
@@ -143,42 +175,58 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "Ouvir este resumo"):
     Botão que lê `texto` em voz alta com a Web Speech API do navegador —
     nativa, sem custo, sem precisar de internet extra nem API paga.
     Clicar de novo interrompe e recomeça a leitura.
+
+    O ícone é um SVG inline (não emoji) pra acompanhar a cor do botão no
+    hover e no modo alto contraste.
     """
     texto_js = _escapar_para_js(texto)
     components.html(
         f"""
         <style>
-        /* Sem isso, o <body> padrão do iframe do componente tem uma margem
+        /* Sem isso, o <body> padrão do iframe do componente tem margem
            própria (tipicamente 8px) que empurra o botão pra baixo e o
-           desalinha verticalmente da caixa de resumo ao lado — zerando a
-           margem, o botão ocupa a altura inteira do iframe (height=44 no
-           components.html abaixo) e fica centralizado de verdade. */
+           desalinha verticalmente da caixa de resumo ao lado. */
         html, body {{
             margin: 0;
             padding: 0;
             height: 100%;
         }}
         .btn-ouvir-{key} {{
-            background:#FFFDF8;
-            color:#C1440E;
-            border:2px solid #C1440E;
-            border-radius:8px;
-            padding:6px 16px;
-            font-weight:700;
-            font-size:14px;
-            cursor:pointer;
-            font-family:sans-serif;
-            width:100%;
-            height:100%;
-            box-sizing:border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #FFFDF8;
+            color: #C1440E;
+            border: 1.5px solid #C1440E;
+            border-radius: 10px;
+            padding: 0 16px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Inter', -apple-system, sans-serif;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
             transition: background-color 0.15s ease, color 0.15s ease;
         }}
         .btn-ouvir-{key}:hover {{
-            background:#C1440E;
-            color:#FFFDF8;
+            background: #C1440E;
+            color: #FFFDF8;
+        }}
+        .btn-ouvir-{key} svg {{
+            flex: 0 0 auto;
+            fill: currentColor;
         }}
         </style>
-        <button id="btn-{key}" class="btn-ouvir-{key}">{rotulo}</button>
+        <button id="btn-{key}" class="btn-ouvir-{key}">
+          <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.8-1-3.3-2.5-4v8c1.5-.7
+                     2.5-2.2 2.5-4zM14 3.2v2.1c2.9.9 5 3.5 5 6.7s-2.1 5.8-5
+                     6.7v2.1c4-1 7-4.6 7-8.8s-3-7.8-7-8.8z"/>
+          </svg>
+          <span>{rotulo}</span>
+        </button>
         <script>
         document.getElementById('btn-{key}').addEventListener('click', function() {{
             window.speechSynthesis.cancel();

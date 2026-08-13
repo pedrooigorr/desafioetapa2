@@ -79,8 +79,11 @@ from src.theme import (
     barra_secao,
     cabecalho_app,
     cartao_hero,
+    cartao_kpi,
+    chip_equipamento,
     destacar_coluna,
     estilo_texto_tabela,
+    marcador,
     rodape_app,
 )
 from src.transparencia import gerar_card_municipio, montar_ranking_publico
@@ -183,22 +186,14 @@ for col, card in zip(hero_cols, CARDS_HERO):
             unsafe_allow_html=True,
         )
         esta_aqui = st.session_state.modo_app == card["modo"]
-        col_btn, col_ouvir = st.columns([5, 1])
-        with col_btn:
-            st.button(
-                "✓ Você está aqui" if esta_aqui else f"Abrir {card['titulo']} →",
-                key=f"hero_btn_{card['titulo']}",
-                use_container_width=True,
-                type="primary" if esta_aqui else "secondary",
-                on_click=ir_para_modo,
-                args=(card["modo"],),
-            )
-        with col_ouvir:
-            botao_ouvir(
-                f"{card['titulo']}. {card['texto']}",
-                key=f"hero_ouvir_{card['titulo']}",
-                rotulo="Ouvir",
-            )
+        st.button(
+            "Você está aqui" if esta_aqui else f"Abrir {card['titulo']} →",
+            key=f"hero_btn_{card['titulo']}",
+            use_container_width=True,
+            type="primary" if esta_aqui else "secondary",
+            on_click=ir_para_modo,
+            args=(card["modo"],),
+        )
 
 st.divider()
 
@@ -339,6 +334,7 @@ if st.session_state.modo_app == MODOS[0]:
     # --------------------------------------------------------------
     # Navbar
     # --------------------------------------------------------------
+    st.markdown(marcador("navbar"), unsafe_allow_html=True)
     nav_cols = st.columns(len(PAGINAS))
     for col, pagina in zip(nav_cols, PAGINAS):
         with col:
@@ -350,29 +346,50 @@ if st.session_state.modo_app == MODOS[0]:
                 args=(pagina,),
             )
 
-    st.divider()
+    st.write("")
 
     # --------------------------------------------------------------
     # KPIs
     # --------------------------------------------------------------
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Municípios analisados", f"{len(df_f):,}".replace(",", "."))
-    c2.metric(
-        "Sem museu, teatro nem cinema",
-        f"{(df_f['n_equipamentos_raros'] == 0).sum():,}".replace(",", "."),
-        help="Biblioteca não entra aqui — praticamente todos os municípios do "
-        "Ceará já têm uma, então ela não ajuda a distinguir quem tem acesso "
-        "cultural de quem não tem",
-    )
     pct_sem_museu = 100 * (~df_f["tem_museu"]).mean() if len(df_f) else 0
-    c3.metric("% sem museu", f"{pct_sem_museu:.1f}%")
     pop_desassistida = df_f.loc[df_f["n_equipamentos_raros"] == 0, "populacao"].sum()
-    c4.metric(
-        "População sem museu, teatro ou cinema por perto",
-        f"{pop_desassistida:,.0f}".replace(",", "."),
-    )
 
-    st.divider()
+    KPIS = [
+        {
+            "rotulo": "Municípios analisados",
+            "valor": f"{len(df_f):,}".replace(",", "."),
+            "cor": COR_GESTOR,
+            "ajuda": "",
+        },
+        {
+            "rotulo": "Sem museu, teatro nem cinema",
+            "valor": f"{(df_f['n_equipamentos_raros'] == 0).sum():,}".replace(",", "."),
+            "cor": "#C1440E",
+            "ajuda": "Biblioteca não entra aqui — praticamente todos os "
+            "municípios do Ceará já têm uma, então ela não ajuda a distinguir "
+            "quem tem acesso cultural de quem não tem",
+        },
+        {
+            "rotulo": "% sem museu",
+            "valor": f"{pct_sem_museu:.1f}%",
+            "cor": "#F2A93B",
+            "ajuda": "",
+        },
+        {
+            "rotulo": "População sem museu, teatro ou cinema por perto",
+            "valor": f"{pop_desassistida:,.0f}".replace(",", "."),
+            "cor": "#8C1C13",
+            "ajuda": "",
+        },
+    ]
+    for col, kpi in zip(st.columns(4), KPIS):
+        with col:
+            st.markdown(
+                cartao_kpi(kpi["rotulo"], kpi["valor"], kpi["cor"], kpi["ajuda"]),
+                unsafe_allow_html=True,
+            )
+
+    st.write("")
 
     # --------------------------------------------------------------
     # Conteúdo — Visão Geral (painéis compactos) ou página dedicada
@@ -656,15 +673,10 @@ elif st.session_state.modo_app == MODOS[1]:
     st.markdown(f"##### O que {municipio_cidadao} já tem")
     existentes = categorias_existentes(df, municipio_cidadao)
     cols_existentes = st.columns(4)
-    for col, (categoria, _coluna) in zip(cols_existentes, MAPA_CATEGORIA_COLUNA.items()):
+    for col, categoria in zip(cols_existentes, MAPA_CATEGORIA_COLUNA):
         with col:
-            tem = categoria in existentes
-            cor = "#4C6444" if tem else "#C1440E"
-            simbolo = "✓" if tem else "✗"
             st.markdown(
-                f'<div style="text-align:center; padding:14px; border-radius:12px; '
-                f'background:{cor}; color:#FFFDF8; font-weight:700;">'
-                f"{simbolo}<br>{categoria}</div>",
+                chip_equipamento(categoria, categoria in existentes),
                 unsafe_allow_html=True,
             )
 
@@ -701,7 +713,7 @@ elif st.session_state.modo_app == MODOS[1]:
             )
             st.rerun()
 
-    st.divider()
+    st.write("")
 
     # --------------------------------------------------------------
     # Contador público

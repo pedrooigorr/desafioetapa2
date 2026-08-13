@@ -2,6 +2,10 @@
 Paleta de cores "Nordeste" do Radar Cultural — terracota (barro), amarelo-sol,
 azul-azulejo e verde-cactos — usada nos gráficos Plotly, no destaque das
 tabelas e no CSS customizado da interface.
+
+Também concentra os componentes visuais reaproveitados pelo app: header,
+footer, cards de apresentação (hero), cards de KPI, chips de status e as
+tarjas coloridas que dão identidade a cada seção.
 """
 
 # Paleta qualitativa (uma cor por mesorregião nos gráficos de dispersão/legenda)
@@ -31,6 +35,7 @@ COR_DEMANDA = "#4C6444"       # verde-cactos
 COR_DEMANDA_CLARO = "#EAF0E4"
 COR_SIMULADOR = "#B8792A"     # dourado-areia (escurecido p/ contraste de texto)
 COR_SIMULADOR_CLARO = "#FBF0DC"
+
 
 def cabecalho_app() -> str:
     """
@@ -126,7 +131,7 @@ def aplicar_texto_escuro(fig, tamanho_fonte: int = 13):
     usada em todos os gráficos do app para manter a mesma identidade visual.
     """
     fig.update_layout(
-        font={"color": TEXTO_ESCURO, "size": tamanho_fonte},
+        font={"color": TEXTO_ESCURO, "size": tamanho_fonte, "family": "Inter, sans-serif"},
         xaxis={
             "title_font": {"color": TEXTO_ESCURO, "size": tamanho_fonte + 1},
             "tickfont": {"color": TEXTO_ESCURO, "size": tamanho_fonte},
@@ -156,6 +161,42 @@ def cartao_hero(titulo: str, texto: str, cor: str, cor_clara: str) -> str:
     )
 
 
+def cartao_kpi(rotulo: str, valor: str, cor: str, ajuda: str = "") -> str:
+    """
+    Card de KPI (número grande + rótulo), com tarja colorida no topo e
+    fundo areia — em vez do st.metric solto sobre o fundo da página.
+    `ajuda` vira tooltip nativo do navegador (atributo title).
+    """
+    title_attr = f' title="{ajuda}"' if ajuda else ""
+    marca_ajuda = '<span class="radar-kpi-ajuda">?</span>' if ajuda else ""
+    return (
+        f'<div class="radar-kpi-card"{title_attr}>'
+        f'<div class="radar-kpi-tarja" style="background:{cor};"></div>'
+        f'<div class="radar-kpi-rotulo">{rotulo}{marca_ajuda}</div>'
+        f'<div class="radar-kpi-valor">{valor}</div>'
+        f"</div>"
+    )
+
+
+def chip_equipamento(nome: str, tem: bool) -> str:
+    """
+    Chip compacto de status de um equipamento cultural num município —
+    verde-cactos discreto pra "tem", terracota discreto pra "não tem".
+    Substitui os blocos grandes e saturados da Demanda Cidadã: comunica
+    o mesmo, sem dominar visualmente a página.
+    """
+    if tem:
+        cor, fundo, simbolo = "#4C6444", "#EAF0E4", "&#10003;"
+    else:
+        cor, fundo, simbolo = "#C1440E", "#FBEBD4", "&#10007;"
+    return (
+        f'<div class="radar-chip" style="border-color:{cor}; background:{fundo};">'
+        f'<span class="radar-chip-simbolo" style="background:{cor};">{simbolo}</span>'
+        f'<span class="radar-chip-nome" style="color:{cor};">{nome}</span>'
+        f"</div>"
+    )
+
+
 def barra_secao(cor: str) -> str:
     """
     Pequena tarja colorida usada no topo de um painel/gráfico pra dar
@@ -165,41 +206,170 @@ def barra_secao(cor: str) -> str:
     return f'<div class="radar-barra-secao" style="background:{cor};"></div>'
 
 
+def marcador(nome: str) -> str:
+    """
+    Marcador invisível usado só como âncora de CSS: o Streamlit não deixa
+    colocar classe direta nos containers dele, então soltamos este div
+    logo antes do bloco que queremos estilizar e miramos nele com
+    `:has()` + seletor de irmão adjacente (ver CSS_CUSTOMIZADO).
+    """
+    return f'<div class="radar-marcador-{nome}"></div>'
+
+
 # ----------------------------------------------------------------------
-# CSS customizado da interface: cards com borda/sombra terracota,
-# métricas (st.metric) com texto maior e mais escuro, e os elementos
-# novos do hero (cards de apresentação + tarjas de seção coloridas).
+# CSS customizado da interface: tipografia própria (Fraunces nos títulos,
+# Inter no corpo), cards com borda/sombra terracota, KPIs em card, navbar
+# em formato de segmented control, chips e tarjas de seção coloridas.
 # ----------------------------------------------------------------------
 CSS_CUSTOMIZADO = """
 <style>
-/* Cards com borda (st.container(border=True)) — destaque terracota */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ------------------------------------------------------------------
+   TIPOGRAFIA — Inter no corpo (legível, neutra) e Fraunces nos títulos
+   (serifada de display, "quente", conversa com a paleta de barro). É o
+   que mais tira a cara de "app Streamlit padrão" da interface.
+   ------------------------------------------------------------------ */
+html, body, [data-testid="stAppViewContainer"], .stMarkdown, .stButton button,
+input, select, textarea, [data-testid="stMetricValue"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+h1, h2, h3, h4,
+.radar-header-titulo, .radar-hero-titulo, .radar-kpi-valor {
+    font-family: 'Fraunces', Georgia, serif !important;
+    letter-spacing: -0.01em;
+}
+h1, h2, h3 {
+    font-weight: 700 !important;
+    color: #2C1B12 !important;
+}
+h3 { font-size: 1.45rem !important; }
+
+/* Cards com borda (st.container(border=True)) — borda mais suave que a
+   terracota cheia de antes, que competia com o conteúdo do card */
 div[data-testid="stVerticalBlockBorderWrapper"] {
-    border: 2px solid #C1440E !important;
-    border-radius: 14px !important;
+    border: 1px solid #E7D5BE !important;
+    border-radius: 16px !important;
     background-color: #FFFDF8 !important;
-    box-shadow: 0 3px 10px rgba(193, 68, 14, 0.18);
-    padding: 4px;
+    box-shadow: 0 2px 10px rgba(122, 46, 14, 0.07);
+    padding: 6px;
 }
 
-/* Cards de apresentação (hero) das 3 features na tela inicial */
+/* ------------------------------------------------------------------
+   Cards de apresentação (hero) das 3 features na tela inicial.
+   Flex + altura 100% iguala a "sola" dos três cards mesmo com textos de
+   tamanhos diferentes — antes o min-height fixo deixava sobra embaixo do
+   card de texto mais curto.
+   ------------------------------------------------------------------ */
 .radar-hero-card {
-    border-top: 6px solid;
-    border-radius: 14px;
-    padding: 22px 20px 18px 20px;
-    min-height: 190px;
-    box-shadow: 0 3px 10px rgba(26, 15, 8, 0.10);
-    margin-bottom: 10px;
+    border-top: 5px solid;
+    border-radius: 16px;
+    padding: 22px 22px 20px 22px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 10px rgba(26, 15, 8, 0.07);
+    margin-bottom: 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.radar-hero-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(26, 15, 8, 0.13);
 }
 .radar-hero-titulo {
-    font-size: 1.15rem;
-    font-weight: 800;
-    margin-bottom: 8px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 .radar-hero-texto {
-    font-size: 0.95rem;
-    color: #3E2723;
-    line-height: 1.45;
+    font-size: 0.94rem;
+    color: #4A3428;
+    line-height: 1.55;
 }
+/* Iguala a altura das colunas do hero pra os cards esticarem juntos */
+div[data-testid="stHorizontalBlock"]:has(.radar-hero-card) {
+    align-items: stretch;
+}
+div[data-testid="stHorizontalBlock"]:has(.radar-hero-card)
+    > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] {
+    height: 100%;
+}
+
+/* ------------------------------------------------------------------
+   Cards de KPI — antes os números grandes flutuavam soltos no fundo da
+   página, sem bloco visual que os agrupasse.
+   ------------------------------------------------------------------ */
+.radar-kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E7D5BE;
+    border-radius: 14px;
+    padding: 16px 18px 18px 18px;
+    height: 100%;
+    box-shadow: 0 2px 8px rgba(122, 46, 14, 0.06);
+}
+.radar-kpi-tarja {
+    height: 4px;
+    width: 34px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+}
+.radar-kpi-rotulo {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6B4226;
+    line-height: 1.35;
+    min-height: 2.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.radar-kpi-valor {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #1A0F08;
+    line-height: 1.1;
+    margin-top: 4px;
+}
+.radar-kpi-ajuda {
+    display: inline-block;
+    margin-left: 6px;
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    text-align: center;
+    border-radius: 50%;
+    background: #E7D5BE;
+    color: #6B4226;
+    font-size: 0.68rem;
+    cursor: help;
+    vertical-align: middle;
+}
+
+/* ------------------------------------------------------------------
+   Chips de status (Demanda Cidadã) — substituem os blocos grandes e
+   saturados: mesma informação, peso visual muito menor.
+   ------------------------------------------------------------------ */
+.radar-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px solid;
+    border-radius: 999px;
+    padding: 8px 16px 8px 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.radar-chip-simbolo {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #FFFDF8;
+    font-size: 0.75rem;
+    line-height: 22px;
+    text-align: center;
+    font-weight: 700;
+}
+.radar-chip-nome { line-height: 1.25; }
 
 /* Tarja colorida no topo de cada painel/gráfico — dá identidade por seção */
 .radar-barra-secao {
@@ -214,7 +384,7 @@ div[data-testid="stVerticalBlockBorderWrapper"] h3 {
     color: #C1440E !important;
 }
 
-/* Métricas (KPIs) maiores e mais escuras */
+/* Métricas nativas (st.metric) — mantidas para telas que ainda as usam */
 div[data-testid="stMetricValue"] {
     font-size: 2.1rem !important;
     color: #1A0F08 !important;
@@ -226,18 +396,121 @@ div[data-testid="stMetricLabel"] {
     font-weight: 700 !important;
 }
 
-/* Botões da navbar */
+/* Botões em geral */
 .stButton button {
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    border-color: #E0CBB0 !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+                transform 0.1s ease;
+}
+.stButton button:hover {
+    border-color: #C1440E !important;
+    color: #C1440E !important;
+}
+.stButton button[kind="primary"] {
+    box-shadow: 0 2px 8px rgba(193, 68, 14, 0.28);
+}
+.stButton button[kind="primary"]:hover {
+    color: #FFFDF8 !important;
+}
+
+/* ------------------------------------------------------------------
+   Navbar do Painel do Gestor em formato "segmented control": o bloco de
+   colunas logo depois do marcador vira um trilho areia, e cada botão uma
+   pílula dentro dele — deixa explícito que são abas, não ações soltas.
+   ------------------------------------------------------------------ */
+div[data-testid="stElementContainer"]:has(.radar-marcador-navbar)
+    + div[data-testid="stHorizontalBlock"] {
+    background: #F6EADA;
+    border: 1px solid #E7D5BE;
+    border-radius: 14px;
+    padding: 6px;
+    gap: 4px !important;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-navbar)
+    + div[data-testid="stHorizontalBlock"] .stButton button {
+    background: transparent !important;
+    border: none !important;
+    color: #6B4226 !important;
+    box-shadow: none !important;
+    border-radius: 10px !important;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-navbar)
+    + div[data-testid="stHorizontalBlock"] .stButton button:hover {
+    background: #EADCC6 !important;
+    color: #7A2E0E !important;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-navbar)
+    + div[data-testid="stHorizontalBlock"] .stButton button[kind="primary"] {
+    background: #FFFDF8 !important;
+    color: #C1440E !important;
+    box-shadow: 0 2px 6px rgba(122, 46, 14, 0.18) !important;
+}
+
+/* ------------------------------------------------------------------
+   Expanders — antes eram barras brancas de largura total, quase
+   invisíveis sobre o fundo claro da página.
+   ------------------------------------------------------------------ */
+div[data-testid="stExpander"] details {
+    background: #FBF5EC !important;
+    border: 1px solid #E7D5BE !important;
+    border-radius: 12px !important;
+}
+div[data-testid="stExpander"] summary {
+    font-weight: 600 !important;
+    color: #6B4226 !important;
+}
+div[data-testid="stExpander"] summary:hover {
+    color: #C1440E !important;
+}
+
+/* ------------------------------------------------------------------
+   Opções da Demanda Cidadã (st.radio) como cartões clicáveis, em vez de
+   uma lista apertada de bolinhas.
+   ------------------------------------------------------------------ */
+div[data-testid="stRadio"] div[role="radiogroup"] {
+    gap: 8px;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] > label {
+    background: #FFFFFF;
+    border: 1.5px solid #E7D5BE;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 0 !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] > label:hover {
+    border-color: #C1440E;
+    background: #FFFDF8;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] > label:has(input:checked) {
+    border-color: #C1440E;
+    background: #FBEBD4;
+}
+
+/* Tabelas (st.dataframe) — cabeçalho em areia e cantos arredondados */
+div[data-testid="stDataFrame"] {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #E7D5BE;
+}
+div[data-testid="stDataFrame"] thead tr th {
+    background: #FBEBD4 !important;
+    color: #6B4226 !important;
     font-weight: 700 !important;
+}
+
+/* Caixas de mensagem (st.info) mais integradas à paleta */
+div[data-testid="stAlert"] {
+    border-radius: 12px;
 }
 
 /* Alinhamento vertical do botão "Ouvir" (componente em iframe, usado em
    src/acessibilidade.py) com o elemento ao lado dele na mesma linha de
-   colunas — seja a caixa de resumo (st.info) ou o botão "Abrir X" dos
-   cards da tela inicial. Por padrão um <iframe> é "display: inline",
-   o que sozinho já cria um pequeno espaço fantasma abaixo dele; center
-   nos garante que ele fique centralizado mesmo quando a linha inteira
-   é mais alta que o próprio iframe. */
+   colunas. Por padrão um <iframe> é "display: inline", o que sozinho já
+   cria um pequeno espaço fantasma abaixo dele; center garante que ele
+   fique centralizado mesmo quando a linha é mais alta que o iframe. */
 iframe {
     display: block;
 }
@@ -289,28 +562,29 @@ div[data-testid="stMainBlockContainer"],
    Full-bleed: "escapa" do container central do Streamlit e cobre toda
    a largura da tela, de ponta a ponta. */
 .radar-header {
-    background: #C1440E !important;
+    background: linear-gradient(120deg, #C1440E 0%, #A83A0C 100%) !important;
     border-radius: 0;
-    padding: 32px 6vw 26px 6vw;
+    padding: 34px 6vw 30px 6vw;
     display: flex;
     align-items: center;
     gap: 18px;
     box-shadow: 0 4px 14px rgba(122, 46, 14, 0.28);
     width: auto;
     margin-inline: calc(50% - 50vw);
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 .radar-header-titulo {
     color: #FFFDF8 !important;
-    font-size: 2rem;
+    font-size: 2.15rem;
     font-weight: 800;
     line-height: 1.15;
 }
 .radar-header-subtitulo {
     color: #FBEBD4 !important;
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-top: 2px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 4px;
 }
 
 /* Footer — marrom bem escuro, contraste diferente do header de propósito.
@@ -318,8 +592,8 @@ div[data-testid="stMainBlockContainer"],
 .radar-footer {
     background: #2C1B12 !important;
     border-radius: 0;
-    padding: 30px 6vw;
-    margin-top: 40px;
+    padding: 34px 6vw;
+    margin-top: 44px;
     display: flex;
     flex-wrap: wrap;
     gap: 30px;
@@ -333,14 +607,16 @@ div[data-testid="stMainBlockContainer"],
 }
 .radar-footer-titulo {
     color: #F2A93B !important;
-    font-weight: 800;
-    font-size: 0.95rem;
-    margin-bottom: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
 }
 .radar-footer-texto {
     color: #E8DFD5 !important;
     font-size: 0.85rem;
-    line-height: 1.6;
+    line-height: 1.65;
 }
 </style>
 """

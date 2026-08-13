@@ -266,18 +266,18 @@ def marcador(nome: str) -> str:
 
 
 # ----------------------------------------------------------------------
-# CSS customizado da interface: tipografia própria (Fraunces nos títulos,
-# Inter no corpo), cards com borda/sombra terracota, KPIs em card, navbar
-# em formato de segmented control, chips e tarjas de seção coloridas.
+# CSS customizado da interface: tipografia própria (Inter em tudo, sem
+# serifa), cards com borda/sombra terracota, KPIs em card, navbar em
+# formato de segmented control, chips e tarjas de seção coloridas.
 # ----------------------------------------------------------------------
 CSS_CUSTOMIZADO = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ------------------------------------------------------------------
-   TIPOGRAFIA — Inter no corpo (legível, neutra) e Fraunces nos títulos
-   (serifada de display, "quente", conversa com a paleta de barro). É o
-   que mais tira a cara de "app Streamlit padrão" da interface.
+   TIPOGRAFIA — Inter em tudo (corpo e títulos). Sem serifa: mais neutra,
+   mais legível em telas pequenas/baixa visão, e é o padrão mais comum
+   pra painéis de dados e produtos públicos.
    ------------------------------------------------------------------ */
 html, body, [data-testid="stAppViewContainer"], .stMarkdown, .stButton button,
 input, select, textarea, [data-testid="stMetricValue"] {
@@ -285,7 +285,7 @@ input, select, textarea, [data-testid="stMetricValue"] {
 }
 h1, h2, h3, h4,
 .radar-header-titulo, .radar-hero-titulo, .radar-kpi-valor {
-    font-family: 'Fraunces', Georgia, serif !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     letter-spacing: -0.01em;
 }
 h1, h2, h3 {

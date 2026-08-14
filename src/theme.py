@@ -73,7 +73,7 @@ def rodape_app() -> str:
         '<div class="radar-footer-col">'
         '<div class="radar-footer-titulo">Fontes dos dados</div>'
         '<div class="radar-footer-texto">IBGE — MUNIC, Suplemento de '
-        "Cultura 2014<br>IBGE — Censo Demográfico 2022</div>"
+        "Cultura 2021<br>IBGE — Censo Demográfico 2022</div>"
         "</div>"
         '<div class="radar-footer-col">'
         '<div class="radar-footer-titulo">ODS trabalhados</div>'
@@ -955,6 +955,26 @@ div[data-testid="stMainBlockContainer"],
     height: 100%;
     background: #B8792A;
     border-radius: 999px;
+}
+
+/* Link de acesso à Metodologia — colado no rodapé, estilizado discreto
+   (sem fundo/borda chamativos) pra não competir com os cards hero */
+div[data-testid="stElementContainer"]:has(.radar-marcador-link-metodologia)
+    + div[data-testid="stHorizontalBlock"] .stButton button {
+    background: transparent !important;
+    border: none !important;
+    color: #8A6A50 !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    box-shadow: none !important;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-link-metodologia)
+    + div[data-testid="stHorizontalBlock"] .stButton button:hover {
+    color: #C1440E !important;
+    text-decoration-color: #C1440E;
 }
 
 </style>

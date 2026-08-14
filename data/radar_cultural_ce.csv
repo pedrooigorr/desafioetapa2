@@ -1,185 +1,185 @@
-municipio,codigo_ibge,mesorregiao,populacao,renda_per_capita,tem_museu,tem_teatro_sala_espetaculo,tem_cinema,tem_biblioteca,n_equipamentos,lat,lon
-Fortaleza,2304400,Metropolitana de Fortaleza,2428708,1668.98,True,True,True,True,4,-3.723805035,-38.589927555
-Caucaia,2303709,Metropolitana de Fortaleza,355679,947.97,True,True,True,True,4,-3.736487,-38.6640175358
-Juazeiro do Norte,2307304,Sul Cearense,286120,1021.94,True,True,True,True,4,-7.210766,-39.3169933556
-Maracanaú,2307650,Metropolitana de Fortaleza,234509,910.74,False,True,True,True,3,-3.876964451,-38.6244186466
-Sobral,2312908,Noroeste Cearense,203023,1013.74,True,True,True,True,4,-3.6880376838,-40.3486680337
-Crato,2304202,Sul Cearense,131050,1060.11,True,True,False,True,3,-7.2317527899,-39.4083902978
-Itapipoca,2306405,Norte Cearense,131123,720.4,True,False,False,True,2,-3.4994355,-39.5834815758
-Maranguape,2307700,Metropolitana de Fortaleza,105093,833.02,True,True,False,True,3,-3.89186946,-38.6858512477
-Iguatu,2305506,Centro-Sul Cearense,98064,1009.72,True,True,False,True,3,-6.36055472,-39.2999056782
-Quixadá,2311306,Sertões Cearenses,84168,888.08,True,True,True,True,4,-4.9637,-39.0117446758
-Canindé,2302800,Norte Cearense,74174,816.43,True,True,False,True,3,-4.3553442897,-39.3103429529
-Crateús,2304103,Sertões Cearenses,76390,920.1,False,True,False,True,2,-5.1769505508,-40.6684001308
-Aquiraz,2301000,Metropolitana de Fortaleza,80645,930.64,True,True,False,True,3,-3.9061945,-38.3898029589
-Pacatuba,2309706,Metropolitana de Fortaleza,81524,862.29,True,True,False,True,3,-3.9861200223,-38.618299312
-Quixeramobim,2311405,Sertões Cearenses,82177,853.65,False,True,False,True,2,-5.1984048374,-39.294354227
-Russas,2311801,Jaguaribe,72928,867.47,True,True,False,True,3,-4.9397378154,-37.9754312969
-Aracati,2301109,Jaguaribe,75113,904.09,True,True,False,True,3,-4.56706647,-37.7727525989
-Tianguá,2313401,Noroeste Cearense,81506,844.1,True,False,False,True,2,-3.722674,-40.9917056227
-Cascavel,2303501,Norte Cearense,72720,873.81,False,True,True,True,3,-4.1314336782,-38.2396859407
-Icó,2305407,Centro-Sul Cearense,62642,706.4,False,True,False,True,2,-6.4030312519,-38.8630851789
-Morada Nova,2308708,Jaguaribe,61443,842.15,True,False,False,True,2,-5.0969520002,-38.3649073451
-Pacajus,2309607,Metropolitana de Fortaleza,70983,835.89,False,False,False,True,1,-4.17054051,-38.4670222649
-Camocim,2302602,Noroeste Cearense,62326,731.25,False,False,False,True,1,-2.9009665746,-40.8475277409
-Acaraú,2300200,Noroeste Cearense,65264,694.7,False,False,False,True,1,-2.8853105401,-40.1182414712
-Limoeiro do Norte,2307601,Jaguaribe,59560,1128.21,True,True,True,True,4,-5.15023902,-38.0990948705
-Tauá,2313302,Sertões Cearenses,61227,831.53,True,True,False,True,3,-6.0029989399,-40.2926246551
-Barbalha,2301901,Sul Cearense,75033,1005.61,False,True,False,True,2,-7.3071721269,-39.3023163692
-Horizonte,2305233,Metropolitana de Fortaleza,74755,762.19,False,True,False,True,2,-4.093278,-38.4942395586
-Viçosa do Ceará,2314102,Noroeste Cearense,59712,548.18,True,True,False,True,3,-3.5660127532,-41.091629075
-Granja,2304707,Noroeste Cearense,53344,564.83,False,False,False,True,1,-3.1189521562,-40.829938991
-Boa Viagem,2302404,Sertões Cearenses,50411,714.71,True,False,False,True,2,-5.1257438701,-39.7332823425
-Trairi,2313500,Norte Cearense,58415,662.17,False,False,False,True,1,-3.2644201691,-39.2722318726
-Acopiara,2300309,Sertões Cearenses,44962,758.47,True,True,False,True,3,-6.092761995,-39.4557052762
-Beberibe,2302206,Norte Cearense,53114,759.16,True,True,False,True,3,-4.1747632212,-38.1232730421
-Itapagé,2306306,Norte Cearense,46426,687.35,False,False,False,True,1,-3.6856731098,-39.5835332386
-Eusébio,2304285,Metropolitana de Fortaleza,74170,2512.7,False,True,False,True,2,-3.8869728867,-38.4451218386
-Brejo Santo,2302503,Sul Cearense,51090,873.09,True,True,True,True,4,-7.4916380087,-38.9855138674
-Mauriti,2308104,Sul Cearense,45561,667.97,False,False,False,True,1,-7.387398,-38.772795438
-São Benedito,2312304,Noroeste Cearense,47640,718.45,False,False,False,True,1,-4.04472699,-40.8644898758
-São Gonçalo do Amarante,2312403,Norte Cearense,54143,834.41,False,False,False,True,1,-3.6056325,-38.9720758653
-Santa Quitéria,2312205,Noroeste Cearense,40183,770.52,True,False,False,True,2,-4.3332705,-40.1535078136
-Mombaça,2308500,Sertões Cearenses,37735,765.22,False,True,False,True,2,-5.74700454,-39.6244052479
-Pedra Branca,2310506,Sertões Cearenses,40187,667.71,True,True,True,True,4,-5.4546855,-39.7139376447
-Ipu,2305803,Noroeste Cearense,41081,735.8,True,True,False,True,3,-4.3134316852,-40.7187261447
-Amontada,2300754,Norte Cearense,42156,582.24,False,False,False,True,1,-3.3648778035,-39.8288227917
-Várzea Alegre,2314003,Centro-Sul Cearense,38984,768.75,False,False,False,True,1,-6.7918458556,-39.2989329971
-Ipueiras,2305902,Noroeste Cearense,36798,625.83,False,False,False,True,1,-4.543785495,-40.7156965106
-Guaraciaba do Norte,2305001,Noroeste Cearense,42053,716.54,False,True,False,True,2,-4.1624510671,-40.7526331779
-Itarema,2306553,Noroeste Cearense,42957,642.63,True,True,False,True,3,-2.923348,-39.9156777489
-Itaitinga,2306256,Metropolitana de Fortaleza,64650,1008.7,False,True,False,True,2,-3.9704590163,-38.5264051495
-Pentecoste,2310704,Norte Cearense,37813,733.42,False,False,False,True,1,-3.7962667362,-39.2670087315
-Massapê,2308005,Noroeste Cearense,37697,652.16,False,False,False,True,1,-3.5238705843,-40.3421348648
-Jaguaribe,2306900,Jaguaribe,33726,882.89,False,True,False,True,2,-5.886459045,-38.6230050493
-Missão Velha,2308401,Sul Cearense,36822,629.9,True,True,False,True,3,-7.2432315138,-39.1451977079
-Baturité,2302107,Norte Cearense,35218,773.07,True,True,False,True,3,-4.3312051564,-38.8800213756
-Jaguaruana,2307007,Jaguaribe,31701,789.66,False,False,False,True,1,-4.8395551683,-37.782391481
-Ubajara,2313609,Noroeste Cearense,32767,785.04,False,True,False,True,2,-3.8484914352,-40.907143928
-Paracuru,2310209,Norte Cearense,38980,871.22,False,False,False,True,1,-3.4116350092,-39.0295453441
-Parambu,2310308,Sertões Cearenses,31445,643.03,True,False,False,True,2,-6.2103360017,-40.6942072413
-Lavras da Mangabeira,2307502,Centro-Sul Cearense,30802,677.99,False,False,False,True,1,-6.7547479768,-38.9672750539
-Nova Russas,2309300,Sertões Cearenses,30699,744.82,False,False,False,True,1,-4.7068083499,-40.5653033549
-Bela Cruz,2302305,Noroeste Cearense,32775,621.73,True,False,False,True,2,-3.0551067243,-40.166842907
-Paraipaba,2310258,Norte Cearense,32216,813.25,False,False,False,True,1,-3.4361967279,-39.1481155272
-Santana do Acaraú,2312007,Noroeste Cearense,30628,587.81,True,True,False,True,3,-3.4597753417,-40.2094628598
-Tabuleiro do Norte,2313104,Jaguaribe,30652,895.75,True,False,False,True,2,-5.2438038699,-38.1297371282
-Milagres,2308302,Sul Cearense,25900,740.97,False,False,False,True,1,-7.3104277968,-38.9431567662
-Novo Oriente,2309409,Sertões Cearenses,27545,771.68,False,True,False,True,2,-5.5338648355,-40.7747672682
-Jardim,2307106,Sul Cearense,27411,726.42,True,False,False,True,2,-7.5855364657,-39.2841644574
-Campos Sales,2302701,Sul Cearense,25135,748.63,False,False,False,True,1,-7.0733835,-40.3790031302
-Senador Pompeu,2312700,Sertões Cearenses,24266,781.3,False,False,False,True,1,-5.5893437521,-39.3753253308
-Redenção,2311603,Norte Cearense,27214,670.02,True,True,False,True,3,-4.2229581502,-38.7295707506
-Caririaçu,2303204,Sul Cearense,26320,627.49,True,True,False,True,3,-7.041528,-39.2843720296
-Independência,2305605,Sertões Cearenses,24024,705.5,False,False,False,True,1,-5.3980281003,-40.3093482606
-Tamboril,2313203,Sertões Cearenses,24815,688.17,True,False,False,True,2,-4.8339285832,-40.3190685133
-Aracoiaba,2301208,Norte Cearense,25553,718.73,True,False,False,True,2,-4.370393807,-38.8094409692
-Marco,2307809,Noroeste Cearense,25799,584.74,True,False,False,True,2,-3.120707025,-40.1516436427
-Aurora,2301703,Sul Cearense,23714,714.57,True,False,False,True,2,-6.940391832,-38.9769908769
-Cedro,2303808,Centro-Sul Cearense,22344,857.12,True,False,False,True,2,-6.6049605,-39.059743148
-Guaiúba,2304954,Metropolitana de Fortaleza,24325,601.44,False,True,False,True,2,-4.0402435005,-38.6344347805
-Ocara,2309458,Norte Cearense,24493,714.07,False,False,False,True,1,-4.4850665445,-38.5985379828
-Ibiapina,2305308,Noroeste Cearense,23965,692.97,False,False,False,True,1,-3.9361312622,-40.8939290198
-Jucás,2307403,Centro-Sul Cearense,23922,694.23,False,True,False,True,2,-6.5225492731,-39.5267762434
-Cruz,2304251,Noroeste Cearense,29761,834.25,True,False,False,True,2,-2.9167080504,-40.1712787065
-Assaré,2301604,Sul Cearense,21697,720.44,True,True,False,True,3,-6.8726071122,-39.8712747475
-Irauçuba,2306108,Noroeste Cearense,23915,584.86,False,False,False,True,1,-3.7454188017,-39.7922381151
-Coreaú,2304004,Noroeste Cearense,20953,656.99,False,False,False,True,1,-3.5494878611,-40.6569510758
-Forquilha,2304350,Noroeste Cearense,24173,727.41,False,False,False,True,1,-3.7989577431,-40.2587689981
-Barro,2302008,Sul Cearense,19381,729.66,True,False,False,True,2,-7.1682087267,-38.7798806461
-Orós,2309508,Centro-Sul Cearense,19675,673.92,True,False,False,True,2,-6.2427987837,-38.9135959845
-Morrinhos,2308906,Noroeste Cearense,22753,667.16,False,False,False,True,1,-3.2288305343,-40.1241788929
-Araripe,2301307,Sul Cearense,19783,545.54,False,True,False,True,2,-7.2061837892,-40.1374458094
-Caridade,2303006,Norte Cearense,16377,655.3,False,False,False,True,1,-4.2249600008,-39.193032915
-Quiterianópolis,2311264,Sertões Cearenses,20213,677.69,False,False,False,True,1,-5.8470092293,-40.7044888468
-Uruburetama,2313807,Norte Cearense,20189,661.25,False,False,False,True,1,-3.6230168337,-39.5081780698
-Barreira,2301950,Norte Cearense,22392,713.88,True,False,False,True,2,-4.2887622668,-38.6385018296
-Reriutaba,2311702,Noroeste Cearense,18606,724.54,False,False,False,True,1,-4.1415676008,-40.5846120037
-Quixeré,2311504,Jaguaribe,20874,900.07,False,True,False,True,2,-5.0687289544,-37.9905222251
-Hidrolândia,2305209,Noroeste Cearense,17855,659.36,False,True,True,True,3,-4.4079994443,-40.4018171244
-Farias Brito,2304301,Sul Cearense,18217,691.36,True,False,False,True,2,-6.9271099806,-39.5708350212
-Chorozinho,2303956,Norte Cearense,20163,723.23,False,False,False,True,1,-4.302170914,-38.5012856667
-Itatira,2306603,Norte Cearense,20424,602.54,False,True,False,True,2,-4.5289225623,-39.6179040159
-Umirim,2313757,Norte Cearense,17470,558.68,False,False,False,True,1,-3.6755618981,-39.3423844043
-Catarina,2303600,Sertões Cearenses,10243,715.33,False,False,False,True,1,-6.1275562908,-39.8794662283
-Pindoretama,2310852,Norte Cearense,23391,794.0,False,True,False,True,2,-4.0278039927,-38.3000879763
-Itapiúna,2306504,Norte Cearense,17841,597.58,False,False,False,True,1,-4.5547401747,-38.9206739559
-Cariús,2303303,Centro-Sul Cearense,17015,681.18,False,False,False,True,1,-6.5311279379,-39.4976886801
-Icapuí,2305357,Jaguaribe,21433,824.14,False,False,False,True,1,-4.7155494878,-37.3535630986
-Cariré,2303105,Noroeste Cearense,17632,608.07,True,False,False,True,2,-3.95161188,-40.4738448077
-Madalena,2307635,Sertões Cearenses,16896,656.35,False,False,False,True,1,-4.8524341766,-39.5757886826
-Jaguaretama,2306702,Jaguaribe,17232,744.65,False,True,False,True,2,-5.6108895632,-38.7625262979
-Solonópole,2313005,Sertões Cearenses,18179,788.81,False,False,False,True,1,-5.726351291,-39.0082249132
-Varjota,2313955,Noroeste Cearense,18105,702.29,False,False,False,True,1,-4.1828222828,-40.4789932741
-Banabuiú,2301851,Sertões Cearenses,17195,740.46,False,True,False,True,2,-5.315047304,-38.9257848049
-Santana do Cariri,2312106,Sul Cearense,16954,597.15,True,False,False,True,2,-7.1808977833,-39.7379797815
-Croatá,2304236,Noroeste Cearense,17481,576.04,False,False,False,True,1,-4.4140572655,-40.9090450982
-Capistrano,2302909,Norte Cearense,17254,612.32,True,False,False,True,2,-4.4598966121,-38.9018287595
-Jijoca de Jericoacoara,2307254,Noroeste Cearense,25555,968.32,False,True,False,True,2,-2.8996827089,-40.4387354019
-Tejuçuoca,2313351,Norte Cearense,17154,554.86,True,True,False,True,3,-3.9897118086,-39.5768263617
-Carnaubal,2303402,Noroeste Cearense,17210,654.73,False,False,False,True,1,-4.1639885624,-40.9356315773
-Monsenhor Tabosa,2308609,Sertões Cearenses,17149,705.32,True,False,False,True,2,-4.7830912915,-40.0700674616
-Alto Santo,2300705,Jaguaribe,14155,803.58,False,True,False,True,2,-5.5220817397,-38.2727781487
-Aiuaba,2300408,Sertões Cearenses,14076,659.88,False,False,False,True,1,-6.5632984401,-40.1231600776
-Pereiro,2310803,Jaguaribe,15274,719.3,False,True,False,True,2,-6.045076902,-38.459136039
-Saboeiro,2311900,Sertões Cearenses,13854,665.49,True,False,False,True,2,-6.5364333525,-39.9045806984
-Piquet Carneiro,2310902,Sertões Cearenses,16616,704.36,False,False,False,True,1,-5.8085695598,-39.4194062555
-Salitre,2311959,Sul Cearense,16633,544.51,False,False,False,True,1,-7.284528685,-40.4647520646
-Acarape,2300150,Norte Cearense,14027,674.46,False,True,True,True,3,-4.2231384094,-38.705623771
-Porteiras,2311108,Sul Cearense,17050,829.82,True,False,False,True,2,-7.5357464416,-39.1153314615
-Graça,2304657,Noroeste Cearense,13801,574.75,False,False,False,True,1,-4.046938794,-40.7555248996
-Quixelô,2311355,Centro-Sul Cearense,15910,693.31,True,False,True,True,3,-6.2512119004,-39.2022943665
-Fortim,2304459,Jaguaribe,17294,900.17,False,False,False,True,1,-4.4498049174,-37.798975486
-Barroquinha,2302057,Noroeste Cearense,14567,509.21,False,False,False,True,1,-3.0091167462,-41.1394815382
-Tururu,2313559,Norte Cearense,15412,565.11,False,False,False,True,1,-3.5955952355,-39.434363537
-Nova Olinda,2309201,Sul Cearense,15399,674.97,True,True,False,True,3,-7.0841028114,-39.6794854727
-Mucambo,2309003,Noroeste Cearense,13666,730.44,False,False,False,True,1,-3.9060299796,-40.7452804652
-Apuiarés,2300903,Norte Cearense,12928,627.92,True,False,False,True,2,-3.9480185186,-39.4304227833
-Iracema,2306009,Jaguaribe,14001,850.77,False,False,False,True,1,-5.8098425529,-38.3046616557
-Meruoca,2308203,Noroeste Cearense,15157,752.71,False,True,True,True,3,-3.5390066623,-40.4508809568
-Milhã,2308351,Sertões Cearenses,14123,827.51,False,False,False,True,1,-5.6795641009,-39.2035741816
-Frecheirinha,2304509,Noroeste Cearense,15657,822.31,True,False,False,True,2,-3.7606119315,-40.8214052012
-Ibaretama,2305266,Sertões Cearenses,11956,624.16,True,False,False,True,2,-4.8186515779,-38.8216783127
-Uruoca,2313906,Noroeste Cearense,13746,611.47,False,False,False,True,1,-3.3132306604,-40.5611630277
-Choró,2303931,Sertões Cearenses,12113,549.53,False,True,False,True,2,-4.8425156593,-39.1374675316
-Miraíma,2308377,Noroeste Cearense,14196,453.17,False,True,False,True,2,-3.5685999066,-39.970064882
-Chaval,2303907,Noroeste Cearense,12462,672.47,False,False,False,True,1,-3.0389011891,-41.2445958219
-São Luís do Curu,2312601,Norte Cearense,10822,622.89,False,False,False,True,1,-3.6730092532,-39.241606185
-Ipaumirim,2305704,Centro-Sul Cearense,12083,744.84,False,False,False,True,1,-6.7883612602,-38.7159037441
-Palmácia,2310100,Norte Cearense,10242,689.96,False,True,False,True,2,-4.1489817745,-38.8450290663
-Poranga,2311009,Noroeste Cearense,12065,654.04,True,True,False,True,3,-4.7439507319,-40.9263795103
-Pacoti,2309805,Norte Cearense,11186,720.8,True,True,False,True,3,-4.2247654331,-38.9258889387
-Aratuba,2301406,Norte Cearense,11224,732.99,True,True,False,True,3,-4.416930645,-39.0475545618
-Mulungu,2309102,Norte Cearense,10569,768.51,False,False,False,True,1,-4.2995283201,-38.9930659239
-Ipaporanga,2305654,Sertões Cearenses,11575,648.09,False,False,False,True,1,-4.9006297857,-40.75796634
-Ibicuitinga,2305332,Jaguaribe,11611,627.47,False,False,False,True,1,-4.9691664228,-38.6408630486
-Paramoti,2310407,Norte Cearense,10384,569.94,False,False,False,True,1,-4.097432332,-39.239466495
-Alcântaras,2300507,Noroeste Cearense,11369,753.79,False,False,False,True,1,-3.5869837692,-40.5446381226
-Abaiara,2300101,Sul Cearense,10038,677.33,False,False,False,True,1,-7.3569765959,-39.0475466362
-Ararendá,2301257,Sertões Cearenses,11096,623.37,False,False,False,True,1,-4.751938272,-40.831096735
-Jaguaribara,2306801,Jaguaribe,10356,892.83,True,False,False,True,2,-5.457502034,-38.4630972956
-Potengi,2311207,Sul Cearense,8833,604.42,True,False,False,True,2,-7.0901794696,-40.0321325357
-Groaíras,2304905,Noroeste Cearense,10910,753.78,False,True,False,True,2,-3.9119541292,-40.3821460239
-Pires Ferreira,2310951,Noroeste Cearense,10606,651.65,False,False,False,True,1,-4.2421541432,-40.6465412478
-Martinópole,2307908,Noroeste Cearense,10846,622.75,False,False,False,True,1,-3.2250122274,-40.6993551751
-Catunda,2303659,Noroeste Cearense,10444,659.33,False,True,False,True,2,-4.6515493857,-40.2058037894
-Deputado Irapuan Pinheiro,2304269,Sertões Cearenses,8932,606.51,True,False,False,True,2,-5.9089623738,-39.2615417651
-Tarrafas,2313252,Centro-Sul Cearense,7529,767.47,False,False,False,True,1,-6.6825903147,-39.7584941949
-Palhano,2310001,Jaguaribe,9346,838.31,False,True,True,True,3,-4.7439450768,-37.9662351611
-Penaforte,2310605,Sul Cearense,8972,712.89,True,False,False,True,2,-7.8299146121,-39.0741275241
-Moraújo,2308807,Noroeste Cearense,8254,763.44,False,False,False,True,1,-3.4663632744,-40.6835989271
-São João do Jaguaribe,2312502,Jaguaribe,5855,939.84,False,False,False,True,1,-5.2686305505,-38.2719407044
-Jati,2307205,Sul Cearense,7861,727.11,False,False,False,True,1,-7.6927415948,-39.0051387612
-Arneiroz,2301505,Sertões Cearenses,7429,732.65,False,False,False,True,1,-6.319425803,-40.1614437124
-Umari,2313708,Centro-Sul Cearense,6871,629.05,False,False,False,True,1,-6.6472443752,-38.7013257159
-Itaiçaba,2306207,Jaguaribe,7536,772.01,False,False,False,True,1,-4.6834047119,-37.8216295137
-Antonina do Norte,2300804,Centro-Sul Cearense,7245,793.02,False,False,False,True,1,-6.7796878471,-39.9823868419
-Altaneira,2300606,Sul Cearense,6782,699.36,False,False,False,True,1,-6.9974983508,-39.7458206389
-Senador Sá,2312809,Noroeste Cearense,7262,623.36,False,False,False,True,1,-3.351789628,-40.4637920044
-Ererê,2304277,Jaguaribe,6474,705.28,True,False,False,True,2,-6.0313327299,-38.3472589621
-General Sampaio,2304608,Norte Cearense,6734,634.44,False,False,False,True,1,-4.0510412747,-39.4535299504
-Potiretama,2311231,Jaguaribe,5974,756.94,False,False,False,True,1,-5.7216679037,-38.1579178532
-Baixio,2301802,Centro-Sul Cearense,5704,660.22,False,False,False,True,1,-6.7271620493,-38.720125916
-Pacujá,2309904,Noroeste Cearense,6175,723.25,True,False,False,True,2,-3.9783943861,-40.6967361073
-Granjeiro,2304806,Sul Cearense,4841,693.39,False,False,False,True,1,-6.8888843729,-39.2203088858
-Guaramiranga,2305100,Norte Cearense,5654,748.44,True,True,False,True,3,-4.2620509186,-38.9406332851
+municipio,codigo_ibge,mesorregiao,populacao,renda_per_capita,lat,lon,tem_museu,tem_teatro_sala_espetaculo,tem_cinema,tem_biblioteca,n_equipamentos
+Fortaleza,2304400,Metropolitana de Fortaleza,2428708,1668.98,-3.723805035,-38.589927555,True,True,True,True,4
+Caucaia,2303709,Metropolitana de Fortaleza,355679,947.97,-3.736487,-38.6640175358,True,True,True,True,4
+Juazeiro do Norte,2307304,Sul Cearense,286120,1021.94,-7.210766,-39.3169933556,True,True,True,True,4
+Maracanaú,2307650,Metropolitana de Fortaleza,234509,910.74,-3.876964451,-38.6244186466,False,True,False,True,2
+Sobral,2312908,Noroeste Cearense,203023,1013.74,-3.6880376838,-40.3486680337,True,True,True,True,4
+Crato,2304202,Sul Cearense,131050,1060.11,-7.2317527899,-39.4083902978,True,True,False,True,3
+Itapipoca,2306405,Norte Cearense,131123,720.4,-3.4994355,-39.5834815758,True,True,True,True,4
+Maranguape,2307700,Metropolitana de Fortaleza,105093,833.02,-3.89186946,-38.6858512477,True,True,True,True,4
+Iguatu,2305506,Centro-Sul Cearense,98064,1009.72,-6.36055472,-39.2999056782,True,True,False,True,3
+Quixadá,2311306,Sertões Cearenses,84168,888.08,-4.9637,-39.0117446758,True,True,False,True,3
+Canindé,2302800,Norte Cearense,74174,816.43,-4.3553442897,-39.3103429529,True,True,False,True,3
+Crateús,2304103,Sertões Cearenses,76390,920.1,-5.1769505508,-40.6684001308,False,True,False,True,2
+Aquiraz,2301000,Metropolitana de Fortaleza,80645,930.64,-3.9061945,-38.3898029589,True,True,False,True,3
+Pacatuba,2309706,Metropolitana de Fortaleza,81524,862.29,-3.9861200223,-38.618299312,True,True,False,True,3
+Quixeramobim,2311405,Sertões Cearenses,82177,853.65,-5.1984048374,-39.294354227,False,True,False,True,2
+Russas,2311801,Jaguaribe,72928,867.47,-4.9397378154,-37.9754312969,True,True,False,True,3
+Aracati,2301109,Jaguaribe,75113,904.09,-4.56706647,-37.7727525989,True,True,True,True,4
+Tianguá,2313401,Noroeste Cearense,81506,844.1,-3.722674,-40.9917056227,True,False,True,True,3
+Cascavel,2303501,Norte Cearense,72720,873.81,-4.1314336782,-38.2396859407,True,True,True,True,4
+Icó,2305407,Centro-Sul Cearense,62642,706.4,-6.4030312519,-38.8630851789,False,True,False,True,2
+Morada Nova,2308708,Jaguaribe,61443,842.15,-5.0969520002,-38.3649073451,True,True,False,True,3
+Pacajus,2309607,Metropolitana de Fortaleza,70983,835.89,-4.17054051,-38.4670222649,True,True,False,True,3
+Camocim,2302602,Noroeste Cearense,62326,731.25,-2.9009665746,-40.8475277409,False,True,False,True,2
+Acaraú,2300200,Noroeste Cearense,65264,694.7,-2.8853105401,-40.1182414712,True,False,True,True,3
+Limoeiro do Norte,2307601,Jaguaribe,59560,1128.21,-5.15023902,-38.0990948705,True,True,True,True,4
+Tauá,2313302,Sertões Cearenses,61227,831.53,-6.0029989399,-40.2926246551,True,True,False,True,3
+Barbalha,2301901,Sul Cearense,75033,1005.61,-7.3071721269,-39.3023163692,False,True,True,True,3
+Horizonte,2305233,Metropolitana de Fortaleza,74755,762.19,-4.093278,-38.4942395586,True,True,False,True,3
+Viçosa do Ceará,2314102,Noroeste Cearense,59712,548.18,-3.5660127532,-41.091629075,True,True,False,True,3
+Granja,2304707,Noroeste Cearense,53344,564.83,-3.1189521562,-40.829938991,True,False,False,True,2
+Boa Viagem,2302404,Sertões Cearenses,50411,714.71,-5.1257438701,-39.7332823425,True,True,False,True,3
+Trairi,2313500,Norte Cearense,58415,662.17,-3.2644201691,-39.2722318726,False,False,False,True,1
+Acopiara,2300309,Sertões Cearenses,44962,758.47,-6.092761995,-39.4557052762,True,True,False,True,3
+Beberibe,2302206,Norte Cearense,53114,759.16,-4.1747632212,-38.1232730421,True,True,False,True,3
+Itapagé,2306306,Norte Cearense,46426,687.35,-3.6856731098,-39.5835332386,False,True,False,True,2
+Eusébio,2304285,Metropolitana de Fortaleza,74170,2512.7,-3.8869728867,-38.4451218386,False,False,True,True,2
+Brejo Santo,2302503,Sul Cearense,51090,873.09,-7.4916380087,-38.9855138674,True,True,True,True,4
+Mauriti,2308104,Sul Cearense,45561,667.97,-7.387398,-38.772795438,False,False,False,True,1
+São Benedito,2312304,Noroeste Cearense,47640,718.45,-4.04472699,-40.8644898758,False,False,False,True,1
+São Gonçalo do Amarante,2312403,Norte Cearense,54143,834.41,-3.6056325,-38.9720758653,True,True,False,True,3
+Santa Quitéria,2312205,Noroeste Cearense,40183,770.52,-4.3332705,-40.1535078136,True,False,False,True,2
+Mombaça,2308500,Sertões Cearenses,37735,765.22,-5.74700454,-39.6244052479,False,True,False,True,2
+Pedra Branca,2310506,Sertões Cearenses,40187,667.71,-5.4546855,-39.7139376447,True,False,False,True,2
+Ipu,2305803,Noroeste Cearense,41081,735.8,-4.3134316852,-40.7187261447,False,True,False,True,2
+Amontada,2300754,Norte Cearense,42156,582.24,-3.3648778035,-39.8288227917,False,False,False,True,1
+Várzea Alegre,2314003,Centro-Sul Cearense,38984,768.75,-6.7918458556,-39.2989329971,False,False,False,True,1
+Ipueiras,2305902,Noroeste Cearense,36798,625.83,-4.543785495,-40.7156965106,False,True,False,True,2
+Guaraciaba do Norte,2305001,Noroeste Cearense,42053,716.54,-4.1624510671,-40.7526331779,False,True,False,True,2
+Itarema,2306553,Noroeste Cearense,42957,642.63,-2.923348,-39.9156777489,True,True,False,True,3
+Itaitinga,2306256,Metropolitana de Fortaleza,64650,1008.7,-3.9704590163,-38.5264051495,False,False,False,True,1
+Pentecoste,2310704,Norte Cearense,37813,733.42,-3.7962667362,-39.2670087315,False,False,False,True,1
+Massapê,2308005,Noroeste Cearense,37697,652.16,-3.5238705843,-40.3421348648,False,False,False,True,1
+Jaguaribe,2306900,Jaguaribe,33726,882.89,-5.886459045,-38.6230050493,True,True,False,True,3
+Missão Velha,2308401,Sul Cearense,36822,629.9,-7.2432315138,-39.1451977079,False,False,False,True,1
+Baturité,2302107,Norte Cearense,35218,773.07,-4.3312051564,-38.8800213756,True,False,False,True,2
+Jaguaruana,2307007,Jaguaribe,31701,789.66,-4.8395551683,-37.782391481,False,False,False,True,1
+Ubajara,2313609,Noroeste Cearense,32767,785.04,-3.8484914352,-40.907143928,True,True,False,True,3
+Paracuru,2310209,Norte Cearense,38980,871.22,-3.4116350092,-39.0295453441,False,False,False,True,1
+Parambu,2310308,Sertões Cearenses,31445,643.03,-6.2103360017,-40.6942072413,True,False,False,True,2
+Lavras da Mangabeira,2307502,Centro-Sul Cearense,30802,677.99,-6.7547479768,-38.9672750539,False,False,False,True,1
+Nova Russas,2309300,Sertões Cearenses,30699,744.82,-4.7068083499,-40.5653033549,False,True,False,True,2
+Bela Cruz,2302305,Noroeste Cearense,32775,621.73,-3.0551067243,-40.166842907,True,False,False,True,2
+Paraipaba,2310258,Norte Cearense,32216,813.25,-3.4361967279,-39.1481155272,False,False,False,True,1
+Santana do Acaraú,2312007,Noroeste Cearense,30628,587.81,-3.4597753417,-40.2094628598,False,True,False,True,2
+Tabuleiro do Norte,2313104,Jaguaribe,30652,895.75,-5.2438038699,-38.1297371282,True,True,False,True,3
+Milagres,2308302,Sul Cearense,25900,740.97,-7.3104277968,-38.9431567662,False,False,False,True,1
+Novo Oriente,2309409,Sertões Cearenses,27545,771.68,-5.5338648355,-40.7747672682,False,True,False,True,2
+Jardim,2307106,Sul Cearense,27411,726.42,-7.5855364657,-39.2841644574,True,False,False,True,2
+Campos Sales,2302701,Sul Cearense,25135,748.63,-7.0733835,-40.3790031302,True,True,False,True,3
+Senador Pompeu,2312700,Sertões Cearenses,24266,781.3,-5.5893437521,-39.3753253308,False,False,False,True,1
+Redenção,2311603,Norte Cearense,27214,670.02,-4.2229581502,-38.7295707506,True,True,False,True,3
+Caririaçu,2303204,Sul Cearense,26320,627.49,-7.041528,-39.2843720296,True,True,False,True,3
+Independência,2305605,Sertões Cearenses,24024,705.5,-5.3980281003,-40.3093482606,True,False,False,True,2
+Tamboril,2313203,Sertões Cearenses,24815,688.17,-4.8339285832,-40.3190685133,False,False,False,True,1
+Aracoiaba,2301208,Norte Cearense,25553,718.73,-4.370393807,-38.8094409692,True,False,False,True,2
+Marco,2307809,Noroeste Cearense,25799,584.74,-3.120707025,-40.1516436427,True,False,False,True,2
+Aurora,2301703,Sul Cearense,23714,714.57,-6.940391832,-38.9769908769,True,False,False,True,2
+Cedro,2303808,Centro-Sul Cearense,22344,857.12,-6.6049605,-39.059743148,True,False,False,True,2
+Guaiúba,2304954,Metropolitana de Fortaleza,24325,601.44,-4.0402435005,-38.6344347805,False,True,False,True,2
+Ocara,2309458,Norte Cearense,24493,714.07,-4.4850665445,-38.5985379828,False,False,False,True,1
+Ibiapina,2305308,Noroeste Cearense,23965,692.97,-3.9361312622,-40.8939290198,True,False,False,True,2
+Jucás,2307403,Centro-Sul Cearense,23922,694.23,-6.5225492731,-39.5267762434,False,False,False,True,1
+Cruz,2304251,Noroeste Cearense,29761,834.25,-2.9167080504,-40.1712787065,True,False,False,True,2
+Assaré,2301604,Sul Cearense,21697,720.44,-6.8726071122,-39.8712747475,True,True,False,True,3
+Irauçuba,2306108,Noroeste Cearense,23915,584.86,-3.7454188017,-39.7922381151,False,False,False,True,1
+Coreaú,2304004,Noroeste Cearense,20953,656.99,-3.5494878611,-40.6569510758,False,False,False,True,1
+Forquilha,2304350,Noroeste Cearense,24173,727.41,-3.7989577431,-40.2587689981,False,False,False,True,1
+Barro,2302008,Sul Cearense,19381,729.66,-7.1682087267,-38.7798806461,True,False,False,True,2
+Orós,2309508,Centro-Sul Cearense,19675,673.92,-6.2427987837,-38.9135959845,True,False,False,True,2
+Morrinhos,2308906,Noroeste Cearense,22753,667.16,-3.2288305343,-40.1241788929,False,False,False,True,1
+Araripe,2301307,Sul Cearense,19783,545.54,-7.2061837892,-40.1374458094,False,True,False,True,2
+Caridade,2303006,Norte Cearense,16377,655.3,-4.2249600008,-39.193032915,True,False,False,True,2
+Quiterianópolis,2311264,Sertões Cearenses,20213,677.69,-5.8470092293,-40.7044888468,False,False,False,True,1
+Uruburetama,2313807,Norte Cearense,20189,661.25,-3.6230168337,-39.5081780698,False,True,False,True,2
+Barreira,2301950,Norte Cearense,22392,713.88,-4.2887622668,-38.6385018296,True,False,False,True,2
+Reriutaba,2311702,Noroeste Cearense,18606,724.54,-4.1415676008,-40.5846120037,False,False,False,True,1
+Quixeré,2311504,Jaguaribe,20874,900.07,-5.0687289544,-37.9905222251,False,False,False,True,1
+Hidrolândia,2305209,Noroeste Cearense,17855,659.36,-4.4079994443,-40.4018171244,True,False,False,True,2
+Farias Brito,2304301,Sul Cearense,18217,691.36,-6.9271099806,-39.5708350212,True,True,False,True,3
+Chorozinho,2303956,Norte Cearense,20163,723.23,-4.302170914,-38.5012856667,False,False,False,True,1
+Itatira,2306603,Norte Cearense,20424,602.54,-4.5289225623,-39.6179040159,True,False,False,True,2
+Umirim,2313757,Norte Cearense,17470,558.68,-3.6755618981,-39.3423844043,True,False,False,True,2
+Catarina,2303600,Sertões Cearenses,10243,715.33,-6.1275562908,-39.8794662283,False,False,False,True,1
+Pindoretama,2310852,Norte Cearense,23391,794.0,-4.0278039927,-38.3000879763,True,True,False,True,3
+Itapiúna,2306504,Norte Cearense,17841,597.58,-4.5547401747,-38.9206739559,False,False,False,True,1
+Cariús,2303303,Centro-Sul Cearense,17015,681.18,-6.5311279379,-39.4976886801,False,False,False,True,1
+Icapuí,2305357,Jaguaribe,21433,824.14,-4.7155494878,-37.3535630986,False,True,False,True,2
+Cariré,2303105,Noroeste Cearense,17632,608.07,-3.95161188,-40.4738448077,True,False,False,True,2
+Madalena,2307635,Sertões Cearenses,16896,656.35,-4.8524341766,-39.5757886826,False,False,False,True,1
+Jaguaretama,2306702,Jaguaribe,17232,744.65,-5.6108895632,-38.7625262979,True,True,False,True,3
+Solonópole,2313005,Sertões Cearenses,18179,788.81,-5.726351291,-39.0082249132,False,False,False,True,1
+Varjota,2313955,Noroeste Cearense,18105,702.29,-4.1828222828,-40.4789932741,False,False,False,True,1
+Banabuiú,2301851,Sertões Cearenses,17195,740.46,-5.315047304,-38.9257848049,False,False,False,True,1
+Santana do Cariri,2312106,Sul Cearense,16954,597.15,-7.1808977833,-39.7379797815,True,False,False,True,2
+Croatá,2304236,Noroeste Cearense,17481,576.04,-4.4140572655,-40.9090450982,False,False,False,True,1
+Capistrano,2302909,Norte Cearense,17254,612.32,-4.4598966121,-38.9018287595,True,False,False,True,2
+Jijoca de Jericoacoara,2307254,Noroeste Cearense,25555,968.32,-2.8996827089,-40.4387354019,False,True,False,True,2
+Tejuçuoca,2313351,Norte Cearense,17154,554.86,-3.9897118086,-39.5768263617,True,False,False,True,2
+Carnaubal,2303402,Noroeste Cearense,17210,654.73,-4.1639885624,-40.9356315773,False,False,False,True,1
+Monsenhor Tabosa,2308609,Sertões Cearenses,17149,705.32,-4.7830912915,-40.0700674616,True,False,False,True,2
+Alto Santo,2300705,Jaguaribe,14155,803.58,-5.5220817397,-38.2727781487,False,False,False,True,1
+Aiuaba,2300408,Sertões Cearenses,14076,659.88,-6.5632984401,-40.1231600776,False,False,False,True,1
+Pereiro,2310803,Jaguaribe,15274,719.3,-6.045076902,-38.459136039,False,True,False,True,2
+Saboeiro,2311900,Sertões Cearenses,13854,665.49,-6.5364333525,-39.9045806984,False,False,False,True,1
+Piquet Carneiro,2310902,Sertões Cearenses,16616,704.36,-5.8085695598,-39.4194062555,False,False,False,True,1
+Salitre,2311959,Sul Cearense,16633,544.51,-7.284528685,-40.4647520646,True,False,False,True,2
+Acarape,2300150,Norte Cearense,14027,674.46,-4.2231384094,-38.705623771,False,False,False,True,1
+Porteiras,2311108,Sul Cearense,17050,829.82,-7.5357464416,-39.1153314615,True,False,False,True,2
+Graça,2304657,Noroeste Cearense,13801,574.75,-4.046938794,-40.7555248996,False,False,False,False,0
+Quixelô,2311355,Centro-Sul Cearense,15910,693.31,-6.2512119004,-39.2022943665,True,True,True,True,4
+Fortim,2304459,Jaguaribe,17294,900.17,-4.4498049174,-37.798975486,False,False,False,True,1
+Barroquinha,2302057,Noroeste Cearense,14567,509.21,-3.0091167462,-41.1394815382,False,False,False,True,1
+Tururu,2313559,Norte Cearense,15412,565.11,-3.5955952355,-39.434363537,False,False,False,True,1
+Nova Olinda,2309201,Sul Cearense,15399,674.97,-7.0841028114,-39.6794854727,True,True,False,True,3
+Mucambo,2309003,Noroeste Cearense,13666,730.44,-3.9060299796,-40.7452804652,False,False,False,True,1
+Apuiarés,2300903,Norte Cearense,12928,627.92,-3.9480185186,-39.4304227833,True,False,False,True,2
+Iracema,2306009,Jaguaribe,14001,850.77,-5.8098425529,-38.3046616557,False,False,False,True,1
+Meruoca,2308203,Noroeste Cearense,15157,752.71,-3.5390066623,-40.4508809568,False,True,False,True,2
+Milhã,2308351,Sertões Cearenses,14123,827.51,-5.6795641009,-39.2035741816,False,False,False,True,1
+Frecheirinha,2304509,Noroeste Cearense,15657,822.31,-3.7606119315,-40.8214052012,False,False,False,True,1
+Ibaretama,2305266,Sertões Cearenses,11956,624.16,-4.8186515779,-38.8216783127,True,False,False,True,2
+Uruoca,2313906,Noroeste Cearense,13746,611.47,-3.3132306604,-40.5611630277,False,False,False,True,1
+Choró,2303931,Sertões Cearenses,12113,549.53,-4.8425156593,-39.1374675316,False,False,False,True,1
+Miraíma,2308377,Noroeste Cearense,14196,453.17,-3.5685999066,-39.970064882,False,False,False,True,1
+Chaval,2303907,Noroeste Cearense,12462,672.47,-3.0389011891,-41.2445958219,False,False,False,True,1
+São Luís do Curu,2312601,Norte Cearense,10822,622.89,-3.6730092532,-39.241606185,False,False,False,True,1
+Ipaumirim,2305704,Centro-Sul Cearense,12083,744.84,-6.7883612602,-38.7159037441,False,False,False,True,1
+Palmácia,2310100,Norte Cearense,10242,689.96,-4.1489817745,-38.8450290663,False,False,False,True,1
+Poranga,2311009,Noroeste Cearense,12065,654.04,-4.7439507319,-40.9263795103,False,False,False,True,1
+Pacoti,2309805,Norte Cearense,11186,720.8,-4.2247654331,-38.9258889387,True,True,False,True,3
+Aratuba,2301406,Norte Cearense,11224,732.99,-4.416930645,-39.0475545618,True,True,False,True,3
+Mulungu,2309102,Norte Cearense,10569,768.51,-4.2995283201,-38.9930659239,False,False,False,True,1
+Ipaporanga,2305654,Sertões Cearenses,11575,648.09,-4.9006297857,-40.75796634,False,False,False,True,1
+Ibicuitinga,2305332,Jaguaribe,11611,627.47,-4.9691664228,-38.6408630486,False,False,False,True,1
+Paramoti,2310407,Norte Cearense,10384,569.94,-4.097432332,-39.239466495,False,False,False,True,1
+Alcântaras,2300507,Noroeste Cearense,11369,753.79,-3.5869837692,-40.5446381226,False,False,False,True,1
+Abaiara,2300101,Sul Cearense,10038,677.33,-7.3569765959,-39.0475466362,False,False,False,True,1
+Ararendá,2301257,Sertões Cearenses,11096,623.37,-4.751938272,-40.831096735,False,False,False,True,1
+Jaguaribara,2306801,Jaguaribe,10356,892.83,-5.457502034,-38.4630972956,True,False,False,True,2
+Potengi,2311207,Sul Cearense,8833,604.42,-7.0901794696,-40.0321325357,True,False,False,True,2
+Groaíras,2304905,Noroeste Cearense,10910,753.78,-3.9119541292,-40.3821460239,False,False,False,True,1
+Pires Ferreira,2310951,Noroeste Cearense,10606,651.65,-4.2421541432,-40.6465412478,False,False,False,True,1
+Martinópole,2307908,Noroeste Cearense,10846,622.75,-3.2250122274,-40.6993551751,False,False,False,True,1
+Catunda,2303659,Noroeste Cearense,10444,659.33,-4.6515493857,-40.2058037894,False,False,False,True,1
+Deputado Irapuan Pinheiro,2304269,Sertões Cearenses,8932,606.51,-5.9089623738,-39.2615417651,False,False,False,True,1
+Tarrafas,2313252,Centro-Sul Cearense,7529,767.47,-6.6825903147,-39.7584941949,False,False,False,True,1
+Palhano,2310001,Jaguaribe,9346,838.31,-4.7439450768,-37.9662351611,False,False,False,True,1
+Penaforte,2310605,Sul Cearense,8972,712.89,-7.8299146121,-39.0741275241,False,False,False,True,1
+Moraújo,2308807,Noroeste Cearense,8254,763.44,-3.4663632744,-40.6835989271,False,False,False,True,1
+São João do Jaguaribe,2312502,Jaguaribe,5855,939.84,-5.2686305505,-38.2719407044,False,False,False,True,1
+Jati,2307205,Sul Cearense,7861,727.11,-7.6927415948,-39.0051387612,False,False,False,True,1
+Arneiroz,2301505,Sertões Cearenses,7429,732.65,-6.319425803,-40.1614437124,False,False,False,True,1
+Umari,2313708,Centro-Sul Cearense,6871,629.05,-6.6472443752,-38.7013257159,False,False,False,True,1
+Itaiçaba,2306207,Jaguaribe,7536,772.01,-4.6834047119,-37.8216295137,False,False,False,True,1
+Antonina do Norte,2300804,Centro-Sul Cearense,7245,793.02,-6.7796878471,-39.9823868419,False,True,False,True,2
+Altaneira,2300606,Sul Cearense,6782,699.36,-6.9974983508,-39.7458206389,True,False,False,True,2
+Senador Sá,2312809,Noroeste Cearense,7262,623.36,-3.351789628,-40.4637920044,False,False,False,True,1
+Ererê,2304277,Jaguaribe,6474,705.28,-6.0313327299,-38.3472589621,True,False,False,True,2
+General Sampaio,2304608,Norte Cearense,6734,634.44,-4.0510412747,-39.4535299504,False,True,False,True,2
+Potiretama,2311231,Jaguaribe,5974,756.94,-5.7216679037,-38.1579178532,False,False,False,True,1
+Baixio,2301802,Centro-Sul Cearense,5704,660.22,-6.7271620493,-38.720125916,False,False,False,True,1
+Pacujá,2309904,Noroeste Cearense,6175,723.25,-3.9783943861,-40.6967361073,True,False,False,True,2
+Granjeiro,2304806,Sul Cearense,4841,693.39,-6.8888843729,-39.2203088858,False,False,False,True,1
+Guaramiranga,2305100,Norte Cearense,5654,748.44,-4.2620509186,-38.9406332851,True,True,False,True,3

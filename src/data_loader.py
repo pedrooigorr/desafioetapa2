@@ -2,7 +2,7 @@
 Carregamento e preparação dos dados do Radar Cultural.
 
 Fontes:
-  - Equipamentos culturais: IBGE — MUNIC, Suplemento de Cultura 2014
+  - Equipamentos culturais: IBGE — MUNIC, Suplemento de Cultura 2021
   - População e renda per capita: IBGE, Censo Demográfico 2022
 
 Ver data/README.md para detalhes de como as duas bases foram cruzadas.
@@ -22,8 +22,8 @@ EQUIPAMENTOS = {
 }
 
 # Equipamentos que de fato diferenciam municípios entre si — biblioteca
-# existe em 100% dos municípios do Ceará (ver data/README.md), então não
-# entra no cálculo de prioridade/equidade
+# existe em 99,5% dos municípios do Ceará, só Graça é exceção (ver
+# data/README.md), então não entra no cálculo de prioridade/equidade
 EQUIPAMENTOS_RAROS = ["tem_museu", "tem_teatro_sala_espetaculo", "tem_cinema"]
 
 

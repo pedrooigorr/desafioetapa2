@@ -227,7 +227,7 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
     )
     _texto_centralizado(
         draw,
-        "Fonte: IBGE/MUNIC 2014 · IBGE Censo 2022",
+        "Fonte: IBGE/MUNIC 2021 · IBGE Censo 2022",
         _ALTURA - 65,
         _fonte(22),
         _AREIA_CLARA,

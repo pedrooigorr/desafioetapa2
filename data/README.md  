@@ -1,7 +1,7 @@
 # Sobre os dados
 
 O app roda com os **dados reais** cruzados a partir de:
-- IBGE — MUNIC, Suplemento de Cultura **2014** (equipamentos culturais)
+- IBGE — MUNIC, Suplemento de Cultura **2021** (equipamentos culturais)
 - IBGE — Censo Demográfico **2022** (população e renda per capita)
 
 O arquivo final está em `data/radar_cultural_ce.csv`, com os 184 municípios
@@ -14,21 +14,26 @@ do Ceará e as colunas:
 | `mesorregiao` | Uma das 7 mesorregiões do Ceará |
 | `populacao` | População (Censo 2022, resultado do Universo — definitivo) |
 | `renda_per_capita` | Renda per capita em R$ (Censo 2022, resultado preliminar da amostra) |
-| `tem_museu` / `tem_teatro_sala_espetaculo` / `tem_cinema` / `tem_biblioteca` | Existência de cada equipamento (MUNIC 2014) |
+| `tem_museu` / `tem_teatro_sala_espetaculo` / `tem_cinema` / `tem_biblioteca` | Existência de cada equipamento (MUNIC 2021) |
 | `n_equipamentos` | Soma dos 4 equipamentos acima (0 a 4) |
 
-**Achado relevante:** biblioteca pública existe em **100% dos municípios do
-Ceará**, então ela não ajuda a diferenciar quem tem acesso cultural de quem
-não tem. Por isso os KPIs e o Índice de Prioridade do app usam apenas
-museu + teatro + cinema como equipamentos "raros" — vale citar esse achado
-no relatório do desafio, é um ponto forte para o critério de tratamento de
-dados.
+**Achado relevante:** biblioteca pública existe em **99,5% dos municípios
+do Ceará** (183 de 184 — só Graça é exceção), então ela quase não ajuda a
+diferenciar quem tem acesso cultural de quem não tem. Por isso os KPIs e
+o Índice de Prioridade do app usam apenas museu + teatro + cinema como
+equipamentos "raros" — vale citar esse achado no relatório do desafio, é
+um ponto forte para o critério de tratamento de dados.
 
 ## Como os dados foram cruzados
 
-1. **MUNIC 2014**, aba "Equipamentos" (existência de museu/teatro/cinema/
-   biblioteca) + aba "Variáveis externas" (nome do município), filtrado
-   para código IBGE começando em `23` (Ceará) → 184 municípios.
+1. **MUNIC 2021**, aba "Cultura" da base de dados completa (`Base_MUNIC_
+   2021_20240425.xlsx`), seção "5.7 Equipamentos" — variáveis `MCUL3901`
+   (Bibliotecas públicas), `MCUL3902` (Museus), `MCUL3903` (Teatros ou
+   salas de espetáculos) e `MCUL3909` (Cinema), todas de "existência" no
+   município (não "quem administra"). Filtrado pelo código IBGE
+   começando em `23` (Ceará) → 184 municípios. Diferente de 2014, essa
+   aba já traz `CodMun`/`Mun`/`Pop` direto, sem precisar cruzar com a
+   aba "Variáveis externas".
 2. **População (Censo 2022)** — tabela SIDRA **4714** ("População
    Residente, Área territorial e Densidade demográfica"), variável
    "População residente", nível município, todos os 5.570 municípios do
@@ -40,10 +45,11 @@ dados.
    ainda não fechou as áreas de ponderação definitivas pra esse indicador,
    mas é o dado municipal mais atual disponível hoje.
 4. **Correção de grafia**: dois municípios têm o nome escrito de forma
-   diferente entre a base do IBGE (Censo 2022) e a base já usada no
-   projeto (MUNIC 2014) — `Ereré`→`Ererê` e `Itapajé`→`Itapagé`. Foram
+   diferente entre a base do IBGE (Censo 2022 e MUNIC 2021) e a base já
+   usada no projeto — `Ereré`→`Ererê` e `Itapajé`→`Itapagé`. Foram
    renomeados pra bater com o nome já usado no dataset, pra não perder o
-   cruzamento nesses dois municípios.
+   cruzamento nesses dois municípios (mesma dupla de nomes que já
+   precisou de correção quando cruzamos o Censo 2022 pela primeira vez).
 5. **Mesorregião**: cruzada pelo código IBGE do município usando a
    classificação oficial de mesorregiões do IBGE (código de 4 dígitos:
    2 primeiros = UF, 2 seguintes = mesorregião).
@@ -51,37 +57,34 @@ dados.
 Todos os cruzamentos bateram **184 de 184** municípios, sem nenhuma linha
 perdida em nenhuma das etapas.
 
-## Por que Censo 2022 (e não Atlas Brasil/Censo 2010, como antes)
+## Por que MUNIC 2021 (e não 2014, como antes)
 
-A primeira versão do projeto usava o Atlas Brasil (PNUD/IPEA/FJP) pra
-população e renda, referente ao Censo **2010** — na época, o Censo 2022
-ainda não tinha os dados de renda per capita municipal disponíveis nesse
-formato. Isso mudou: o IBGE divulgou, em 2025, o módulo "Trabalho e
-Rendimento" do Censo 2022 com dados até o nível de município, incluindo
-renda per capita domiciliar — por isso migramos direto pra fonte
-oficial do IBGE, sem depender mais de um agregador terceiro.
+A base original do projeto usava a MUNIC 2014 pra equipamentos culturais
+— era o Suplemento de Cultura mais recente na época em que o projeto
+começou. A MUNIC 2021 é o próximo Suplemento de Cultura disponível; é a
+edição mais atual do IBGE com esse nível de detalhe.
 
-**Sobre a API do SIDRA:** ela existe (`apisidra.ibge.gov.br`) mas bloqueia
-acesso automatizado (robots.txt), então os dados foram baixados
-manualmente pela interface web do SIDRA (`sidra.ibge.gov.br/tabela/4714`
-e `sidra.ibge.gov.br/tabela/10295`), exportados em `.xlsx` e processados
-com pandas. Não precisou de nenhuma chave de API nem script complexo —
-só selecionar a variável certa, o ano (2022) e "Município" como unidade
-territorial, e baixar.
+**Fontes alternativas que consideramos e descartamos:**
+- **Rede Pública de Espaços e Equipamentos Culturais do Ceará (Rece)** —
+  descartada porque só lista os ~27-28 equipamentos mantidos
+  **diretamente pela Secult**, não todo museu/teatro/cinema do estado
+  (municipal, privado, etc.). Usar essa fonte inflaria artificialmente o
+  número de "desertos culturais".
+- **Mapa Cultural do Ceará** (`mapacultural.secult.ce.gov.br`) — tem API
+  real e documentada, mas é uma plataforma **colaborativa** (qualquer
+  agente cultural cadastra), o que gera risco de cobertura desigual
+  entre municípios — diferente da MUNIC, que é um censo estruturado
+  respondido pela prefeitura de cada município. Ficou registrada como
+  opção pra uma eventual validação cruzada no futuro, mas não como fonte
+  principal.
 
-## Se quiserem atualizar de novo no futuro
-
-- A MUNIC tem edições de Cultura mais novas que 2014 (2018, 2021) — se
-  saírem edições futuras, vale trocar a fonte de equipamentos culturais
-  também.
-- A renda per capita 2022 é **preliminar da amostra** — quando o IBGE
-  divulgar o resultado definitivo (com as áreas de ponderação fechadas),
-  vale atualizar de novo pela mesma tabela (10295) ou pela que a
-  substituir.
+Com essa troca, o "gap" entre o ano da MUNIC e o ano do Censo caiu de 4
+anos (2014 vs 2010) para **apenas 1 ano** (2021 vs 2022) — o conjunto de
+dados do projeto ficou bem mais contemporâneo.
 
 ## Demanda Cidadã (substituiu o antigo "Cultura Perto de Mim")
 
-O segundo modo do app ("🗳️ Demanda Cidadã") deixou de ser um feed de
+O segundo modo do app ("Demanda Cidadã") deixou de ser um feed de
 descoberta de eventos e virou uma ferramenta de coleta de demanda: o
 cidadão escolhe o município dele, vê o que já existe (dado real do Radar
 Cultural) e registra — entre o que falta — o que mais gostaria de ver.
@@ -94,7 +97,7 @@ Isso se conecta com o resto do app de duas formas, ambas em
 
 1. **Índice de Prioridade ajustado**: cada pedido soma um peso pequeno e
    suave (raiz quadrada do total de pedidos × 0,05) ao Índice de
-   Prioridade do município — visível na página "🚩 Municípios
+   Prioridade do município — visível na página "Municípios
    Prioritários" do Painel do Gestor, numa coluna separada (o índice
    original, calculado só com dado real, nunca é sobrescrito).
 2. **Sugestão no Simulador**: ao clicar num município que já tem pedidos
@@ -110,13 +113,13 @@ pedidos somem ao recarregar a página. Os arquivos antigos do Feed
 
 ## Painel de Transparência do Gestor (Simulador & Transparência)
 
-O terceiro modo do app ("💰 Simulador & Transparência") tem duas partes:
+O terceiro modo do app ("Simulador & Transparência") tem duas partes:
 
 1. **Simulador de Investimento** — mapa clicável, calcula com dados 100%
    reais (mesmas coordenadas e fórmula de distância do resto do app) o
    impacto de instalar um equipamento cultural num município.
 2. **Painel de Transparência** — versão pública do Índice de Prioridade
-   (o mesmo já usado em "🚩 Municípios Prioritários"), com cards em
+   (o mesmo já usado em "Municípios Prioritários"), com cards em
    formato retrato prontos pra baixar e compartilhar em redes sociais —
    pensado como ferramenta de cobrança cívica, não só de planejamento
    interno. Gerado com Pillow (`src/transparencia.py`), sem depender de
@@ -129,3 +132,16 @@ Público" cruzando o Índice de Prioridade com investimento público real
 extração inviável dentro do tempo do desafio. Decidimos substituir por
 este Painel de Transparência, que já entrega o mesmo tipo de pressão de
 accountability usando só dado que já tínhamos validado.
+
+## Gamificação (conquistas + progresso de exploração)
+
+Módulo `src/gamificacao.py`. Duas mecânicas, session-based (zeram ao
+recarregar a página):
+
+1. **Progresso de exploração**: conta quantos dos 184 municípios a
+   pessoa já "visitou" — abrindo na Demanda Cidadã ou clicando no mapa
+   do Simulador.
+2. **Conquistas**: 6 badges desbloqueados por uso — Primeiro Pedido,
+   Explorador (5 municípios), Voz Ativa (3 mesorregiões), Cartógrafo (20
+   municípios), Atento ao Deserto (pedido registrado num Deserto
+   Cultural) e Mobilizador (10 pedidos).

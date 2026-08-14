@@ -181,8 +181,9 @@ st.markdown(
         "O que é um Deserto Cultural?",
         "Município que <b>não tem nenhum</b> museu, teatro/sala de "
         "espetáculo ou cinema — mesmo que já tenha biblioteca (que existe "
-        "em 100% dos municípios cearenses, e por isso não diferencia "
-        "quem tem acesso de quem não tem).",
+        "em praticamente todos os municípios cearenses — 99,5%, só Graça "
+        "é exceção — e por isso não diferencia quem tem acesso de quem "
+        "não tem).",
     ),
     unsafe_allow_html=True,
 )
@@ -247,20 +248,6 @@ for col, card in zip(hero_cols, CARDS_HERO):
             args=(card["modo"],),
         )
 
-# Metodologia — acesso discreto, sem card próprio: é página de apoio
-# (fontes, fórmulas, decisões de tratamento), não uma das 3 features.
-_col_meto, _, _ = st.columns([1.4, 1, 1])
-with _col_meto:
-    _na_metodologia = st.session_state.modo_app == MODOS[3]
-    st.button(
-        "Você está aqui" if _na_metodologia else "Ver Metodologia e fontes dos dados",
-        key="btn_metodologia",
-        use_container_width=True,
-        type="primary" if _na_metodologia else "secondary",
-        on_click=ir_para_modo,
-        args=(MODOS[3],),
-    )
-
 st.divider()
 
 # ========================================================================
@@ -286,18 +273,18 @@ if st.session_state.modo_app == MODOS[0]:
         st.markdown(
             "- **Equipamentos culturais** (museu, teatro/sala de espetáculo, "
             "cinema, biblioteca): IBGE, Pesquisa de Informações Básicas "
-            "Municipais (MUNIC), Suplemento de Cultura **2014**.\n"
+            "Municipais (MUNIC), Suplemento de Cultura **2021**.\n"
             "- **População**: IBGE, Censo Demográfico **2022** (resultado do "
             "Universo, definitivo) — tabela SIDRA 4714.\n"
             "- **Renda per capita**: IBGE, Censo Demográfico **2022** "
             "(resultado preliminar da amostra — o IBGE ainda não fechou as "
             "áreas de ponderação definitivas, mas já é o dado mais atual "
             "disponível) — tabela SIDRA 10295.\n\n"
-            "Como a MUNIC é de 2014 e o resto é de 2022, os números "
-            "absolutos de equipamentos culturais podem estar desatualizados, "
-            "mas o **padrão de desigualdade** entre municípios se mantém "
-            "coerente. Ver `data/README.md` para detalhes de como as bases "
-            "foram cruzadas.\n\n"
+            "Como a MUNIC (2021) e o Censo (2022) são de anos próximos, o "
+            "conjunto de dados é bem contemporâneo — bem diferente da "
+            "versão anterior deste painel, que cruzava MUNIC 2014 com "
+            "Censo 2010. Ver `data/README.md` para detalhes de como as "
+            "bases foram cruzadas.\n\n"
             "**Atenção, não confundir:** a 'Renda per capita' usada aqui é a "
             "**renda domiciliar** — quanto cada pessoa recebe, em média, "
             "somando a renda de todo mundo em casa (Censo 2022). É "
@@ -626,8 +613,9 @@ if st.session_state.modo_app == MODOS[0]:
                 "`% = (nº de municípios filtrados que têm o equipamento) "
                 "÷ (total de municípios filtrados) × 100`\n\n"
                 "Os dados de existência de cada equipamento vêm da MUNIC/IBGE "
-                "2014, respondida pela própria prefeitura de cada município. "
-                "**Achado curioso:** biblioteca aparece em 100% dos municípios "
+                "2021, respondida pela própria prefeitura de cada município. "
+                "**Achado curioso:** biblioteca aparece em 99,5% dos "
+                "municípios (só Graça é exceção) "
                 "— por isso ela não é usada nas análises de equidade e "
                 "prioridade mais à frente, já que não ajuda a diferenciar "
                 "quem tem acesso cultural de quem não tem."
@@ -734,7 +722,7 @@ if st.session_state.modo_app == MODOS[0]:
     st.divider()
     st.caption(
         "Fontes: IBGE — Pesquisa de Informações Básicas Municipais (MUNIC), "
-        "Suplemento de Cultura 2014 · IBGE — Censo Demográfico 2022 "
+        "Suplemento de Cultura 2021 · IBGE — Censo Demográfico 2022 "
         "(população e renda per capita municipal)."
     )
 
@@ -1166,8 +1154,9 @@ else:
             "Deserto Cultural",
             "Município que <b>não tem nenhum</b> museu, teatro/sala de "
             "espetáculo ou cinema. Biblioteca fica de fora do conceito: "
-            "ela existe em <b>100% dos 184 municípios cearenses</b>, "
-            "então não diferencia quem tem acesso de quem não tem.",
+            "ela existe em <b>99,5% dos 184 municípios cearenses</b> "
+            "(só Graça é exceção), então não diferencia quem tem acesso "
+            "de quem não tem.",
         ),
         unsafe_allow_html=True,
     )
@@ -1179,7 +1168,7 @@ else:
         "| O quê | Fonte | Ano | Situação |\n"
         "|---|---|---|---|\n"
         "| Equipamentos culturais (museu, teatro, cinema, biblioteca) | "
-        "IBGE — MUNIC, Suplemento de Cultura | 2014 | Definitivo |\n"
+        "IBGE — MUNIC, Suplemento de Cultura | 2021 | Definitivo |\n"
         "| População | IBGE — Censo Demográfico (tabela SIDRA 4714) | "
         "2022 | Definitivo (Universo) |\n"
         "| Renda per capita domiciliar | IBGE — Censo Demográfico "
@@ -1269,13 +1258,14 @@ else:
         unsafe_allow_html=True,
     )
     st.markdown(
-        "- **Biblioteca fora do índice:** existe em 100% dos municípios "
-        "cearenses, então incluí-la só achataria as diferenças entre "
-        "eles. Foi o primeiro achado relevante do projeto.\n"
-        "- **Anos-base diferentes:** equipamentos são de 2014 e "
-        "população/renda de 2022. Os números absolutos de equipamentos "
-        "podem estar defasados, mas o padrão de desigualdade entre "
-        "municípios se mantém coerente.\n"
+        "- **Biblioteca fora do índice:** existe em 99,5% dos municípios "
+        "cearenses (só Graça é exceção), então incluí-la só achataria as "
+        "diferenças entre eles. Foi o primeiro achado relevante do "
+        "projeto — e continua valendo mesmo depois de atualizar a fonte "
+        "de MUNIC 2014 pra MUNIC 2021.\n"
+        "- **Anos-base próximos:** equipamentos são de 2021 e "
+        "população/renda de 2022 — só 1 ano de diferença, bem mais "
+        "coerente que a versão anterior (2014 x 2010).\n"
         "- **Grafia de municípios:** dois municípios têm nome grafado "
         "diferente entre as bases (Ereré/Ererê e Itapajé/Itapagé) — "
         "foram normalizados pra não perder o cruzamento.\n"
@@ -1304,8 +1294,23 @@ else:
     st.divider()
     st.caption(
         "Fontes: IBGE — Pesquisa de Informações Básicas Municipais (MUNIC), "
-        "Suplemento de Cultura 2014 · IBGE — Censo Demográfico 2022 "
+        "Suplemento de Cultura 2021 · IBGE — Censo Demográfico 2022 "
         "(população e renda per capita municipal)."
+    )
+
+# Link de acesso à Metodologia — fica colado no rodapé de propósito: é
+# informação de apoio (fontes, fórmulas), não uma das 3 features
+# principais, então não compete por atenção lá em cima com os cards hero.
+st.markdown(marcador("link-metodologia"), unsafe_allow_html=True)
+_col_esq, _col_meio, _col_dir = st.columns([1, 1, 1])
+with _col_meio:
+    _na_metodologia = st.session_state.modo_app == MODOS[3]
+    st.button(
+        "Você está na Metodologia" if _na_metodologia else "Metodologia e fontes dos dados",
+        key="btn_metodologia",
+        use_container_width=True,
+        on_click=ir_para_modo,
+        args=(MODOS[3],),
     )
 
 st.markdown(rodape_app(), unsafe_allow_html=True)

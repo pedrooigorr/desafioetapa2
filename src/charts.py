@@ -121,7 +121,12 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
     return fig
 
 
-def mapa_simulador(df: pd.DataFrame, coluna_equipamento: str, altura: int = 600):
+def mapa_simulador(
+    df: pd.DataFrame,
+    coluna_equipamento: str,
+    altura: int = 600,
+    rotulo_equipamento: str = "o equipamento",
+):
     """
     Mapa clicável para o Simulador de Investimento: cada município aparece
     colorido conforme TEM ou NÃO TEM o equipamento escolhido — verde
@@ -131,7 +136,9 @@ def mapa_simulador(df: pd.DataFrame, coluna_equipamento: str, altura: int = 600)
     foi selecionado.
     """
     df = df.copy()
-    df["_status"] = df[coluna_equipamento].map({True: "Tem", False: "Não tem"})
+    df["_status"] = df[coluna_equipamento].map(
+        {True: "Tem", False: "Deserto Cultural"}
+    )
     df["_tamanho"] = df["populacao"] ** 0.5
 
     fig = go.Figure()
@@ -171,13 +178,25 @@ def mapa_simulador(df: pd.DataFrame, coluna_equipamento: str, altura: int = 600)
         color="_status",
         custom_data=["municipio"],
         hover_name="municipio",
-        color_discrete_map={"Tem": "#4C6444", "Não tem": "#C1440E"},
+        # Azul x terracota em vez de verde x vermelho: a combinação
+        # verde/vermelho é justamente a mais difícil pra quem tem
+        # daltonismo (protanopia/deuteranopia), que é o tipo mais comum
+        color_discrete_map={"Tem": "#1B7A8C", "Deserto Cultural": "#C1440E"},
         size_max=26,
         labels={"_status": "Situação"},
     )
     for trace in pontos_fig.data:
         trace.marker.sizemin = 4
-        trace.hovertemplate = "<b>%{customdata[0]}</b><extra></extra>"
+        # O nome do trace é o próprio status ("Tem" / "Deserto Cultural"),
+        # então dá pra mostrá-lo no hover sem passar customdata extra
+        sufixo = (
+            "🏜️ Deserto Cultural"
+            if trace.name == "Deserto Cultural"
+            else f"Tem {rotulo_equipamento.lower()}"
+        )
+        trace.hovertemplate = (
+            "<b>%{customdata[0]}</b><br>" + sufixo + "<extra></extra>"
+        )
         fig.add_trace(trace)
 
     fig.update_layout(

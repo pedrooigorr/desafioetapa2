@@ -54,6 +54,13 @@ from src.demanda import (
     registrar_pedido,
     total_pedidos,
 )
+from src.gamificacao import (
+    avaliar_conquistas,
+    inicializar_gamificacao,
+    progresso_exploracao,
+    registrar_exploracao,
+    resumo_conquistas,
+)
 from src.resumos import (
     resumo_demanda_cidada,
     resumo_equidade_mesorregiao,
@@ -77,15 +84,19 @@ from src.theme import (
     COR_SIMULADOR_CLARO,
     CSS_CUSTOMIZADO,
     barra_secao,
+    box_glossario,
     cabecalho_app,
+    cartao_conquista,
     cartao_hero,
     cartao_kpi,
     chip_equipamento,
+    contador_hero,
     destacar_coluna,
     estado_vazio,
     estilo_texto_tabela,
     marcador,
     rodape_app,
+    selo_deserto,
     titulo_secao,
 )
 from src.transparencia import gerar_card_municipio, montar_ranking_publico
@@ -99,6 +110,7 @@ st.markdown(CSS_CUSTOMIZADO, unsafe_allow_html=True)
 
 inicializar_pedidos()
 inicializar_preferencias()
+inicializar_gamificacao()
 
 df = carregar_dados()
 
@@ -115,6 +127,7 @@ MODOS = [
     "Painel do Gestor",
     "Demanda Cidadã",
     "Simulador & Transparência",
+    "Metodologia",
 ]
 if "modo_app" not in st.session_state:
     st.session_state.modo_app = MODOS[0]
@@ -140,6 +153,39 @@ st.markdown(
     "a cultura perto de casa — e quem não tem.** Escolha por onde começar"
 )
 renderizar_controles_topo()
+
+# ----------------------------------------------------------------------
+# Contador "hero" — o número que resume o problema todo, logo de cara,
+# antes até dos cards de navegação. Calculado do dado real (não é texto
+# fixo): muda sozinho se a base for atualizada.
+# ----------------------------------------------------------------------
+_n_desertos = int((df["n_equipamentos_raros"] == 0).sum())
+_pct_desertos = 100 * _n_desertos / len(df)
+_pop_desertos = int(df.loc[df["n_equipamentos_raros"] == 0, "populacao"].sum())
+
+st.markdown(
+    contador_hero(
+        numero=f"{_n_desertos} municípios ({_pct_desertos:.0f}%)",
+        complemento="do Ceará são Desertos Culturais",
+        subtexto=(
+            f"São {_pop_desertos:,}".replace(",", ".")
+            + " pessoas que não têm museu, teatro nem cinema na cidade "
+            "onde moram."
+        ),
+    ),
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    box_glossario(
+        "O que é um Deserto Cultural?",
+        "Município que <b>não tem nenhum</b> museu, teatro/sala de "
+        "espetáculo ou cinema — mesmo que já tenha biblioteca (que existe "
+        "em 100% dos municípios cearenses, e por isso não diferencia "
+        "quem tem acesso de quem não tem).",
+    ),
+    unsafe_allow_html=True,
+)
 
 CARDS_HERO = [
     {
@@ -200,6 +246,20 @@ for col, card in zip(hero_cols, CARDS_HERO):
             on_click=ir_para_modo,
             args=(card["modo"],),
         )
+
+# Metodologia — acesso discreto, sem card próprio: é página de apoio
+# (fontes, fórmulas, decisões de tratamento), não uma das 3 features.
+_col_meto, _, _ = st.columns([1.4, 1, 1])
+with _col_meto:
+    _na_metodologia = st.session_state.modo_app == MODOS[3]
+    st.button(
+        "Você está aqui" if _na_metodologia else "Ver Metodologia e fontes dos dados",
+        key="btn_metodologia",
+        use_container_width=True,
+        type="primary" if _na_metodologia else "secondary",
+        on_click=ir_para_modo,
+        args=(MODOS[3],),
+    )
 
 st.divider()
 
@@ -437,6 +497,14 @@ if st.session_state.modo_app == MODOS[0]:
             "lá você também encontra a explicação de como cada uma foi feita."
         )
         _render_resumo(resumo_visao_geral(df_f), key="resumo_visao_geral")
+        st.markdown(
+            box_glossario(
+                "Deserto Cultural",
+                "Município sem <b>nenhum</b> museu, teatro ou cinema — "
+                "mesmo que já tenha biblioteca.",
+            ),
+            unsafe_allow_html=True,
+        )
 
         linha1_a, linha1_b = st.columns(2)
         with linha1_a, st.container(border=True):
@@ -687,6 +755,7 @@ elif st.session_state.modo_app == MODOS[1]:
     municipio_cidadao = st.selectbox(
         "Meu município", sorted(df["municipio"].unique())
     )
+    registrar_exploracao(municipio_cidadao)
     linha_municipio = df.loc[df["municipio"] == municipio_cidadao].iloc[0]
 
     st.markdown(f"##### O que {municipio_cidadao} já tem")
@@ -789,6 +858,50 @@ elif st.session_state.modo_app == MODOS[1]:
     else:
         st.caption("Nenhum pedido registrado ainda em nenhum município.")
 
+    # ------------------------------------------------------------------
+    # Gamificação — progresso de exploração + conquistas
+    # ------------------------------------------------------------------
+    st.divider()
+    st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
+    n_desbloqueadas, n_total_conquistas = resumo_conquistas(df)
+    st.markdown(
+        titulo_secao(
+            "trophy",
+            f"Sua jornada ({n_desbloqueadas} de {n_total_conquistas} conquistas)",
+            cor=COR_DEMANDA,
+        ),
+        unsafe_allow_html=True,
+    )
+
+    explorados, total_municipios, fracao = progresso_exploracao()
+    st.markdown(
+        f"**Você já explorou {explorados} de {total_municipios} municípios "
+        f"do Ceará** ({fracao * 100:.0f}%)"
+    )
+    st.progress(fracao)
+    st.caption(
+        "Conta municípios que você abriu aqui na Demanda Cidadã ou clicou "
+        "no mapa do Simulador. Reinicia ao recarregar a página."
+    )
+
+    st.markdown("##### Conquistas")
+    conquistas = avaliar_conquistas(df)
+    for i in range(0, len(conquistas), 3):
+        for col, conquista in zip(st.columns(3), conquistas[i : i + 3]):
+            with col:
+                st.markdown(
+                    cartao_conquista(
+                        icone_nome=conquista["icone"],
+                        titulo=conquista["titulo"],
+                        descricao=conquista["descricao"],
+                        desbloqueada=conquista["desbloqueada"],
+                        atual=conquista["atual"],
+                        meta=conquista["meta"],
+                        cor=COR_DEMANDA,
+                    ),
+                    unsafe_allow_html=True,
+                )
+
     with st.expander("Como esse pedido se conecta com o resto do app", icon=":material/help:"):
         st.markdown(
             "1. **Índice de Prioridade** (Painel do Gestor): cada pedido "
@@ -809,7 +922,7 @@ elif st.session_state.modo_app == MODOS[1]:
 # ========================================================================
 # MODO 3 — SIMULADOR DE INVESTIMENTO
 # ========================================================================
-else:
+elif st.session_state.modo_app == MODOS[2]:
     st.markdown(barra_secao(COR_SIMULADOR), unsafe_allow_html=True)
     st.markdown(
         "### Onde investir pra reduzir o deserto cultural?\n"
@@ -841,12 +954,14 @@ else:
         )
 
     st.caption(
-        f"verde = município já tem {tipo_label.lower()} · terracota = "
-        "deserto cultural para esse equipamento. Clique num ponto do mapa."
+        f"Azul = município já tem {tipo_label.lower()} · Terracota = "
+        "🏜️ Deserto Cultural para esse equipamento. Clique num ponto do mapa."
     )
 
     evento_mapa = st.plotly_chart(
-        mapa_simulador(df, coluna_equipamento, altura=600),
+        mapa_simulador(
+            df, coluna_equipamento, altura=600, rotulo_equipamento=tipo_label
+        ),
         on_select="rerun",
         selection_mode="points",
         key="mapa_simulador_plot",
@@ -859,6 +974,7 @@ else:
         customdata = ponto.get("customdata")
         if customdata:
             municipio_clicado = customdata[0]
+            registrar_exploracao(municipio_clicado)
 
     if municipio_clicado:
         categoria_pedida, votos_pedidos = categoria_mais_pedida(municipio_clicado)
@@ -1031,6 +1147,165 @@ else:
         "Simulador & Transparência — protótipo. Fórmulas de distância e "
         "impacto, e o ranking do Painel de Transparência, usam dados "
         "reais do Radar Cultural."
+    )
+
+# ========================================================================
+# MODO 4 — METODOLOGIA
+# ========================================================================
+else:
+    st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
+    st.markdown(
+        "### Metodologia\n"
+        "Tudo que está por trás dos números do Cultura Ceará, num lugar "
+        "só: de onde vêm os dados, como o Índice de Prioridade é "
+        "calculado, e quais decisões de tratamento tomamos pelo caminho."
+    )
+
+    st.markdown(
+        box_glossario(
+            "Deserto Cultural",
+            "Município que <b>não tem nenhum</b> museu, teatro/sala de "
+            "espetáculo ou cinema. Biblioteca fica de fora do conceito: "
+            "ela existe em <b>100% dos 184 municípios cearenses</b>, "
+            "então não diferencia quem tem acesso de quem não tem.",
+        ),
+        unsafe_allow_html=True,
+    )
+
+    # --------------------------------------------------------------
+    st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
+    st.markdown(titulo_secao("book-open-check", "Fontes dos dados"), unsafe_allow_html=True)
+    st.markdown(
+        "| O quê | Fonte | Ano | Situação |\n"
+        "|---|---|---|---|\n"
+        "| Equipamentos culturais (museu, teatro, cinema, biblioteca) | "
+        "IBGE — MUNIC, Suplemento de Cultura | 2014 | Definitivo |\n"
+        "| População | IBGE — Censo Demográfico (tabela SIDRA 4714) | "
+        "2022 | Definitivo (Universo) |\n"
+        "| Renda per capita domiciliar | IBGE — Censo Demográfico "
+        "(tabela SIDRA 10295) | 2022 | Preliminar (amostra) |\n"
+        "| Mesorregiões e coordenadas | IBGE — malha municipal | — | "
+        "Definitivo |\n"
+    )
+    st.caption(
+        "Os 184 municípios do Ceará bateram 100% em todos os cruzamentos, "
+        "sem nenhuma linha perdida. Detalhes completos em `data/README.md`."
+    )
+
+    st.warning(
+        "**Renda per capita é dado preliminar.** O IBGE ainda não fechou "
+        "as áreas de ponderação definitivas desse indicador no Censo "
+        "2022 — é o dado municipal mais atual disponível, mas pode ser "
+        "revisado. A população, por outro lado, já é definitiva.",
+        icon=":material/info:",
+    )
+
+    st.info(
+        "**Não confundir com PIB per capita.** A renda usada aqui é a "
+        "**renda domiciliar** — quanto cada pessoa recebe, em média, "
+        "somando o que entra na casa dela. O PIB per capita que aparece "
+        "no IBGE Cidades é outra coisa: todo o PIB do município "
+        "(inclusive gastos públicos, agropecuária e indústria) dividido "
+        "pela população. Não é incomum um município ter PIB per capita "
+        "alto e renda domiciliar baixa — o que, aliás, é em si um "
+        "indicador de desigualdade.",
+        icon=":material/lightbulb:",
+    )
+
+    # --------------------------------------------------------------
+    st.divider()
+    st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
+    st.markdown(titulo_secao("scale", "Índice de Prioridade"), unsafe_allow_html=True)
+    st.markdown(
+        "Combina, num número só, os dois fatores que juntos indicam "
+        "urgência de atenção: **falta de equipamento cultural** e "
+        "**baixa renda**."
+    )
+    st.latex(
+        r"\text{Índice} = (3 - E) \times \left(1 - \frac{R}{R_{max}}\right)"
+    )
+    st.markdown(
+        "- **E** = número de equipamentos \"raros\" que o município tem "
+        "(museu, teatro, cinema — de 0 a 3). Biblioteca fica de fora "
+        "porque existe em todos os municípios.\n"
+        "- **R** = renda per capita do município.\n"
+        "- **R₍max₎** = a maior renda per capita do estado (Fortaleza).\n\n"
+        "Assim, um município **sem nenhum** desses equipamentos e com "
+        "renda **bem abaixo** da capital pontua alto. Um município rico "
+        "mesmo sem equipamentos, ou um município pobre mas já bem servido "
+        "culturalmente, pontua mais baixo."
+    )
+    st.markdown(
+        "**Ajuste por demanda cidadã:** na página 'Municípios "
+        "Prioritários' existe também uma coluna de *Índice Ajustado*, que "
+        "soma um peso pequeno vindo dos pedidos registrados na Demanda "
+        "Cidadã (raiz quadrada do total de pedidos × 0,05). O índice "
+        "original, calculado só com dado oficial, nunca é sobrescrito."
+    )
+
+    # --------------------------------------------------------------
+    st.divider()
+    st.markdown(barra_secao(COR_SIMULADOR), unsafe_allow_html=True)
+    st.markdown(
+        titulo_secao("map-pinned", "Simulador de Investimento", cor=COR_SIMULADOR),
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "1. Ao clicar num município, calculamos a **distância real** "
+        "(fórmula de Haversine) entre ele e os outros 183 municípios.\n"
+        "2. Município **dentro do raio escolhido** que **hoje não tem** o "
+        "equipamento → conta como **beneficiado**.\n"
+        "3. A **população beneficiada** soma a população desses "
+        "municípios.\n"
+        "4. A **redução do déficit** compara o % de municípios sem o "
+        "equipamento na mesorregião, antes e depois."
+    )
+
+    # --------------------------------------------------------------
+    st.divider()
+    st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
+    st.markdown(
+        titulo_secao("scale", "Decisões de tratamento de dados", cor=COR_DEMANDA),
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "- **Biblioteca fora do índice:** existe em 100% dos municípios "
+        "cearenses, então incluí-la só achataria as diferenças entre "
+        "eles. Foi o primeiro achado relevante do projeto.\n"
+        "- **Anos-base diferentes:** equipamentos são de 2014 e "
+        "população/renda de 2022. Os números absolutos de equipamentos "
+        "podem estar defasados, mas o padrão de desigualdade entre "
+        "municípios se mantém coerente.\n"
+        "- **Grafia de municípios:** dois municípios têm nome grafado "
+        "diferente entre as bases (Ereré/Ererê e Itapajé/Itapagé) — "
+        "foram normalizados pra não perder o cruzamento.\n"
+        "- **Dados de sessão:** pedidos da Demanda Cidadã e conquistas "
+        "ficam só no navegador e somem ao recarregar. É decisão de "
+        "escopo do protótipo, não limitação técnica."
+    )
+
+    # --------------------------------------------------------------
+    st.divider()
+    st.markdown(barra_secao(COR_GESTOR), unsafe_allow_html=True)
+    st.markdown(titulo_secao("landmark", "ODS trabalhados"), unsafe_allow_html=True)
+    ods_cols = st.columns(3)
+    ods_lista = [
+        ("ODS 4", "Educação de qualidade", COR_GESTOR, COR_GESTOR_CLARO),
+        ("ODS 10", "Redução das desigualdades", COR_DEMANDA, COR_DEMANDA_CLARO),
+        ("ODS 11", "Cidades e comunidades sustentáveis", COR_SIMULADOR, COR_SIMULADOR_CLARO),
+    ]
+    for col, (numero, texto, cor, cor_clara) in zip(ods_cols, ods_lista):
+        with col:
+            st.markdown(
+                cartao_hero("landmark", numero, texto, cor, cor_clara),
+                unsafe_allow_html=True,
+            )
+
+    st.divider()
+    st.caption(
+        "Fontes: IBGE — Pesquisa de Informações Básicas Municipais (MUNIC), "
+        "Suplemento de Cultura 2014 · IBGE — Censo Demográfico 2022 "
+        "(população e renda per capita municipal)."
     )
 
 st.markdown(rodape_app(), unsafe_allow_html=True)

@@ -266,6 +266,101 @@ def marcador(nome: str) -> str:
 
 
 # ----------------------------------------------------------------------
+# Componentes do "Deserto Cultural" — o conceito central do projeto
+# ----------------------------------------------------------------------
+COR_DESERTO = "#C1440E"
+COR_DESERTO_CLARO = "#FBEBD4"
+
+
+def selo_deserto(compacto: bool = False) -> str:
+    """
+    Selo visual de "Deserto Cultural" — usado em qualquer lugar que
+    identifique um município sem museu, teatro nem cinema. Ter um símbolo
+    próprio (e não só uma cor) dá peso conceitual ao termo e funciona
+    também pra quem tem daltonismo.
+    """
+    texto = "" if compacto else '<span class="radar-selo-deserto-texto">Deserto Cultural</span>'
+    return (
+        '<span class="radar-selo-deserto">'
+        f'{icone("sun-dim", cor="#FFFDF8", tamanho=13)}'
+        f"{texto}</span>"
+    )
+
+
+def contador_hero(numero: str, complemento: str, subtexto: str) -> str:
+    """
+    Número grande de impacto na tela inicial — resume o problema central
+    do projeto numa frase só, antes de qualquer navegação.
+    """
+    return (
+        '<div class="radar-contador-hero">'
+        f'<div class="radar-contador-hero-icone">{icone("sun-dim", cor="#FFFDF8", tamanho=30)}</div>'
+        '<div class="radar-contador-hero-conteudo">'
+        f'<div class="radar-contador-hero-numero">{numero}</div>'
+        f'<div class="radar-contador-hero-complemento">{complemento}</div>'
+        f'<div class="radar-contador-hero-subtexto">{subtexto}</div>'
+        "</div>"
+        "</div>"
+    )
+
+
+def box_glossario(titulo: str, texto: str, cor: str = COR_DESERTO) -> str:
+    """Box de definição fixa — usado pro glossário do 'Deserto Cultural'."""
+    return (
+        f'<div class="radar-glossario" style="border-left-color:{cor};">'
+        f'<div class="radar-glossario-titulo" style="color:{cor};">'
+        f'{icone("book-open-check", cor=cor, tamanho=17)}'
+        f"<span>{titulo}</span></div>"
+        f'<div class="radar-glossario-texto">{texto}</div>'
+        "</div>"
+    )
+
+
+def cartao_conquista(
+    icone_nome: str,
+    titulo: str,
+    descricao: str,
+    desbloqueada: bool,
+    atual: int,
+    meta: int,
+    cor: str = "#4C6444",
+) -> str:
+    """
+    Card de conquista (badge) — desbloqueada fica colorida e opaca,
+    bloqueada fica esmaecida com o progresso rumo à meta.
+    """
+    if desbloqueada:
+        classe = "radar-conquista desbloqueada"
+        estilo = f"border-color:{cor}; background:#FFFDF8;"
+        cor_icone = "#FFFDF8"
+        fundo_icone = cor
+        rodape = '<div class="radar-conquista-status" style="color:%s;">Desbloqueada</div>' % cor
+    else:
+        classe = "radar-conquista"
+        estilo = "border-color:#E0D5C5; background:#FAF6F0;"
+        cor_icone = "#FFFDF8"
+        fundo_icone = "#C9BCAC"
+        pct = int(100 * atual / meta) if meta else 0
+        rodape = (
+            '<div class="radar-conquista-barra">'
+            f'<div class="radar-conquista-barra-preenchida" style="width:{pct}%;"></div>'
+            "</div>"
+            f'<div class="radar-conquista-status">{atual} de {meta}</div>'
+        )
+
+    return (
+        f'<div class="{classe}" style="{estilo}">'
+        f'<div class="radar-conquista-icone" style="background:{fundo_icone};">'
+        f"{icone(icone_nome, cor=cor_icone, tamanho=18)}</div>"
+        f'<div class="radar-conquista-titulo">{titulo}</div>'
+        f'<div class="radar-conquista-descricao">{descricao}</div>'
+        f"{rodape}"
+        "</div>"
+    )
+
+
+
+# ----------------------------------------------------------------------
 # CSS customizado da interface: tipografia própria (Inter em tudo, sem
 # serifa), cards com borda/sombra terracota, KPIs em card, navbar em
 # formato de segmented control, chips e tarjas de seção coloridas.
@@ -725,5 +820,142 @@ div[data-testid="stMainBlockContainer"],
     font-size: 0.85rem;
     line-height: 1.65;
 }
+/* ------------------------------------------------------------------
+   DESERTO CULTURAL — selo, contador hero e box de glossário.
+   O conceito central do projeto ganha identidade visual própria (ícone
+   + cor + formato), em vez de ser só uma cor no mapa.
+   ------------------------------------------------------------------ */
+.radar-selo-deserto {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #C1440E;
+    color: #FFFDF8;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.radar-selo-deserto-texto { letter-spacing: 0.01em; }
+
+.radar-contador-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: linear-gradient(100deg, #C1440E 0%, #7A2E0E 100%);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin: 6px 0 18px 0;
+    box-shadow: 0 4px 16px rgba(122, 46, 14, 0.22);
+}
+.radar-contador-hero-icone {
+    flex: 0 0 auto;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(255, 253, 248, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.radar-contador-hero-conteudo { flex: 1 1 auto; min-width: 0; }
+.radar-contador-hero-numero {
+    color: #FFFDF8;
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1.05;
+}
+.radar-contador-hero-complemento {
+    color: #FBEBD4;
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+.radar-contador-hero-subtexto {
+    color: rgba(251, 235, 212, 0.82);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 6px;
+    line-height: 1.45;
+}
+
+.radar-glossario {
+    background: #FFFDF8;
+    border: 1px solid #EFE3D2;
+    border-left: 5px solid #C1440E;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 4px 0 16px 0;
+}
+.radar-glossario-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 0.98rem;
+    margin-bottom: 6px;
+}
+.radar-glossario-texto {
+    color: #3E2723;
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+/* ------------------------------------------------------------------
+   GAMIFICAÇÃO — cards de conquista (badges).
+   ------------------------------------------------------------------ */
+.radar-conquista {
+    border: 2px solid;
+    border-radius: 14px;
+    padding: 14px 16px 12px 16px;
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease;
+}
+.radar-conquista.desbloqueada { box-shadow: 0 3px 10px rgba(76, 100, 68, 0.16); }
+.radar-conquista-icone {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 9px;
+}
+.radar-conquista-titulo {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #1A0F08;
+    margin-bottom: 3px;
+}
+.radar-conquista-descricao {
+    font-size: 0.82rem;
+    color: #5A4438;
+    line-height: 1.4;
+    flex: 1 1 auto;
+}
+.radar-conquista-status {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #6B4226;
+    margin-top: 7px;
+}
+.radar-conquista-barra {
+    height: 6px;
+    border-radius: 999px;
+    background: #E7DCCC;
+    overflow: hidden;
+    margin-top: 9px;
+}
+.radar-conquista-barra-preenchida {
+    height: 100%;
+    background: #B8792A;
+    border-radius: 999px;
+}
+
 </style>
 """

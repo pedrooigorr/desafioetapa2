@@ -151,6 +151,38 @@ div[data-testid="stDataFrame"] thead tr th {
     color: #FFFF00 !important;
 }
 
+/* Componentes novos (Deserto Cultural + conquistas) no alto contraste */
+.radar-selo-deserto,
+.radar-contador-hero,
+.radar-conquista-icone {
+    background: #000000 !important;
+}
+.radar-contador-hero-numero,
+.radar-contador-hero-complemento,
+.radar-contador-hero-subtexto {
+    color: #FFFF00 !important;
+}
+.radar-selo-deserto svg,
+.radar-contador-hero-icone svg,
+.radar-conquista-icone svg {
+    stroke: #FFFF00 !important;
+}
+.radar-contador-hero-icone {
+    background: rgba(255, 255, 0, 0.18) !important;
+}
+.radar-glossario, .radar-conquista {
+    background: #FFFFFF !important;
+    border-color: #000000 !important;
+}
+.radar-glossario-titulo, .radar-glossario-texto,
+.radar-conquista-titulo, .radar-conquista-descricao,
+.radar-conquista-status {
+    color: #000000 !important;
+}
+.radar-glossario-titulo svg { stroke: #000000 !important; }
+.radar-conquista-barra { background: #FFFFFF !important; border: 1px solid #000000; }
+.radar-conquista-barra-preenchida { background: #000000 !important; }
+
 /* Reforça contraste/saturação dos gráficos Plotly — não muda as cores
    de cada categoria (isso exigiria mudar o Python), só intensifica */
 .js-plotly-plot {

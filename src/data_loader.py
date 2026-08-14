@@ -56,11 +56,16 @@ def calcular_indice_prioridade(df: pd.DataFrame) -> pd.Series:
 
 def montar_tabela_prioritarios(df: pd.DataFrame, n: int = 15) -> pd.DataFrame:
     """Monta a tabela de municípios prioritários, pronta para exibição."""
-    top = df.sort_values("indice_prioridade", ascending=False).head(n)
+    top = df.sort_values("indice_prioridade", ascending=False).head(n).copy()
+    # Coluna dedicada ao conceito central do projeto — deixa explícito na
+    # tabela quem é Deserto Cultural, em vez de a pessoa ter que deduzir
+    # pelo "Nº equipamentos"
+    top["deserto"] = top["n_equipamentos_raros"].eq(0).map({True: "🏜️ Sim", False: "Não"})
     return top[
         [
             "municipio",
             "mesorregiao",
+            "deserto",
             "populacao",
             "renda_per_capita",
             "n_equipamentos",
@@ -70,6 +75,7 @@ def montar_tabela_prioritarios(df: pd.DataFrame, n: int = 15) -> pd.DataFrame:
         columns={
             "municipio": "Município",
             "mesorregiao": "Mesorregião",
+            "deserto": "Deserto Cultural",
             "populacao": "População",
             "renda_per_capita": "Renda per capita (R$, Censo 2022)",
             "n_equipamentos": "Nº equipamentos",

@@ -45,11 +45,15 @@ def montar_ranking_publico(df: pd.DataFrame, n: int = 30) -> pd.DataFrame:
     """Ranking público pelo Índice de Prioridade, com a posição (1º, 2º...)."""
     ranking = df.sort_values("indice_prioridade", ascending=False).head(n).copy()
     ranking.insert(0, "posicao", range(1, len(ranking) + 1))
+    ranking["deserto"] = (
+        ranking["n_equipamentos_raros"].eq(0).map({True: "🏜️ Sim", False: "Não"})
+    )
     return ranking[
         [
             "posicao",
             "municipio",
             "mesorregiao",
+            "deserto",
             "populacao",
             "renda_per_capita",
             "n_equipamentos_raros",
@@ -60,6 +64,7 @@ def montar_ranking_publico(df: pd.DataFrame, n: int = 30) -> pd.DataFrame:
             "posicao": "#",
             "municipio": "Município",
             "mesorregiao": "Mesorregião",
+            "deserto": "Deserto Cultural",
             "populacao": "População",
             "renda_per_capita": "Renda per capita (R$, Censo 2022)",
             "n_equipamentos_raros": "Equipamentos (de 3)",
@@ -163,11 +168,34 @@ def gerar_card_municipio(linha_ranking: pd.Series, total_no_ranking: int) -> byt
         "#6B4226",
     )
 
+    # Selo de "Deserto Cultural" — só aparece quando o município de fato
+    # não tem nenhum museu, teatro ou cinema. Dá ao conceito central do
+    # projeto um destaque visual próprio também no card compartilhável.
+    eh_deserto = str(linha_ranking.get("Deserto Cultural", "")).startswith("🏜️")
+    if eh_deserto:
+        texto_selo = "DESERTO CULTURAL"
+        fonte_selo = _fonte(27, negrito=True)
+        bbox_selo = draw.textbbox((0, 0), texto_selo, font=fonte_selo)
+        largura_selo = bbox_selo[2] - bbox_selo[0]
+        x0 = (_LARGURA - largura_selo) / 2 - 26
+        x1 = (_LARGURA + largura_selo) / 2 + 26
+        draw.rounded_rectangle([x0, 528, x1, 578], radius=25, fill=_TERRACOTA)
+        _texto_centralizado(draw, texto_selo, 539, fonte_selo, _AREIA_CLARA)
+        y_divisoria = 610
+        y_stats = 652
+    else:
+        y_divisoria = 545
+        y_stats = 590
+
     # Linha divisória
-    draw.line([margem, 545, _LARGURA - margem, 545], fill=_TERRACOTA, width=4)
+    draw.line(
+        [margem, y_divisoria, _LARGURA - margem, y_divisoria],
+        fill=_TERRACOTA,
+        width=4,
+    )
 
     # Estatísticas
-    y = 590
+    y = y_stats
     linhas_stats = [
         ("POPULAÇÃO", f"{int(linha_ranking['População']):,}".replace(",", ".")),
         (

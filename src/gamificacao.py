@@ -147,7 +147,7 @@ def avaliar_conquistas(df) -> list[dict]:
                 "icone": c["icone"],
                 "titulo": c["titulo"],
                 "descricao": c["descricao"],
-                "desbloqueada": bool(c["criterio"](ctx),
+                "desbloqueada": bool(c["criterio"](ctx)),
                 "atual": atual,
                 "meta": c["meta"],
             }

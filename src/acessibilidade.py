@@ -296,3 +296,50 @@ def botao_ouvir(texto: str, key: str, rotulo: str = "Ouvir este resumo"):
         """,
         height=44,
     )
+
+
+def sincronizar_padding_header():
+    """
+    Mede o padding lateral REAL do container principal do Streamlit (que
+    é responsivo — muda com o tamanho da tela e com a sidebar aberta ou
+    fechada) e guarda esse valor numa variável CSS (--radar-padding-
+    lateral). O header/footer usam essa variável pra "escapar" do
+    container com uma margem negativa que sempre bate certo — sem isso,
+    a gente teria que chutar um valor fixo, que quebra em algum tamanho
+    de tela ou estado de sidebar mais cedo ou mais tarde.
+    Reage a mudanças de tamanho (ResizeObserver) e ao abrir/fechar a
+    sidebar, então continua correto mesmo sem recarregar a página.
+    """
+    components.html(
+        """
+        <script>
+        (function() {
+            function seletorContainer() {
+                var doc = window.parent.document;
+                return doc.querySelector('[data-testid="stMainBlockContainer"]')
+                    || doc.querySelector('.block-container');
+            }
+            function atualizar() {
+                var el = seletorContainer();
+                if (!el) return;
+                var estilo = window.parent.getComputedStyle(el);
+                window.parent.document.documentElement.style.setProperty(
+                    '--radar-padding-lateral', estilo.paddingLeft
+                );
+            }
+            atualizar();
+            if (!window.parent.__radarResizeListener) {
+                window.parent.addEventListener('resize', atualizar);
+                window.parent.__radarResizeListener = true;
+            }
+            var alvo = seletorContainer();
+            if (alvo && window.parent.ResizeObserver && !alvo.__radarObservado) {
+                new window.parent.ResizeObserver(atualizar).observe(alvo);
+                alvo.__radarObservado = true;
+            }
+        })();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )

@@ -20,11 +20,20 @@ de dados, login), o app continua de custo e manutenção zero.
 
 from __future__ import annotations
 
+import base64
+import io
+
 import streamlit as st
+from PIL import Image
 
 TOTAL_MUNICIPIOS_CE = 184
 
 AVATARES = ["🎭", "🎨", "📚", "🎬", "🎪", "🎵", "🖼️", "🏛️", "🌵", "☀️"]
+
+# Tamanho fixo da foto processada — pequeno de propósito, pra manter o
+# session_state leve mesmo que a pessoa envie uma foto grande. É a
+# mesma lógica de "sem infraestrutura externa": tudo cabe na sessão.
+_LADO_FOTO_PX = 200
 
 
 # ----------------------------------------------------------------------
@@ -33,7 +42,51 @@ AVATARES = ["🎭", "🎨", "📚", "🎬", "🎪", "🎵", "🖼️", "🏛️"
 def inicializar_perfil():
     st.session_state.setdefault("perfil_apelido", "")
     st.session_state.setdefault("perfil_local", "")
+    st.session_state.setdefault("perfil_avatar_emoji", AVATARES[0])
+    st.session_state.setdefault("perfil_foto", None)
+    # "perfil_avatar" é o valor EFETIVO (foto se tiver, senão o emoji) —
+    # é o que o resto do app (botão do topo, cards de feedback) usa,
+    # sem precisar saber se é foto ou emoji por dentro.
     st.session_state.setdefault("perfil_avatar", AVATARES[0])
+
+
+def processar_foto_perfil(arquivo_upload) -> str:
+    """
+    Recorta em quadrado (centralizado), redimensiona pra 200x200 e
+    comprime como JPEG — assim uma foto de qualquer tamanho/proporção
+    vira uma string base64 pequena (tipicamente 15-30KB), independente
+    do arquivo original. Retorna no formato "data:image/jpeg;base64,...",
+    pronto pra usar direto num <img src="...">.
+    """
+    imagem = Image.open(arquivo_upload).convert("RGB")
+    lado = min(imagem.size)
+    esquerda = (imagem.width - lado) // 2
+    topo = (imagem.height - lado) // 2
+    imagem = imagem.crop((esquerda, topo, esquerda + lado, topo + lado))
+    imagem = imagem.resize((_LADO_FOTO_PX, _LADO_FOTO_PX))
+
+    buffer = io.BytesIO()
+    imagem.save(buffer, format="JPEG", quality=85)
+    b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return f"data:image/jpeg;base64,{b64}"
+
+
+def eh_foto(valor: str | None) -> bool:
+    """O avatar atual é uma foto (data URI) ou um emoji simples?"""
+    return bool(valor) and valor.startswith("data:image")
+
+
+def atualizar_avatar_efetivo():
+    """
+    Recalcula "perfil_avatar" a partir da foto (se tiver) ou do emoji
+    escolhido — chamado depois que o modal processa o upload/seleção,
+    pra sempre refletir a escolha mais recente sem os dois widgets
+    (file_uploader e selectbox) brigarem pelo mesmo campo.
+    """
+    foto = st.session_state.get("perfil_foto")
+    st.session_state["perfil_avatar"] = foto or st.session_state.get(
+        "perfil_avatar_emoji", AVATARES[0]
+    )
 
 
 def perfil_definido() -> bool:

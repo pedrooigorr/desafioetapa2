@@ -759,27 +759,40 @@ header[data-testid="stHeader"] button {
 
 /* Reduz o respiro padrão do Streamlit acima e abaixo do conteúdo — em
    cima pra o header ficar rente à barra de ferramentas, embaixo pra o
-   footer ficar colado no final da página, sem sobrar margem branca
-   depois dele */
+   footer ficar colado no final da página. O padding lateral fica no
+   padrão do Streamlit (é ele que a JS mede em sincronizar_padding_
+   header, pra header/footer escaparem com a margem negativa certa). */
 div[data-testid="stMainBlockContainer"],
 .block-container {
     padding-top: 0.5rem !important;
     padding-bottom: 0 !important;
+    max-width: 100% !important;
 }
 
-/* Header — barra terracota cheia, contrasta com o fundo claro do app.
-   Full-bleed: "escapa" do container central do Streamlit e cobre toda
-   a largura da tela, de ponta a ponta. */
+/* Header — bloco terracota alinhado com o conteúdo (mesma largura e
+   margem do resto da página). Não usa mais margem negativa nem 100vw
+   pra "escapar" do container: aquilo brigava com a barra lateral (com
+   vw, ficava escondido atrás dela; com margem negativa em rem, sobrava
+   faixa branca porque o padding do Streamlit é responsivo). Alinhado,
+   funciona com a sidebar aberta ou fechada, sem depender de acertar
+   nenhum valor de padding. */
+:root {
+    /* Valor de segurança até o JS (sincronizar_padding_header) medir o
+       padding real do container e substituir esse número — evita um
+       "pulo" visual grande caso o JS demore uma fração de segundo. */
+    --radar-padding-lateral: 4rem;
+}
 .radar-header {
     background: linear-gradient(120deg, #C1440E 0%, #A83A0C 100%) !important;
     border-radius: 0;
-    padding: 34px 6vw 30px 6vw;
+    padding-block: 30px 26px;
+    padding-inline: var(--radar-padding-lateral);
     display: flex;
     align-items: center;
     gap: 18px;
     box-shadow: 0 4px 14px rgba(122, 46, 14, 0.28);
     width: auto;
-    margin-inline: calc(50% - 50vw);
+    margin-inline: calc(-1 * var(--radar-padding-lateral));
     margin-bottom: 22px;
 }
 .radar-header-titulo {
@@ -797,18 +810,20 @@ div[data-testid="stMainBlockContainer"],
 }
 
 /* Footer — marrom bem escuro, contraste diferente do header de propósito.
-   Full-bleed igual ao header. */
+   Alinhado com o conteúdo, igual ao header. */
 .radar-footer {
     background: #2C1B12 !important;
     border-radius: 0;
-    padding: 34px 6vw;
+    padding-block: 30px;
+    padding-inline: var(--radar-padding-lateral);
     margin-top: 44px;
+    margin-bottom: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 30px;
     justify-content: space-between;
     width: auto;
-    margin-inline: calc(50% - 50vw);
+    margin-inline: calc(-1 * var(--radar-padding-lateral));
 }
 .radar-footer-col {
     flex: 1;
@@ -985,74 +1000,13 @@ div[data-testid="stElementContainer"]:has(.radar-marcador-link-metodologia)
 }
 
 /* ------------------------------------------------------------------
-   ÍCONES DO CABEÇALHO — Acessibilidade e Meu Perfil flutuam por cima
-   da barra terracota, alinhados à direita do título "Radar Cultural".
-   Os dois botões reais do Streamlit continuam no fluxo normal da
-   página (senão perderiam a interatividade) — o que muda é só a
-   posição visual, via position:fixed ancorado no topo da tela. Como os
-   dois abrem modal (não expandem em linha), flutuar funciona sem
-   desconectar visualmente o clique do conteúdo que abre.
+   CARD DE FEEDBACK — autor/texto com hierarquia própria e botões
+   compactos (like/dislike/responder). O avatar (foto ou emoji) é
+   gerado inline pelo helper _avatar_html no streamlit_app.py, não por
+   uma classe CSS fixa — foto e emoji precisam de estilos diferentes
+   (img recortada vs. div com fundo), então o HTML já sai pronto.
+   Usado nas 3 features que exibem feedback.
    ------------------------------------------------------------------ */
-div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
-    + div[data-testid="stHorizontalBlock"] {
-    position: fixed !important;
-    /* "top" conta a partir do topo da janela, não do topo do nosso
-       cabeçalho — precisa somar a altura da barra padrão do Streamlit
-       (Share/GitHub/⋮) que fica acima dele. Valor estimado; pode
-       precisar de ajuste fino depois de ver renderizado de verdade. */
-    top: 92px !important;
-    right: 6vw !important;
-    z-index: 999 !important;
-    width: auto !important;
-    gap: 10px;
-}
-div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
-    + div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
-    width: auto !important;
-    min-width: 0 !important;
-    flex: 0 0 auto !important;
-}
-div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
-    + div[data-testid="stHorizontalBlock"] .stButton button {
-    background: rgba(255, 253, 248, 0.14) !important;
-    border: 1.5px solid rgba(255, 253, 248, 0.55) !important;
-    color: #FFFDF8 !important;
-    border-radius: 999px !important;
-    font-size: 0.85rem !important;
-    padding: 6px 16px !important;
-    white-space: nowrap;
-}
-div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
-    + div[data-testid="stHorizontalBlock"] .stButton button:hover {
-    background: rgba(255, 253, 248, 0.26) !important;
-    border-color: #FFFDF8 !important;
-}
-/* Em telas estreitas (celular), o cabeçalho baixa de altura porque o
-   título quebra linha — os ícones descem junto pra não sobrepor o texto */
-@media (max-width: 640px) {
-    div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
-        + div[data-testid="stHorizontalBlock"] {
-        position: static !important;
-        margin: -10px 0 14px 0;
-    }
-}
-/* ------------------------------------------------------------------
-   CARD DE FEEDBACK — avatar em círculo, autor/texto com hierarquia
-   própria e botões compactos (like/dislike/responder). Usado nas 3
-   features que exibem feedback.
-   ------------------------------------------------------------------ */
-.radar-feedback-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #FBEBD4;
-    border: 1.5px solid #E0CDB0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 19px;
-    line-height: 1;
-}
 .radar-feedback-autor {
     font-weight: 700;
     font-size: 0.94rem;
@@ -1081,11 +1035,6 @@ div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
     font-size: 0.87rem;
     color: #3E2723;
     line-height: 1.45;
-}
-.radar-feedback-resposta-avatar {
-    font-size: 15px;
-    line-height: 1.4;
-    flex: 0 0 auto;
 }
 /* Botões de ação do card mais compactos que o padrão do Streamlit */
 div[data-testid="stVerticalBlockBorderWrapper"]:has(.radar-marcador-feedback-card)

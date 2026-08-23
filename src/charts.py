@@ -25,7 +25,9 @@ _CEARA_ZOOM = 6.3
 _COR_FUNDO_PAGINA = "#FFFDF8"  # mesma cor de fundo do app (config.toml)
 
 
-def mapa_municipios(df: pd.DataFrame, altura: int = 600):
+def mapa_municipios(
+    df: pd.DataFrame, altura: int = 600, municipio_destacado: str | None = None
+):
     """
     Mapa real (OpenStreetMap, com nomes de cidades e estradas) mostrando
     só o Ceará — os estados vizinhos ficam "apagados" por uma máscara na
@@ -33,11 +35,24 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
     Tem um ponto por município — tamanho proporcional à população (em
     escala raiz quadrada, para Fortaleza não "engolir" as bolhas menores),
     cor proporcional à renda per capita.
+
+    Se `municipio_destacado` for passado (nome exato, vindo da busca), o
+    mapa já abre centralizado e com zoom nele, e ganha um halo dourado
+    ao redor do ponto pra confirmar visualmente qual foi encontrado.
     """
     df = df.copy()
     # Raiz quadrada comprime a escala: Fortaleza (~2,4 mi hab.) não deixa os
     # municípios pequenos praticamente invisíveis no mapa
     df["_tamanho"] = df["populacao"] ** 0.5
+
+    centro, zoom = _CEARA_CENTRO, _CEARA_ZOOM
+    linha_destacada = None
+    if municipio_destacado:
+        encontrado = df[df["municipio"] == municipio_destacado]
+        if not encontrado.empty:
+            linha_destacada = encontrado.iloc[0]
+            centro = {"lat": linha_destacada["lat"], "lon": linha_destacada["lon"]}
+            zoom = 10.5
 
     fig = go.Figure()
 
@@ -73,7 +88,22 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
         )
     )
 
-    # Camada 3: um ponto por município, por cima de tudo
+    # Camada 3 (só quando tem busca): halo dourado por baixo do ponto
+    # encontrado — desenhado ANTES dos pontos normais pra ficar atrás,
+    # como um círculo maior e translúcido em volta do ponto de verdade.
+    if linha_destacada is not None:
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=[linha_destacada["lat"]],
+                lon=[linha_destacada["lon"]],
+                mode="markers",
+                marker={"size": 42, "color": "#FFD700", "opacity": 0.55},
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+
+    # Camada 4: um ponto por município, por cima de tudo
     pontos = px.scatter_mapbox(
         df,
         lat="lat",
@@ -104,7 +134,7 @@ def mapa_municipios(df: pd.DataFrame, altura: int = 600):
 
     fig.update_layout(
         mapbox_style="open-street-map",
-        mapbox={"center": _CEARA_CENTRO, "zoom": _CEARA_ZOOM},
+        mapbox={"center": centro, "zoom": zoom},
         height=altura,
         margin={"t": 10, "l": 0, "r": 0, "b": 0},
         coloraxis={
@@ -126,6 +156,7 @@ def mapa_simulador(
     coluna_equipamento: str,
     altura: int = 600,
     rotulo_equipamento: str = "o equipamento",
+    municipio_destacado: str | None = None,
 ):
     """
     Mapa clicável para o Simulador de Investimento: cada município aparece
@@ -134,12 +165,25 @@ def mapa_simulador(
     Usa `custom_data=["municipio"]` para que o clique no ponto (via
     `st.plotly_chart(..., on_select="rerun")`) identifique qual município
     foi selecionado.
+
+    Se `municipio_destacado` for passado (nome exato, vindo da busca), o
+    mapa já abre centralizado e com zoom nele, com um halo dourado ao
+    redor do ponto pra confirmar visualmente qual foi encontrado.
     """
     df = df.copy()
     df["_status"] = df[coluna_equipamento].map(
         {True: "Tem", False: "Deserto Cultural"}
     )
     df["_tamanho"] = df["populacao"] ** 0.5
+
+    centro, zoom = _CEARA_CENTRO, _CEARA_ZOOM
+    linha_destacada = None
+    if municipio_destacado:
+        encontrado = df[df["municipio"] == municipio_destacado]
+        if not encontrado.empty:
+            linha_destacada = encontrado.iloc[0]
+            centro = {"lat": linha_destacada["lat"], "lon": linha_destacada["lon"]}
+            zoom = 10.5
 
     fig = go.Figure()
 
@@ -169,6 +213,18 @@ def mapa_simulador(
             hoverinfo="skip",
         )
     )
+
+    if linha_destacada is not None:
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=[linha_destacada["lat"]],
+                lon=[linha_destacada["lon"]],
+                mode="markers",
+                marker={"size": 40, "color": "#FFD700", "opacity": 0.55},
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
 
     pontos_fig = px.scatter_mapbox(
         df,
@@ -201,7 +257,7 @@ def mapa_simulador(
 
     fig.update_layout(
         mapbox_style="open-street-map",
-        mapbox={"center": _CEARA_CENTRO, "zoom": _CEARA_ZOOM},
+        mapbox={"center": centro, "zoom": zoom},
         height=altura,
         margin={"t": 10, "l": 0, "r": 0, "b": 0},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.01, "xanchor": "left", "x": 0},

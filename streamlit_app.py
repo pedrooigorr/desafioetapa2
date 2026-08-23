@@ -27,6 +27,7 @@ from src.acessibilidade import (
     css_acessibilidade,
     inicializar_preferencias,
     renderizar_controles_topo,
+    sincronizar_padding_header,
 )
 from src.charts import (
     grafico_equidade_por_mesorregiao,
@@ -63,10 +64,13 @@ from src.demanda import (
 )
 from src.gamificacao import (
     AVATARES,
+    atualizar_avatar_efetivo,
     avaliar_conquistas,
+    eh_foto,
     inicializar_gamificacao,
     nome_exibicao,
     perfil_definido,
+    processar_foto_perfil,
     progresso_exploracao,
     registrar_exploracao,
     resumo_conquistas,
@@ -118,6 +122,7 @@ st.set_page_config(
 )
 
 st.markdown(CSS_CUSTOMIZADO, unsafe_allow_html=True)
+sincronizar_padding_header()
 
 inicializar_pedidos()
 inicializar_feedbacks()
@@ -159,6 +164,27 @@ def _render_resumo(texto: str, key: str):
         botao_ouvir(texto, key=key)
 
 
+def _avatar_html(valor: str, tamanho: int = 38) -> str:
+    """
+    HTML de um avatar — funciona pra foto (data URI) ou emoji, sem quem
+    chama precisar saber qual dos dois é. Usado em todo lugar que mostra
+    avatar (sidebar, cards de feedback, respostas), pra foto de perfil
+    funcionar automaticamente em todos eles de uma vez.
+    """
+    if eh_foto(valor):
+        return (
+            f'<img src="{valor}" style="width:{tamanho}px; height:{tamanho}px; '
+            f'border-radius:50%; object-fit:cover; display:inline-block; '
+            f'vertical-align:middle; border:1.5px solid #E0CDB0;">'
+        )
+    return (
+        f'<div style="width:{tamanho}px; height:{tamanho}px; border-radius:50%; '
+        f'background:#FBEBD4; border:1.5px solid #E0CDB0; display:inline-flex; '
+        f'align-items:center; justify-content:center; font-size:{int(tamanho * 0.5)}px; '
+        f'line-height:1; vertical-align:middle;">{valor}</div>'
+    )
+
+
 def _render_feedback_card(fb: dict, key_prefix: str):
     """
     Um comentário completo: avatar + apelido de quem escreveu, texto,
@@ -175,7 +201,7 @@ def _render_feedback_card(fb: dict, key_prefix: str):
         col_avatar, col_conteudo = st.columns([1, 14])
         with col_avatar:
             st.markdown(
-                f'<div class="radar-feedback-avatar">{fb["avatar"]}</div>',
+                _avatar_html(fb["avatar"], tamanho=38),
                 unsafe_allow_html=True,
             )
         with col_conteudo:
@@ -221,7 +247,7 @@ def _render_feedback_card(fb: dict, key_prefix: str):
         for resp in respostas:
             st.markdown(
                 f'<div class="radar-feedback-resposta">'
-                f'<span class="radar-feedback-resposta-avatar">{resp["avatar"]}</span>'
+                f'<span>{_avatar_html(resp["avatar"], tamanho=20)}</span>'
                 f'<span><b>{resp["apelido"]}</b> — {resp["texto"]}</span>'
                 f"</div>",
                 unsafe_allow_html=True,
@@ -337,16 +363,17 @@ def abrir_perfil():
     projeto, então não compete por espaço com elas na navegação principal.
     """
     st.caption(
-        "Um apelido e um avatar — sem senha, sem conta. Só pra dar cara "
-        "às suas conquistas nesta sessão. Some tudo ao recarregar a "
-        "página, do mesmo jeito que os pedidos da Demanda Cidadã."
+        "Um apelido e uma foto (ou avatar) — sem senha, sem conta. Só "
+        "pra dar cara às suas conquistas nesta sessão. Some tudo ao "
+        "recarregar a página, do mesmo jeito que os pedidos da Demanda "
+        "Cidadã."
     )
 
     col_avatar, col_dados = st.columns([1, 3])
     with col_avatar:
         st.markdown(
-            f'<div style="font-size:56px; text-align:center; '
-            f'line-height:1;">{st.session_state.get("perfil_avatar", "🎭")}'
+            f'<div style="text-align:center; margin-bottom:8px;">'
+            f'{_avatar_html(st.session_state.get("perfil_avatar", "🎭"), tamanho=90)}'
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -354,17 +381,29 @@ def abrir_perfil():
         # ("perfil_..."): como o modal só executa quando está aberto, um
         # valor preso só na chave do widget some do session_state assim
         # que o modal fecha ou não é redesenhado numa execução — a
-        # reatribuição explícita abaixo garante que o apelido/avatar
+        # reatribuição explícita abaixo garante que apelido/avatar/foto
         # sobrevivem mesmo depois do modal fechar (ex: ao enviar um
         # feedback na Demanda Cidadã, sem reabrir o Perfil antes).
         avatar_escolhido = st.selectbox(
             "Avatar",
             AVATARES,
-            index=AVATARES.index(st.session_state.get("perfil_avatar", AVATARES[0])),
+            index=AVATARES.index(st.session_state.get("perfil_avatar_emoji", AVATARES[0])),
             key="dialog_avatar_input",
             label_visibility="collapsed",
+            help="Só vale se você não tiver enviado uma foto — a foto "
+            "sempre tem prioridade sobre o emoji",
         )
-        st.session_state["perfil_avatar"] = avatar_escolhido
+        st.session_state["perfil_avatar_emoji"] = avatar_escolhido
+
+        if eh_foto(st.session_state.get("perfil_foto")):
+            if st.button(
+                "Remover foto",
+                key="btn_remover_foto",
+                icon=":material/delete:",
+                use_container_width=True,
+            ):
+                st.session_state["perfil_foto"] = None
+                st.rerun()
     with col_dados:
         apelido_novo = st.text_input(
             "Apelido",
@@ -381,6 +420,24 @@ def abrir_perfil():
             placeholder="De onde você é?",
         )
         st.session_state["perfil_local"] = local_novo
+
+        foto_upload = st.file_uploader(
+            "Ou envie uma foto",
+            type=["png", "jpg", "jpeg"],
+            key="dialog_foto_input",
+            help="Fica só nesta sessão do navegador, sem nenhum "
+            "armazenamento externo — some ao recarregar a página.",
+        )
+        if foto_upload is not None:
+            try:
+                st.session_state["perfil_foto"] = processar_foto_perfil(foto_upload)
+            except Exception:
+                st.error(
+                    "Não consegui ler esse arquivo como imagem — tenta "
+                    "outro (PNG ou JPEG)."
+                )
+
+    atualizar_avatar_efetivo()
 
     if not perfil_definido():
         st.info("Escolhe um apelido acima pra personalizar seu perfil.")
@@ -433,26 +490,29 @@ def abrir_perfil():
 
 st.markdown(cabecalho_app(), unsafe_allow_html=True)
 
-# Ícones de Acessibilidade e Perfil — via CSS (ver .radar-icones-header em
-# src/theme.py) ficam visualmente dentro do próprio cabeçalho, no canto
-# superior direito, ao lado do título "Radar Cultural". Os dois abrem
-# modal (janela por cima da página) quando clicados — nenhum expande em
-# linha, por isso dá pra flutuar os dois lá em cima sem ficar
-# desconectado do conteúdo que abrem.
-st.markdown(marcador("icones-header"), unsafe_allow_html=True)
-_col_a11y, _col_perfil, _, _ = st.columns([1, 1.6, 1, 1])
-with _col_a11y:
-    renderizar_controles_topo()
-with _col_perfil:
+# Perfil e Acessibilidade ficam no topo da barra lateral, acima dos
+# filtros: são controles transversais (valem em qualquer modo), então
+# não competem por espaço com o conteúdo principal. Os dois abrem modal
+# (janela por cima da página) quando clicados.
+with st.sidebar:
     _nome_perfil = nome_exibicao() if perfil_definido() else "Meu Perfil"
     _avatar_atual = st.session_state.get("perfil_avatar", "🎭")
+    # st.button só aceita emoji/texto no rótulo, não uma imagem de
+    # verdade — quando o avatar é uma foto (string enorme em base64),
+    # usamos só o ícone genérico do Material em vez de tentar imprimir a
+    # foto como texto (o que apareceria como um emaranhado ilegível).
+    _rotulo_perfil = (
+        _nome_perfil if eh_foto(_avatar_atual) else f"{_avatar_atual} {_nome_perfil}"
+    )
     if st.button(
-        f"{_avatar_atual} {_nome_perfil}",
+        _rotulo_perfil,
         key="btn_perfil",
         use_container_width=True,
         icon=":material/account_circle:",
     ):
         abrir_perfil()
+    renderizar_controles_topo()
+    st.divider()
 
 st.markdown(
     "### Bem-vindo(a) ao Radar Cultural!\n"
@@ -635,37 +695,35 @@ if st.session_state.modo_app == MODOS[0]:
         f" · {n_ativos} ativo{'s' if n_ativos != 1 else ''}" if n_ativos else ""
     )
 
-    with st.expander(rotulo_filtros, expanded=False, icon=":material/filter_alt:"):
-        col_titulo, col_limpar = st.columns([4, 1])
-        with col_titulo:
-            st.caption("Ajuste o recorte de municípios usado em todos os gráficos abaixo.")
-        with col_limpar:
-            st.button(
-                "Limpar filtros",
-                icon=":material/filter_alt_off:",
-                on_click=_limpar_filtros_gestor,
-                use_container_width=True,
-                disabled=n_ativos == 0,
-            )
+    # Filtros na barra lateral: ficam sempre acessíveis enquanto a pessoa
+    # rola os gráficos, sem ocupar espaço vertical do conteúdo. Layout em
+    # coluna única (sem st.columns) porque a sidebar é estreita.
+    with st.sidebar:
+        st.markdown(f"### {rotulo_filtros}")
+        st.caption("Ajuste o recorte usado em todos os gráficos.")
+        st.button(
+            "Limpar filtros",
+            icon=":material/filter_alt_off:",
+            on_click=_limpar_filtros_gestor,
+            use_container_width=True,
+            disabled=n_ativos == 0,
+        )
 
         st.markdown("**Localização**")
-        col_meso, col_fortaleza = st.columns([3, 1])
-        with col_meso:
-            mesorregioes_sel = st.pills(
-                "Mesorregião",
-                todas_mesorregioes,
-                selection_mode="multi",
-                default=todas_mesorregioes,
-                key="filtro_mesorregioes",
-                label_visibility="collapsed",
-            )
-        with col_fortaleza:
-            excluir_fortaleza = st.checkbox(
-                "Excluir Fortaleza",
-                key="filtro_excluir_fortaleza",
-                help="Fortaleza concentra grande parte da população e dos "
-                "equipamentos — marque para ver só o padrão do interior",
-            )
+        mesorregioes_sel = st.pills(
+            "Mesorregião",
+            todas_mesorregioes,
+            selection_mode="multi",
+            default=todas_mesorregioes,
+            key="filtro_mesorregioes",
+            label_visibility="collapsed",
+        )
+        excluir_fortaleza = st.checkbox(
+            "Excluir Fortaleza",
+            key="filtro_excluir_fortaleza",
+            help="Fortaleza concentra grande parte da população e dos "
+            "equipamentos — marque para ver só o padrão do interior",
+        )
 
         st.markdown("**População**")
         faixa_pop = st.slider(
@@ -854,7 +912,20 @@ if st.session_state.modo_app == MODOS[0]:
             "incluindo o número de equipamentos culturais."
         )
         _render_resumo(resumo_mapa(df_f), key="resumo_mapa")
-        st.plotly_chart(mapa_municipios(df_f, altura=680), use_container_width=True)
+
+        busca_gestor = st.selectbox(
+            "Buscar município no mapa",
+            options=sorted(df_f["municipio"].unique()),
+            index=None,
+            placeholder="Digite ou escolha um município...",
+            key="busca_mapa_gestor",
+        )
+        st.plotly_chart(
+            mapa_municipios(
+                df_f, altura=680, municipio_destacado=busca_gestor
+            ),
+            use_container_width=True,
+        )
 
         with st.expander("Como esse mapa foi feito", icon=":material/help:"):
             st.markdown(
@@ -1307,12 +1378,25 @@ elif st.session_state.modo_app == MODOS[2]:
 
     st.caption(
         f"Azul = município já tem {tipo_label.lower()} · Terracota = "
-        "🏜️ Deserto Cultural para esse equipamento. Clique num ponto do mapa."
+        "🏜️ Deserto Cultural para esse equipamento. Clique num ponto do mapa "
+        "ou use a busca abaixo."
+    )
+
+    busca_simulador = st.selectbox(
+        "Buscar município no mapa",
+        options=sorted(df["municipio"].unique()),
+        index=None,
+        placeholder="Digite ou escolha um município...",
+        key="busca_mapa_simulador",
     )
 
     evento_mapa = st.plotly_chart(
         mapa_simulador(
-            df, coluna_equipamento, altura=600, rotulo_equipamento=tipo_label
+            df,
+            coluna_equipamento,
+            altura=600,
+            rotulo_equipamento=tipo_label,
+            municipio_destacado=busca_simulador,
         ),
         on_select="rerun",
         selection_mode="points",
@@ -1320,13 +1404,18 @@ elif st.session_state.modo_app == MODOS[2]:
         use_container_width=True,
     )
 
-    municipio_clicado = None
+    # A busca também conta como "selecionar" o município pra simular —
+    # não é só navegação visual, funciona como alternativa ao clique no
+    # mapa (que sozinho excluiria quem navega só por teclado/leitor de
+    # tela). Um clique no mapa depois da busca sobrescreve a escolha.
+    municipio_clicado = busca_simulador
     if evento_mapa and evento_mapa.selection and evento_mapa.selection.points:
         ponto = evento_mapa.selection.points[0]
         customdata = ponto.get("customdata")
         if customdata:
             municipio_clicado = customdata[0]
-            registrar_exploracao(municipio_clicado)
+    if municipio_clicado:
+        registrar_exploracao(municipio_clicado)
 
     if municipio_clicado:
         categoria_pedida, votos_pedidos = categoria_mais_pedida(municipio_clicado)

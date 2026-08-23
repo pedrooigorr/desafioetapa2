@@ -127,3 +127,30 @@ def ranking_pedidos_ceara() -> list[dict]:
             }
         )
     return sorted(linhas, key=lambda x: x["total_pedidos"], reverse=True)
+
+
+# ----------------------------------------------------------------------
+# Feedback textual — o voto mostra O QUE falta, mas não diz POR QUE isso
+# importa. O feedback é um espaço curto de texto livre pra complementar
+# o pedido com contexto de verdade (um lugar específico, uma experiência,
+# uma sugestão) — fica público pra quem for decidir onde investir.
+# ----------------------------------------------------------------------
+def inicializar_feedbacks():
+    st.session_state.setdefault("feedbacks", [])
+
+
+def registrar_feedback(municipio: str, apelido: str, texto: str):
+    st.session_state.setdefault("feedbacks", []).append(
+        {"municipio": municipio, "apelido": apelido or "Anônimo", "texto": texto}
+    )
+
+
+def listar_feedbacks(municipio: str | None = None) -> list[dict]:
+    todos = st.session_state.get("feedbacks", [])
+    if municipio:
+        return [f for f in todos if f["municipio"] == municipio]
+    return todos
+
+
+def total_feedbacks() -> int:
+    return len(st.session_state.get("feedbacks", []))

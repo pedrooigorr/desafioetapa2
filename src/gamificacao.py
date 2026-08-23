@@ -1,17 +1,21 @@
 """
-Gamificação — conquistas (badges) e progresso de exploração.
+Gamificação e Perfil — conquistas (badges), progresso de exploração e o
+perfil leve do usuário (apelido + avatar, sem senha).
 
-Duas mecânicas, ambas em cima do que a pessoa já faz naturalmente no app:
+Três mecânicas, todas em cima do que a pessoa já faz naturalmente no app:
 
   1. **Conquistas**: desbloqueadas conforme a pessoa registra pedidos na
      Demanda Cidadã (primeiro pedido, pedidos em várias mesorregiões...).
   2. **Progresso de exploração**: conta quantos dos 184 municípios a
      pessoa já "visitou" — seja abrindo na Demanda Cidadã, seja clicando
      num ponto do mapa do Simulador.
+  3. **Perfil**: apelido + avatar (emoji) escolhidos pela pessoa, sem
+     senha nem conta — é só pra dar identidade ao "Meu Perfil", não é
+     autenticação de verdade.
 
 Persistência: sessão do navegador, como o resto do protótipo — zera ao
-recarregar a página. É de propósito: o objetivo aqui é incentivar a
-exploração durante a visita, não criar perfil de usuário.
+recarregar a página. É de propósito: sem infraestrutura externa (banco
+de dados, login), o app continua de custo e manutenção zero.
 """
 
 from __future__ import annotations
@@ -20,6 +24,25 @@ import streamlit as st
 
 TOTAL_MUNICIPIOS_CE = 184
 
+AVATARES = ["🎭", "🎨", "📚", "🎬", "🎪", "🎵", "🖼️", "🏛️", "🌵", "☀️"]
+
+
+# ----------------------------------------------------------------------
+# Perfil (apelido + avatar — sem senha, sem conta)
+# ----------------------------------------------------------------------
+def inicializar_perfil():
+    st.session_state.setdefault("perfil_apelido", "")
+    st.session_state.setdefault("perfil_local", "")
+    st.session_state.setdefault("perfil_avatar", AVATARES[0])
+
+
+def perfil_definido() -> bool:
+    return bool(st.session_state.get("perfil_apelido", "").strip())
+
+
+def nome_exibicao() -> str:
+    return st.session_state.get("perfil_apelido", "").strip() or "Visitante"
+
 
 # ----------------------------------------------------------------------
 # Estado
@@ -27,6 +50,7 @@ TOTAL_MUNICIPIOS_CE = 184
 def inicializar_gamificacao():
     st.session_state.setdefault("municipios_explorados", set())
     st.session_state.setdefault("conquistas_vistas", set())
+    inicializar_perfil()
 
 
 def registrar_exploracao(municipio: str):

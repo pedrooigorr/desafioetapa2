@@ -38,6 +38,13 @@ COR_DEMANDA_CLARO = "#EAF0E4"
 COR_SIMULADOR = "#B8792A"     # dourado-areia (escurecido p/ contraste de texto)
 COR_SIMULADOR_CLARO = "#FBF0DC"
 
+# Perfil e Metodologia são páginas "de apoio" — não pertencem a nenhuma
+# das 3 lentes do projeto, então usam uma cor neutra própria em vez de
+# emprestar a cor de um dos 3 modos (evita sugerir que uma delas "é dona"
+# dessas páginas transversais)
+COR_NEUTRA = "#6B4226"        # marrom-couro
+COR_NEUTRA_CLARO = "#EFE6DC"
+
 
 def cabecalho_app() -> str:
     """

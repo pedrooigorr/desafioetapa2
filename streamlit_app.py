@@ -46,17 +46,24 @@ from src.demanda import (
     categoria_mais_pedida,
     categorias_existentes,
     categorias_faltantes,
+    inicializar_feedbacks,
     inicializar_pedidos,
     ja_votou_no_municipio,
+    listar_feedbacks,
     pedidos_do_municipio,
     peso_demanda,
     ranking_pedidos_ceara,
+    registrar_feedback,
     registrar_pedido,
+    total_feedbacks,
     total_pedidos,
 )
 from src.gamificacao import (
+    AVATARES,
     avaliar_conquistas,
     inicializar_gamificacao,
+    nome_exibicao,
+    perfil_definido,
     progresso_exploracao,
     registrar_exploracao,
     resumo_conquistas,
@@ -80,6 +87,7 @@ from src.theme import (
     COR_DEMANDA_CLARO,
     COR_GESTOR,
     COR_GESTOR_CLARO,
+    COR_NEUTRA,
     COR_SIMULADOR,
     COR_SIMULADOR_CLARO,
     CSS_CUSTOMIZADO,
@@ -109,6 +117,7 @@ st.set_page_config(
 st.markdown(CSS_CUSTOMIZADO, unsafe_allow_html=True)
 
 inicializar_pedidos()
+inicializar_feedbacks()
 inicializar_preferencias()
 inicializar_gamificacao()
 
@@ -147,18 +156,138 @@ def _render_resumo(texto: str, key: str):
         botao_ouvir(texto, key=key)
 
 
+@st.dialog("Meu Perfil", width="large")
+def abrir_perfil():
+    """
+    Perfil leve — apelido + avatar, sem senha nem conta — e as conquistas
+    da sessão. Abre como modal (janela por cima da página) em vez de
+    virar uma aba/modo: é conteúdo de apoio, não uma das 3 features do
+    projeto, então não compete por espaço com elas na navegação principal.
+    """
+    st.caption(
+        "Um apelido e um avatar — sem senha, sem conta. Só pra dar cara "
+        "às suas conquistas nesta sessão. Some tudo ao recarregar a "
+        "página, do mesmo jeito que os pedidos da Demanda Cidadã."
+    )
+
+    col_avatar, col_dados = st.columns([1, 3])
+    with col_avatar:
+        st.markdown(
+            f'<div style="font-size:56px; text-align:center; '
+            f'line-height:1;">{st.session_state.get("perfil_avatar", "🎭")}'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        st.selectbox(
+            "Avatar",
+            AVATARES,
+            key="perfil_avatar",
+            label_visibility="collapsed",
+        )
+    with col_dados:
+        st.text_input(
+            "Apelido",
+            key="perfil_apelido",
+            placeholder="Como quer ser chamado(a)?",
+            max_chars=30,
+        )
+        st.text_input(
+            "Seu município (opcional)",
+            key="perfil_local",
+            placeholder="De onde você é?",
+        )
+
+    if not perfil_definido():
+        st.info("Escolhe um apelido acima pra personalizar seu perfil.")
+
+    st.divider()
+    n_desbloqueadas, n_total_conquistas = resumo_conquistas(df)
+    st.markdown(
+        titulo_secao(
+            "trophy",
+            f"Sua jornada ({n_desbloqueadas} de {n_total_conquistas} conquistas)",
+            cor=COR_NEUTRA,
+        ),
+        unsafe_allow_html=True,
+    )
+
+    explorados, total_municipios, fracao = progresso_exploracao()
+    st.markdown(
+        f"**Você já explorou {explorados} de {total_municipios} municípios "
+        f"do Ceará** ({fracao * 100:.0f}%)"
+    )
+    st.progress(fracao)
+    st.caption(
+        "Conta municípios que você abriu na Demanda Cidadã ou clicou no "
+        "mapa do Simulador."
+    )
+    if total_feedbacks() > 0:
+        st.caption(
+            f"Você também já deixou {total_feedbacks()} feedback(s) na "
+            "Demanda Cidadã."
+        )
+
+    st.markdown("##### Conquistas")
+    conquistas = avaliar_conquistas(df)
+    for i in range(0, len(conquistas), 3):
+        for col, conquista in zip(st.columns(3), conquistas[i : i + 3]):
+            with col:
+                st.markdown(
+                    cartao_conquista(
+                        icone_nome=conquista["icone"],
+                        titulo=conquista["titulo"],
+                        descricao=conquista["descricao"],
+                        desbloqueada=conquista["desbloqueada"],
+                        atual=conquista["atual"],
+                        meta=conquista["meta"],
+                        cor=COR_NEUTRA,
+                    ),
+                    unsafe_allow_html=True,
+                )
+
+
 st.markdown(cabecalho_app(), unsafe_allow_html=True)
 st.markdown(
-    "Três jeitos de olhar pra um mesmo problema: **quem no Ceará tem acesso "
-    "a cultura perto de casa — e quem não tem.** Escolha por onde começar"
+    "### Bem-vindo(a) ao Radar Cultural!\n"
+    "**Quem no Ceará tem acesso a cultura perto de casa — e quem não "
+    "tem?** Cruzamos dados oficiais dos 184 municípios pra mostrar onde "
+    "a cultura está concentrada e onde ela quase não chega."
 )
 renderizar_controles_topo()
 
+# Ícone de acesso ao Perfil — visível pra qualquer pessoa (gestor ou
+# cidadão comum), sem login. Abre como modal (janela por cima da
+# página), não como aba nova — o projeto continua sendo uma página só.
+_col_perfil, _, _ = st.columns([1.2, 1, 1])
+with _col_perfil:
+    _nome_perfil = nome_exibicao() if perfil_definido() else "Meu Perfil"
+    _avatar_atual = st.session_state.get("perfil_avatar", "🎭")
+    if st.button(
+        f"{_avatar_atual} {_nome_perfil}",
+        key="btn_perfil",
+        use_container_width=True,
+        icon=":material/account_circle:",
+    ):
+        abrir_perfil()
+
 # ----------------------------------------------------------------------
-# Contador "hero" — o número que resume o problema todo, logo de cara,
-# antes até dos cards de navegação. Calculado do dado real (não é texto
-# fixo): muda sozinho se a base for atualizada.
+# Ordem pensada pra contar a história antes de mostrar o dado: primeiro
+# explica o conceito central (Deserto Cultural), só depois mostra o
+# número de impacto — assim quem chega já sabe o que aquele "81" quer
+# dizer antes de ver ele.
 # ----------------------------------------------------------------------
+st.markdown(
+    box_glossario(
+        "O que é um Deserto Cultural?",
+        "Município que <b>não tem nenhum</b> museu, teatro/sala de "
+        "espetáculo ou cinema — mesmo que já tenha biblioteca (que existe "
+        "em praticamente todos os municípios cearenses — 99,5%, só Graça "
+        "é exceção — e por isso não diferencia quem tem acesso de quem "
+        "não tem).",
+    ),
+    unsafe_allow_html=True,
+)
+
 _n_desertos = int((df["n_equipamentos_raros"] == 0).sum())
 _pct_desertos = 100 * _n_desertos / len(df)
 _pop_desertos = int(df.loc[df["n_equipamentos_raros"] == 0, "populacao"].sum())
@@ -176,28 +305,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    box_glossario(
-        "O que é um Deserto Cultural?",
-        "Município que <b>não tem nenhum</b> museu, teatro/sala de "
-        "espetáculo ou cinema — mesmo que já tenha biblioteca (que existe "
-        "em praticamente todos os municípios cearenses — 99,5%, só Graça "
-        "é exceção — e por isso não diferencia quem tem acesso de quem "
-        "não tem).",
-    ),
-    unsafe_allow_html=True,
-)
-
 CARDS_HERO = [
     {
         "modo": MODOS[0],
         "icone": "landmark",
         "titulo": "Painel do Gestor",
         "texto": (
-            "O raio-x da desigualdade cultural: cruza dados oficiais de "
-            "população, renda e equipamentos culturais nos 184 municípios "
-            "pra mostrar onde a cultura está concentrada e onde ela quase "
-            "não chega. Feito pra quem decide política pública."
+            "O raio-x da desigualdade cultural nos 184 municípios do "
+            "Ceará. Pra quem decide política pública."
         ),
         "cor": COR_GESTOR,
         "cor_clara": COR_GESTOR_CLARO,
@@ -207,9 +322,8 @@ CARDS_HERO = [
         "icone": "vote",
         "titulo": "Demanda Cidadã",
         "texto": (
-            "A voz de quem mora lá: escolha seu município, veja o que já "
-            "existe e registre o que mais falta. Seu pedido vira contagem "
-            "pública e pesa de verdade no ranking de prioridades."
+            "Escolha seu município e registre o que falta. Seu pedido "
+            "pesa de verdade no ranking de prioridades."
         ),
         "cor": COR_DEMANDA,
         "cor_clara": COR_DEMANDA_CLARO,
@@ -219,15 +333,15 @@ CARDS_HERO = [
         "icone": "piggy-bank",
         "titulo": "Simulador & Transparência",
         "texto": (
-            "Simule o impacto de instalar um museu, teatro ou cinema antes "
-            "de construir — e gere cards prontos pra baixar e cobrar "
-            "publicamente investimento nos municípios mais esquecidos."
+            "Simule o impacto de um novo equipamento cultural — e cobre "
+            "publicamente investimento com cards prontos pra compartilhar."
         ),
         "cor": COR_SIMULADOR,
         "cor_clara": COR_SIMULADOR_CLARO,
     },
 ]
 
+st.markdown("##### Três jeitos de explorar isso — escolha por onde começar")
 hero_cols = st.columns(3)
 for col, card in zip(hero_cols, CARDS_HERO):
     with col:
@@ -463,35 +577,11 @@ if st.session_state.modo_app == MODOS[0]:
     pagina_atual = st.session_state.pagina
 
     if pagina_atual == "Visão Geral":
-        st.markdown(
-            "### Bem-vindo(a) ao Radar Cultural!\n"
-            "Este painel nasceu de uma pergunta simples: **quem no Ceará tem "
-            "acesso a museu, teatro ou cinema perto de casa — e quem não tem?** "
-            "Cruzamos dados oficiais de população, renda e equipamentos "
-            "culturais dos 184 municípios cearenses para mostrar, de forma "
-            "visual, onde a cultura está concentrada e onde ela quase não "
-            "chega.\n\n"
-            "A ideia é ajudar gestores públicos, organizações culturais e "
-            "qualquer pessoa curiosa a **enxergar essa desigualdade e decidir "
-            "com mais clareza onde investir**. Use os filtros à esquerda para "
-            "explorar por mesorregião, faixa de população ou tipo de "
-            "equipamento — e navegue pelas abas acima para se aprofundar em "
-            "cada análise."
-        )
         st.caption(
             "Prévia de todas as análises abaixo. Clique em um card ou na "
-            "navbar acima para abrir a visão completa e maior de cada uma — "
-            "lá você também encontra a explicação de como cada uma foi feita."
+            "navbar acima pra abrir a versão completa de cada uma."
         )
         _render_resumo(resumo_visao_geral(df_f), key="resumo_visao_geral")
-        st.markdown(
-            box_glossario(
-                "Deserto Cultural",
-                "Município sem <b>nenhum</b> museu, teatro ou cinema — "
-                "mesmo que já tenha biblioteca.",
-            ),
-            unsafe_allow_html=True,
-        )
 
         linha1_a, linha1_b = st.columns(2)
         with linha1_a, st.container(border=True):
@@ -660,40 +750,61 @@ if st.session_state.modo_app == MODOS[0]:
             "urgente a atenção."
         )
         _render_resumo(resumo_municipios_prioritarios(df_f), key="resumo_prioritarios")
-        n_linhas = st.slider(
-            "Quantos municípios mostrar",
-            min_value=10,
-            max_value=len(df_f),
-            value=min(30, len(df_f)),
-        )
-        tabela_completa = montar_tabela_prioritarios(df_f, n=n_linhas)
-        tabela_completa["Pedidos da população"] = tabela_completa["Município"].map(
-            total_pedidos
-        )
-        tabela_completa["Índice Ajustado (c/ demanda)"] = tabela_completa[
-            "Município"
-        ].map(lambda m: peso_demanda(m)) + tabela_completa["Índice de Prioridade"]
-
-        if tabela_completa["Pedidos da população"].sum() > 0:
-            st.caption(
-                "As colunas **Pedidos da população** e **Índice Ajustado** "
-                "vêm dos pedidos registrados em 'Demanda Cidadã' nesta sessão."
+        total_filtrado = len(df_f)
+        if total_filtrado == 0:
+            st.markdown(
+                estado_vazio(
+                    "circle-x",
+                    "Nenhum município corresponde aos filtros escolhidos. "
+                    "Ajusta a mesorregião ou a faixa de população na barra "
+                    "lateral.",
+                    cor="#8C1C13",
+                ),
+                unsafe_allow_html=True,
             )
+        else:
+            # min_value não pode ser fixo em 10: se o filtro deixar menos
+            # de 10 municípios, min > max e o slider quebra a página
+            # inteira (StreamlitAPIException). Se sobrar só 1 município,
+            # nem faz sentido mostrar o slider.
+            minimo_slider = min(10, total_filtrado)
+            if minimo_slider < total_filtrado:
+                n_linhas = st.slider(
+                    "Quantos municípios mostrar",
+                    min_value=minimo_slider,
+                    max_value=total_filtrado,
+                    value=min(30, total_filtrado),
+                )
+            else:
+                n_linhas = total_filtrado
+            tabela_completa = montar_tabela_prioritarios(df_f, n=n_linhas)
+            tabela_completa["Pedidos da população"] = tabela_completa["Município"].map(
+                total_pedidos
+            )
+            tabela_completa["Índice Ajustado (c/ demanda)"] = tabela_completa[
+                "Município"
+            ].map(lambda m: peso_demanda(m)) + tabela_completa["Índice de Prioridade"]
 
-        st.dataframe(
-            tabela_completa.style.set_properties(**estilo_texto_tabela())
-            .apply(destacar_coluna, subset=["Índice de Prioridade"])
-            .format(
-                {
-                    "Índice de Prioridade": "{:.2f}",
-                    "Renda per capita (R$, Censo 2022)": "{:.2f}",
-                    "Índice Ajustado (c/ demanda)": "{:.2f}",
-                }
-            ),
-            use_container_width=True,
-            hide_index=True,
-            height=650,
-        )
+            if tabela_completa["Pedidos da população"].sum() > 0:
+                st.caption(
+                    "As colunas **Pedidos da população** e **Índice Ajustado** "
+                    "vêm dos pedidos registrados em 'Demanda Cidadã' nesta sessão."
+                )
+
+            st.dataframe(
+                tabela_completa.style.set_properties(**estilo_texto_tabela())
+                .apply(destacar_coluna, subset=["Índice de Prioridade"])
+                .format(
+                    {
+                        "Índice de Prioridade": "{:.2f}",
+                        "Renda per capita (R$, Censo 2022)": "{:.2f}",
+                        "Índice Ajustado (c/ demanda)": "{:.2f}",
+                    }
+                ),
+                use_container_width=True,
+                hide_index=True,
+                height=650,
+            )
 
         with st.expander("Como esse ranking foi feito", icon=":material/help:"):
             st.markdown(
@@ -847,48 +958,72 @@ elif st.session_state.modo_app == MODOS[1]:
         st.caption("Nenhum pedido registrado ainda em nenhum município.")
 
     # ------------------------------------------------------------------
-    # Gamificação — progresso de exploração + conquistas
+    # Feedback — o voto mostra O QUE falta, mas sozinho não garante nada.
+    # O feedback dá contexto real: um lugar específico, uma sugestão,
+    # uma experiência — fica público, junto do pedido.
+    # ------------------------------------------------------------------
+    st.divider()
+    st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
+    st.markdown(
+        titulo_secao("message-square", "Deixe um feedback", cor=COR_DEMANDA),
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        f"O voto mostra o que falta em {municipio_cidadao}. O feedback "
+        "explica **por que** isso importa — sugira um lugar, conte uma "
+        "experiência, dê contexto. Isso também fica visível pra quem for "
+        "decidir onde investir."
+    )
+    texto_feedback = st.text_area(
+        "Seu feedback",
+        placeholder="Ex.: minha cidade tem um casarão histórico abandonado "
+        "na praça central que daria um museu ótimo...",
+        max_chars=400,
+        key="input_feedback",
+        label_visibility="collapsed",
+    )
+    if st.button("Enviar feedback", key="btn_enviar_feedback"):
+        if texto_feedback.strip():
+            registrar_feedback(
+                municipio_cidadao, nome_exibicao(), texto_feedback.strip()
+            )
+            st.success("Feedback registrado — obrigado por contribuir!")
+            st.rerun()
+        else:
+            st.warning("Escreve alguma coisa antes de enviar.")
+
+    feedbacks_municipio = listar_feedbacks(municipio_cidadao)
+    if feedbacks_municipio:
+        st.markdown(
+            f"##### O que já disseram sobre {municipio_cidadao} "
+            f"({len(feedbacks_municipio)})"
+        )
+        for fb in reversed(feedbacks_municipio[-5:]):
+            st.markdown(f"> **{fb['apelido']}:** {fb['texto']}")
+
+    # ------------------------------------------------------------------
+    # Teaser do Perfil — conquistas e progresso moraram aqui antes, agora
+    # ficam no Perfil (acessível a qualquer pessoa, sem senha)
     # ------------------------------------------------------------------
     st.divider()
     st.markdown(barra_secao(COR_DEMANDA), unsafe_allow_html=True)
     n_desbloqueadas, n_total_conquistas = resumo_conquistas(df)
-    st.markdown(
-        titulo_secao(
-            "trophy",
-            f"Sua jornada ({n_desbloqueadas} de {n_total_conquistas} conquistas)",
-            cor=COR_DEMANDA,
-        ),
-        unsafe_allow_html=True,
-    )
-
     explorados, total_municipios, fracao = progresso_exploracao()
-    st.markdown(
-        f"**Você já explorou {explorados} de {total_municipios} municípios "
-        f"do Ceará** ({fracao * 100:.0f}%)"
-    )
-    st.progress(fracao)
-    st.caption(
-        "Conta municípios que você abriu aqui na Demanda Cidadã ou clicou "
-        "no mapa do Simulador. Reinicia ao recarregar a página."
-    )
-
-    st.markdown("##### Conquistas")
-    conquistas = avaliar_conquistas(df)
-    for i in range(0, len(conquistas), 3):
-        for col, conquista in zip(st.columns(3), conquistas[i : i + 3]):
-            with col:
-                st.markdown(
-                    cartao_conquista(
-                        icone_nome=conquista["icone"],
-                        titulo=conquista["titulo"],
-                        descricao=conquista["descricao"],
-                        desbloqueada=conquista["desbloqueada"],
-                        atual=conquista["atual"],
-                        meta=conquista["meta"],
-                        cor=COR_DEMANDA,
-                    ),
-                    unsafe_allow_html=True,
-                )
+    col_teaser, col_btn_perfil = st.columns([3, 1])
+    with col_teaser:
+        st.markdown(
+            f"**{n_desbloqueadas} de {n_total_conquistas} conquistas** "
+            f"desbloqueadas · **{explorados} de {total_municipios} "
+            "municípios** explorados nesta sessão"
+        )
+        st.progress(fracao)
+    with col_btn_perfil:
+        if st.button(
+            "Ver meu Perfil →",
+            key="btn_ir_perfil_demanda",
+            use_container_width=True,
+        ):
+            abrir_perfil()
 
     with st.expander("Como esse pedido se conecta com o resto do app", icon=":material/help:"):
         st.markdown(
@@ -1080,44 +1215,62 @@ elif st.session_state.modo_app == MODOS[2]:
         height=420,
     )
 
-    st.markdown("##### Gerar card pra compartilhar")
-    municipio_card = st.selectbox(
-        "Escolha um município do ranking acima",
-        ranking_publico["Município"].tolist(),
+    st.divider()
+    st.markdown(
+        box_glossario(
+            "Por que baixar e compartilhar esse card?",
+            "Uma tabela técnica não sai do gabinete do gestor. Um card "
+            "pronto pra WhatsApp, Instagram ou uma matéria de jornal, "
+            "sim. É o <b>mesmo dado oficial</b> da tabela acima — só que "
+            "em formato feito pra circular e virar cobrança pública de "
+            "verdade, não só análise interna.",
+            cor=COR_SIMULADOR,
+        ),
+        unsafe_allow_html=True,
     )
-    linha_escolhida = ranking_publico.loc[
-        ranking_publico["Município"] == municipio_card
-    ].iloc[0]
 
-    col_preview, col_info = st.columns([1, 1.3])
-    with col_preview:
-        card_png = gerar_card_municipio(linha_escolhida, len(ranking_publico))
-        st.image(card_png, width=320)
-        st.download_button(
-            "Baixar card (PNG)",
-            icon=":material/download:",
-            data=card_png,
-            file_name=f"radar_cultural_{municipio_card.lower().replace(' ', '_')}.png",
-            mime="image/png",
-            use_container_width=True,
-        )
-    with col_info:
+    with st.container(border=True):
         st.markdown(
-            f"**{municipio_card}** é o **{int(linha_escolhida['#'])}º** "
-            f"município com maior déficit cultural do ranking (de "
-            f"{len(ranking_publico)} analisados).\n\n"
-            f"- Mesorregião: {linha_escolhida['Mesorregião']}\n"
-            f"- População: {int(linha_escolhida['População']):,}".replace(",", ".")
-            + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$, Censo 2022)']:.2f}\n"
-            f"- Equipamentos culturais (museu/teatro/cinema): "
-            f"{int(linha_escolhida['Equipamentos (de 3)'])} de 3\n"
-            f"- Índice de Prioridade: {linha_escolhida['Índice de Prioridade']:.2f}"
+            titulo_secao("share-2", "Gerar card pra compartilhar", COR_SIMULADOR),
+            unsafe_allow_html=True,
         )
-        st.caption(
-            "Formato retrato (1080×1350), pronto pra Stories/Instagram/"
-            "WhatsApp — o objetivo é que qualquer pessoa, jornalista ou "
-            "vereador possa baixar e cobrar publicamente."
+        municipio_card = st.selectbox(
+            "Escolha um município do ranking acima",
+            ranking_publico["Município"].tolist(),
         )
+        linha_escolhida = ranking_publico.loc[
+            ranking_publico["Município"] == municipio_card
+        ].iloc[0]
+
+        col_preview, col_info = st.columns([1, 1.3])
+        with col_preview:
+            card_png = gerar_card_municipio(linha_escolhida, len(ranking_publico))
+            st.image(card_png, width=320)
+            st.download_button(
+                "Baixar card (PNG)",
+                icon=":material/download:",
+                data=card_png,
+                file_name=f"radar_cultural_{municipio_card.lower().replace(' ', '_')}.png",
+                mime="image/png",
+                use_container_width=True,
+            )
+        with col_info:
+            st.markdown(
+                f"**{municipio_card}** é o **{int(linha_escolhida['#'])}º** "
+                f"município com maior déficit cultural do ranking (de "
+                f"{len(ranking_publico)} analisados).\n\n"
+                f"- Mesorregião: {linha_escolhida['Mesorregião']}\n"
+                f"- População: {int(linha_escolhida['População']):,}".replace(",", ".")
+                + f"\n- Renda per capita: R$ {linha_escolhida['Renda per capita (R$, Censo 2022)']:.2f}\n"
+                f"- Equipamentos culturais (museu/teatro/cinema): "
+                f"{int(linha_escolhida['Equipamentos (de 3)'])} de 3\n"
+                f"- Índice de Prioridade: {linha_escolhida['Índice de Prioridade']:.2f}"
+            )
+            st.caption(
+                "Formato retrato (1080×1350), pronto pra Stories/Instagram/"
+                "WhatsApp — qualquer pessoa, jornalista ou vereador pode "
+                "baixar e cobrar publicamente."
+            )
 
     with st.expander("Como esse ranking foi feito", icon=":material/help:"):
         st.markdown(

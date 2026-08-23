@@ -24,32 +24,39 @@ def inicializar_preferencias():
     st.session_state.setdefault("a11y_tamanho_texto", "Normal")
 
 
+@st.dialog("Acessibilidade")
+def abrir_acessibilidade():
+    """
+    Modal de configurações de acessibilidade — alto contraste, tamanho de
+    texto. Abre por cima da página (não é mais um expansor em linha) pra
+    poder ser acionado por um ícone compacto dentro do cabeçalho, junto
+    do ícone de Perfil.
+    """
+    st.checkbox(
+        "Modo alto contraste",
+        key="a11y_alto_contraste",
+        help="Troca a paleta por uma versão em preto/branco/amarelo, "
+        "com contraste bem mais forte",
+    )
+    st.select_slider(
+        "Tamanho do texto",
+        options=list(TAMANHOS_TEXTO.keys()),
+        key="a11y_tamanho_texto",
+    )
+    st.caption(
+        "Cada painel também tem um botão pra ouvir o resumo em voz alta."
+    )
+
+
 def renderizar_controles_topo():
-    """
-    Painel de acessibilidade — igual em todos os modos, sempre no topo da
-    página principal (não na sidebar). Ficar na sidebar exige clicar no
-    botão de abrir/fechar a barra lateral, que depende de o navegador
-    conseguir clicar nele — colocando aqui, o controle sempre aparece
-    sem precisar abrir nada.
-    """
-    with st.expander("Acessibilidade", expanded=False, icon=":material/accessibility_new:"):
-        col1, col2 = st.columns(2)
-        with col1:
-            st.checkbox(
-                "Modo alto contraste",
-                key="a11y_alto_contraste",
-                help="Troca a paleta por uma versão em preto/branco/amarelo, "
-                "com contraste bem mais forte",
-            )
-        with col2:
-            st.select_slider(
-                "Tamanho do texto",
-                options=list(TAMANHOS_TEXTO.keys()),
-                key="a11y_tamanho_texto",
-            )
-        st.caption(
-            "Cada painel também tem um botão pra ouvir o resumo em voz alta."
-        )
+    """Botão compacto que abre o modal de Acessibilidade."""
+    if st.button(
+        "Acessibilidade",
+        key="btn_abrir_acessibilidade",
+        icon=":material/accessibility_new:",
+        use_container_width=True,
+    ):
+        abrir_acessibilidade()
 
 
 CSS_ALTO_CONTRASTE = """

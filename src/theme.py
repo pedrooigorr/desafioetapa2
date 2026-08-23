@@ -984,5 +984,117 @@ div[data-testid="stElementContainer"]:has(.radar-marcador-link-metodologia)
     text-decoration-color: #C1440E;
 }
 
+/* ------------------------------------------------------------------
+   ÍCONES DO CABEÇALHO — Acessibilidade e Meu Perfil flutuam por cima
+   da barra terracota, alinhados à direita do título "Radar Cultural".
+   Os dois botões reais do Streamlit continuam no fluxo normal da
+   página (senão perderiam a interatividade) — o que muda é só a
+   posição visual, via position:fixed ancorado no topo da tela. Como os
+   dois abrem modal (não expandem em linha), flutuar funciona sem
+   desconectar visualmente o clique do conteúdo que abre.
+   ------------------------------------------------------------------ */
+div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
+    + div[data-testid="stHorizontalBlock"] {
+    position: fixed !important;
+    /* "top" conta a partir do topo da janela, não do topo do nosso
+       cabeçalho — precisa somar a altura da barra padrão do Streamlit
+       (Share/GitHub/⋮) que fica acima dele. Valor estimado; pode
+       precisar de ajuste fino depois de ver renderizado de verdade. */
+    top: 92px !important;
+    right: 6vw !important;
+    z-index: 999 !important;
+    width: auto !important;
+    gap: 10px;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
+    + div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
+    + div[data-testid="stHorizontalBlock"] .stButton button {
+    background: rgba(255, 253, 248, 0.14) !important;
+    border: 1.5px solid rgba(255, 253, 248, 0.55) !important;
+    color: #FFFDF8 !important;
+    border-radius: 999px !important;
+    font-size: 0.85rem !important;
+    padding: 6px 16px !important;
+    white-space: nowrap;
+}
+div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
+    + div[data-testid="stHorizontalBlock"] .stButton button:hover {
+    background: rgba(255, 253, 248, 0.26) !important;
+    border-color: #FFFDF8 !important;
+}
+/* Em telas estreitas (celular), o cabeçalho baixa de altura porque o
+   título quebra linha — os ícones descem junto pra não sobrepor o texto */
+@media (max-width: 640px) {
+    div[data-testid="stElementContainer"]:has(.radar-marcador-icones-header)
+        + div[data-testid="stHorizontalBlock"] {
+        position: static !important;
+        margin: -10px 0 14px 0;
+    }
+}
+/* ------------------------------------------------------------------
+   CARD DE FEEDBACK — avatar em círculo, autor/texto com hierarquia
+   própria e botões compactos (like/dislike/responder). Usado nas 3
+   features que exibem feedback.
+   ------------------------------------------------------------------ */
+.radar-feedback-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #FBEBD4;
+    border: 1.5px solid #E0CDB0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    line-height: 1;
+}
+.radar-feedback-autor {
+    font-weight: 700;
+    font-size: 0.94rem;
+    color: #1A0F08;
+    margin-top: 2px;
+}
+.radar-feedback-local {
+    font-weight: 500;
+    color: #8A6A50;
+}
+.radar-feedback-texto {
+    color: #3E2723;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin: 4px 0 2px 0;
+}
+.radar-feedback-resposta {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #FAF6F0;
+    border-left: 3px solid #E0CDB0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 6px 0 0 20px;
+    font-size: 0.87rem;
+    color: #3E2723;
+    line-height: 1.45;
+}
+.radar-feedback-resposta-avatar {
+    font-size: 15px;
+    line-height: 1.4;
+    flex: 0 0 auto;
+}
+/* Botões de ação do card mais compactos que o padrão do Streamlit */
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.radar-marcador-feedback-card)
+    .stButton button {
+    padding: 2px 12px !important;
+    min-height: 32px !important;
+    font-size: 0.82rem !important;
+    border-radius: 8px !important;
+}
+
 </style>
 """

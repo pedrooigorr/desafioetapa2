@@ -137,12 +137,25 @@ def ranking_pedidos_ceara() -> list[dict]:
 # ----------------------------------------------------------------------
 def inicializar_feedbacks():
     st.session_state.setdefault("feedbacks", [])
+    st.session_state.setdefault("feedback_proximo_id", 1)
+    st.session_state.setdefault("votos_feedback", {})
 
 
-def registrar_feedback(municipio: str, apelido: str, texto: str):
+def registrar_feedback(municipio: str, apelido: str, avatar: str, texto: str):
+    novo_id = st.session_state.get("feedback_proximo_id", 1)
     st.session_state.setdefault("feedbacks", []).append(
-        {"municipio": municipio, "apelido": apelido or "Anônimo", "texto": texto}
+        {
+            "id": novo_id,
+            "municipio": municipio,
+            "apelido": apelido or "Anônimo",
+            "avatar": avatar or "🎭",
+            "texto": texto,
+            "likes": 0,
+            "dislikes": 0,
+            "respostas": [],
+        }
     )
+    st.session_state["feedback_proximo_id"] = novo_id + 1
 
 
 def listar_feedbacks(municipio: str | None = None) -> list[dict]:
@@ -154,3 +167,44 @@ def listar_feedbacks(municipio: str | None = None) -> list[dict]:
 
 def total_feedbacks() -> int:
     return len(st.session_state.get("feedbacks", []))
+
+
+def _buscar_feedback(feedback_id: int) -> dict | None:
+    for fb in st.session_state.get("feedbacks", []):
+        if fb["id"] == feedback_id:
+            return fb
+    return None
+
+
+def votar_feedback(feedback_id: int, tipo: str):
+    """
+    tipo: "like" ou "dislike". Clicar de novo no mesmo botão desfaz o
+    voto (toggle); clicar no botão oposto troca o voto — uma sessão só
+    conta um voto por feedback, nunca os dois ao mesmo tempo.
+    """
+    fb = _buscar_feedback(feedback_id)
+    if fb is None:
+        return
+    votos = st.session_state.setdefault("votos_feedback", {})
+    voto_anterior = votos.get(feedback_id)
+
+    if voto_anterior == tipo:
+        fb[f"{tipo}s"] -= 1
+        del votos[feedback_id]
+    else:
+        if voto_anterior:
+            fb[f"{voto_anterior}s"] -= 1
+        fb[f"{tipo}s"] += 1
+        votos[feedback_id] = tipo
+
+
+def voto_atual_feedback(feedback_id: int) -> str | None:
+    return st.session_state.get("votos_feedback", {}).get(feedback_id)
+
+
+def responder_feedback(feedback_id: int, apelido: str, avatar: str, texto: str):
+    fb = _buscar_feedback(feedback_id)
+    if fb is not None:
+        fb.setdefault("respostas", []).append(
+            {"apelido": apelido or "Anônimo", "avatar": avatar or "🎭", "texto": texto}
+        )

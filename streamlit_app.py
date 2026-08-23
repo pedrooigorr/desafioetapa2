@@ -55,8 +55,11 @@ from src.demanda import (
     ranking_pedidos_ceara,
     registrar_feedback,
     registrar_pedido,
+    responder_feedback,
     total_feedbacks,
     total_pedidos,
+    votar_feedback,
+    voto_atual_feedback,
 )
 from src.gamificacao import (
     AVATARES,
@@ -156,6 +159,175 @@ def _render_resumo(texto: str, key: str):
         botao_ouvir(texto, key=key)
 
 
+def _render_feedback_card(fb: dict, key_prefix: str):
+    """
+    Um comentário completo: avatar + apelido de quem escreveu, texto,
+    like/dislike (um voto por sessão, clicável de novo pra desfazer) e
+    uma seção pra responder. Usado nas 3 features que mostram feedback
+    (Demanda Cidadã, Painel do Gestor, Simulador & Transparência) —
+    mesmo componente em todo lugar, pra manter a experiência igual.
+    """
+    voto_atual = voto_atual_feedback(fb["id"])
+    respostas = fb.get("respostas", [])
+
+    with st.container(border=True):
+        st.markdown(marcador("feedback-card"), unsafe_allow_html=True)
+        col_avatar, col_conteudo = st.columns([1, 14])
+        with col_avatar:
+            st.markdown(
+                f'<div class="radar-feedback-avatar">{fb["avatar"]}</div>',
+                unsafe_allow_html=True,
+            )
+        with col_conteudo:
+            st.markdown(
+                f'<div class="radar-feedback-autor">{fb["apelido"]}'
+                f'<span class="radar-feedback-local"> · {fb["municipio"]}</span></div>'
+                f'<div class="radar-feedback-texto">{fb["texto"]}</div>',
+                unsafe_allow_html=True,
+            )
+
+        # Botões compactos: colunas estreitas + sem use_container_width,
+        # pra não esticarem pela largura toda do card
+        col_like, col_dislike, col_resp, _ = st.columns([1, 1, 1.4, 6])
+        with col_like:
+            if st.button(
+                str(fb["likes"]),
+                key=f"{key_prefix}_like_{fb['id']}",
+                icon=":material/thumb_up:",
+                type="primary" if voto_atual == "like" else "secondary",
+            ):
+                votar_feedback(fb["id"], "like")
+                st.rerun()
+        with col_dislike:
+            if st.button(
+                str(fb["dislikes"]),
+                key=f"{key_prefix}_dislike_{fb['id']}",
+                icon=":material/thumb_down:",
+                type="primary" if voto_atual == "dislike" else "secondary",
+            ):
+                votar_feedback(fb["id"], "dislike")
+                st.rerun()
+        with col_resp:
+            chave_aberto = f"{key_prefix}_resp_aberta_{fb['id']}"
+            if st.button(
+                f"Responder{f' ({len(respostas)})' if respostas else ''}",
+                key=f"{key_prefix}_toggle_resp_{fb['id']}",
+                icon=":material/reply:",
+            ):
+                st.session_state[chave_aberto] = not st.session_state.get(
+                    chave_aberto, False
+                )
+
+        for resp in respostas:
+            st.markdown(
+                f'<div class="radar-feedback-resposta">'
+                f'<span class="radar-feedback-resposta-avatar">{resp["avatar"]}</span>'
+                f'<span><b>{resp["apelido"]}</b> — {resp["texto"]}</span>'
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+        if st.session_state.get(f"{key_prefix}_resp_aberta_{fb['id']}", False):
+            texto_resposta = st.text_area(
+                "Sua resposta",
+                key=f"{key_prefix}_input_resposta_{fb['id']}",
+                label_visibility="collapsed",
+                placeholder="Escreva uma resposta pra esse comentário...",
+                max_chars=300,
+                height=80,
+            )
+            col_env, _ = st.columns([1.4, 6])
+            with col_env:
+                if st.button(
+                    "Enviar",
+                    key=f"{key_prefix}_btn_resposta_{fb['id']}",
+                    icon=":material/send:",
+                    type="primary",
+                ):
+                    if texto_resposta.strip():
+                        responder_feedback(
+                            fb["id"],
+                            nome_exibicao(),
+                            st.session_state.get("perfil_avatar", "🎭"),
+                            texto_resposta.strip(),
+                        )
+                        st.session_state[f"{key_prefix}_resp_aberta_{fb['id']}"] = False
+                        st.rerun()
+                    else:
+                        st.warning("Escreve alguma coisa antes de enviar.")
+
+
+def _render_secao_feedback(df: pd.DataFrame, key_prefix: str, cor: str = "#8C1C13"):
+    """
+    Seção completa de feedback: título com contador, filtros por
+    mesorregião/município, e a lista de comentários (mais recente
+    primeiro). Reaproveitada no Painel do Gestor e no Simulador &
+    Transparência — o mesmo feedback coletado na Demanda Cidadã fica
+    visível (e respondível) nas duas frentes de decisão do projeto.
+    """
+    st.markdown(barra_secao(cor), unsafe_allow_html=True)
+    st.markdown(
+        titulo_secao("message-square", f"Feedback da população ({total_feedbacks()})", cor=cor),
+        unsafe_allow_html=True,
+    )
+
+    todos_feedbacks = listar_feedbacks()
+    if not todos_feedbacks:
+        st.markdown(
+            estado_vazio(
+                "message-square",
+                "Nenhum feedback registrado ainda nesta sessão. Ele "
+                "aparece aqui assim que alguém escrever um na Demanda "
+                "Cidadã.",
+                cor=cor,
+            ),
+            unsafe_allow_html=True,
+        )
+        return
+
+    df_feedback = pd.DataFrame(todos_feedbacks).merge(
+        df[["municipio", "mesorregiao"]], on="municipio", how="left"
+    )
+
+    col_filtro_meso, col_filtro_mun = st.columns(2)
+    with col_filtro_meso:
+        mesos_com_feedback = sorted(df_feedback["mesorregiao"].dropna().unique())
+        filtro_meso_fb = st.multiselect(
+            "Filtrar por mesorregião",
+            mesos_com_feedback,
+            default=mesos_com_feedback,
+            key=f"{key_prefix}_filtro_meso",
+        )
+    with col_filtro_mun:
+        municipios_com_feedback = sorted(df_feedback["municipio"].unique())
+        filtro_mun_fb = st.multiselect(
+            "Filtrar por município",
+            municipios_com_feedback,
+            key=f"{key_prefix}_filtro_mun",
+            help="Deixe vazio pra ver todos os municípios da mesorregião escolhida",
+        )
+
+    df_feedback_filtrado = df_feedback[df_feedback["mesorregiao"].isin(filtro_meso_fb)]
+    if filtro_mun_fb:
+        df_feedback_filtrado = df_feedback_filtrado[
+            df_feedback_filtrado["municipio"].isin(filtro_mun_fb)
+        ]
+
+    st.caption(
+        f"{len(df_feedback_filtrado)} de {len(df_feedback)} feedback(s) "
+        "— conforme o filtro acima"
+    )
+
+    if df_feedback_filtrado.empty:
+        st.caption("Nenhum feedback com esse filtro.")
+        return
+
+    ids_filtrados = set(df_feedback_filtrado["id"])
+    for fb in reversed(todos_feedbacks):
+        if fb["id"] in ids_filtrados:
+            _render_feedback_card(fb, key_prefix=f"{key_prefix}_{fb['id']}")
+
+
 @st.dialog("Meu Perfil", width="large")
 def abrir_perfil():
     """
@@ -178,24 +350,37 @@ def abrir_perfil():
             f"</div>",
             unsafe_allow_html=True,
         )
-        st.selectbox(
+        # Chave do widget ("dialog_...") separada da chave durável
+        # ("perfil_..."): como o modal só executa quando está aberto, um
+        # valor preso só na chave do widget some do session_state assim
+        # que o modal fecha ou não é redesenhado numa execução — a
+        # reatribuição explícita abaixo garante que o apelido/avatar
+        # sobrevivem mesmo depois do modal fechar (ex: ao enviar um
+        # feedback na Demanda Cidadã, sem reabrir o Perfil antes).
+        avatar_escolhido = st.selectbox(
             "Avatar",
             AVATARES,
-            key="perfil_avatar",
+            index=AVATARES.index(st.session_state.get("perfil_avatar", AVATARES[0])),
+            key="dialog_avatar_input",
             label_visibility="collapsed",
         )
+        st.session_state["perfil_avatar"] = avatar_escolhido
     with col_dados:
-        st.text_input(
+        apelido_novo = st.text_input(
             "Apelido",
-            key="perfil_apelido",
+            value=st.session_state.get("perfil_apelido", ""),
+            key="dialog_apelido_input",
             placeholder="Como quer ser chamado(a)?",
             max_chars=30,
         )
-        st.text_input(
+        st.session_state["perfil_apelido"] = apelido_novo
+        local_novo = st.text_input(
             "Seu município (opcional)",
-            key="perfil_local",
+            value=st.session_state.get("perfil_local", ""),
+            key="dialog_local_input",
             placeholder="De onde você é?",
         )
+        st.session_state["perfil_local"] = local_novo
 
     if not perfil_definido():
         st.info("Escolhe um apelido acima pra personalizar seu perfil.")
@@ -247,18 +432,17 @@ def abrir_perfil():
 
 
 st.markdown(cabecalho_app(), unsafe_allow_html=True)
-st.markdown(
-    "### Bem-vindo(a) ao Radar Cultural!\n"
-    "**Quem no Ceará tem acesso a cultura perto de casa — e quem não "
-    "tem?** Cruzamos dados oficiais dos 184 municípios pra mostrar onde "
-    "a cultura está concentrada e onde ela quase não chega."
-)
-renderizar_controles_topo()
 
-# Ícone de acesso ao Perfil — visível pra qualquer pessoa (gestor ou
-# cidadão comum), sem login. Abre como modal (janela por cima da
-# página), não como aba nova — o projeto continua sendo uma página só.
-_col_perfil, _, _ = st.columns([1.2, 1, 1])
+# Ícones de Acessibilidade e Perfil — via CSS (ver .radar-icones-header em
+# src/theme.py) ficam visualmente dentro do próprio cabeçalho, no canto
+# superior direito, ao lado do título "Radar Cultural". Os dois abrem
+# modal (janela por cima da página) quando clicados — nenhum expande em
+# linha, por isso dá pra flutuar os dois lá em cima sem ficar
+# desconectado do conteúdo que abrem.
+st.markdown(marcador("icones-header"), unsafe_allow_html=True)
+_col_a11y, _col_perfil, _, _ = st.columns([1, 1.6, 1, 1])
+with _col_a11y:
+    renderizar_controles_topo()
 with _col_perfil:
     _nome_perfil = nome_exibicao() if perfil_definido() else "Meu Perfil"
     _avatar_atual = st.session_state.get("perfil_avatar", "🎭")
@@ -269,6 +453,13 @@ with _col_perfil:
         icon=":material/account_circle:",
     ):
         abrir_perfil()
+
+st.markdown(
+    "### Bem-vindo(a) ao Radar Cultural!\n"
+    "**Quem no Ceará tem acesso a cultura perto de casa — e quem não "
+    "tem?** Cruzamos dados oficiais dos 184 municípios pra mostrar onde "
+    "a cultura está concentrada e onde ela quase não chega."
+)
 
 # ----------------------------------------------------------------------
 # Ordem pensada pra contar a história antes de mostrar o dado: primeiro
@@ -806,6 +997,14 @@ if st.session_state.modo_app == MODOS[0]:
                 height=650,
             )
 
+        # ------------------------------------------------------------------
+        # Feedback da população — mesmo componente usado no Simulador &
+        # Transparência, pra manter a experiência (e os likes/respostas)
+        # consistentes nas duas frentes de decisão do projeto.
+        # ------------------------------------------------------------------
+        st.divider()
+        _render_secao_feedback(df, key_prefix="gestor", cor="#8C1C13")
+
         with st.expander("Como esse ranking foi feito", icon=":material/help:"):
             st.markdown(
                 "Criamos o **Índice de Prioridade** para combinar, num só "
@@ -850,6 +1049,24 @@ elif st.session_state.modo_app == MODOS[1]:
         "investimento deveria ir."
     )
     _render_resumo(resumo_demanda_cidada(), key="resumo_demanda")
+
+    with st.expander("Onde a atenção é mais urgente agora?", icon=":material/priority_high:"):
+        st.caption(
+            "Os 8 municípios com maior Índice de Prioridade — combina "
+            "ausência de museu/teatro/cinema com baixa renda. Dado real, "
+            "calculado no Painel do Gestor."
+        )
+        top_prioritarios = montar_tabela_prioritarios(df, n=8)[
+            ["Município", "Mesorregião", "Deserto Cultural", "Índice de Prioridade"]
+        ]
+        st.dataframe(
+            top_prioritarios.style.set_properties(**estilo_texto_tabela())
+            .apply(destacar_coluna, subset=["Índice de Prioridade"])
+            .format({"Índice de Prioridade": "{:.2f}"}),
+            use_container_width=True,
+            hide_index=True,
+        )
+        st.caption("Escolha um desses no seletor abaixo pra participar.")
 
     municipio_cidadao = st.selectbox(
         "Meu município", sorted(df["municipio"].unique())
@@ -985,7 +1202,10 @@ elif st.session_state.modo_app == MODOS[1]:
     if st.button("Enviar feedback", key="btn_enviar_feedback"):
         if texto_feedback.strip():
             registrar_feedback(
-                municipio_cidadao, nome_exibicao(), texto_feedback.strip()
+                municipio_cidadao,
+                nome_exibicao(),
+                st.session_state.get("perfil_avatar", "🎭"),
+                texto_feedback.strip(),
             )
             st.success("Feedback registrado — obrigado por contribuir!")
             st.rerun()
@@ -999,7 +1219,7 @@ elif st.session_state.modo_app == MODOS[1]:
             f"({len(feedbacks_municipio)})"
         )
         for fb in reversed(feedbacks_municipio[-5:]):
-            st.markdown(f"> **{fb['apelido']}:** {fb['texto']}")
+            _render_feedback_card(fb, key_prefix=f"demanda_{fb['id']}")
 
     # ------------------------------------------------------------------
     # Teaser do Perfil — conquistas e progresso moraram aqui antes, agora
@@ -1040,6 +1260,15 @@ elif st.session_state.modo_app == MODOS[1]:
             "navegador — reinicia ao recarregar a página, mesma decisão "
             "de escopo do resto do protótipo."
         )
+
+    # ------------------------------------------------------------------
+    # Feedback de todo o Ceará — mesma seção filtrável que aparece no
+    # Painel do Gestor e no Simulador. Acima, logo depois do formulário,
+    # a pessoa vê só o do próprio município; aqui embaixo dá pra explorar
+    # o que o estado inteiro está dizendo.
+    # ------------------------------------------------------------------
+    st.divider()
+    _render_secao_feedback(df, key_prefix="demanda_geral", cor=COR_DEMANDA)
 
 
 # ========================================================================
@@ -1282,6 +1511,15 @@ elif st.session_state.modo_app == MODOS[2]:
             "pensado pra circular fora do ambiente de gestão — em redes "
             "sociais, grupos de WhatsApp, matérias de jornal local."
         )
+
+    # ------------------------------------------------------------------
+    # Feedback da população — antes de simular ou baixar um card, dá pra
+    # ver o que a população já disse sobre esses municípios na Demanda
+    # Cidadã. Mesmo componente do Painel do Gestor (like/dislike/resposta
+    # incluídos).
+    # ------------------------------------------------------------------
+    st.divider()
+    _render_secao_feedback(df, key_prefix="simulador", cor=COR_SIMULADOR)
 
     st.divider()
     st.caption(

@@ -14,10 +14,9 @@ from src.ceara_boundary import CEARA_GEOJSON
 from src.data_loader import EQUIPAMENTOS
 from src.mascara_fora_ceara import MASCARA_GEOJSON
 from src.theme import (
-    NORDESTE_DISCRETA,
-    NORDESTE_SEQUENCIAL,
     TEXTO_ESCURO,
     aplicar_texto_escuro,
+    paleta_ativa,
 )
 
 _CEARA_CENTRO = {"lat": -5.32, "lon": -39.34}
@@ -40,6 +39,7 @@ def mapa_municipios(
     mapa já abre centralizado e com zoom nele, e ganha um halo dourado
     ao redor do ponto pra confirmar visualmente qual foi encontrado.
     """
+    paleta = paleta_ativa()
     df = df.copy()
     # Raiz quadrada comprime a escala: Fortaleza (~2,4 mi hab.) não deixa os
     # municípios pequenos praticamente invisíveis no mapa
@@ -79,10 +79,10 @@ def mapa_municipios(
             locations=["CE"],
             z=[1],
             featureidkey="properties.SIGLA",
-            colorscale=[[0, "#C1440E"], [1, "#C1440E"]],
+            colorscale=[[0, paleta["deserto"]], [1, paleta["deserto"]]],
             showscale=False,
             marker_opacity=0,
-            marker_line_color="#C1440E",
+            marker_line_color=paleta["deserto"],
             marker_line_width=2.5,
             hoverinfo="skip",
         )
@@ -120,7 +120,7 @@ def mapa_municipios(
             "lat": False,
             "lon": False,
         },
-        color_continuous_scale=NORDESTE_SEQUENCIAL,
+        color_continuous_scale=paleta["sequencial"],
         size_max=27,
         labels={
             "renda_per_capita": "Renda per capita (R$, Censo 2022)",
@@ -138,7 +138,7 @@ def mapa_municipios(
         height=altura,
         margin={"t": 10, "l": 0, "r": 0, "b": 0},
         coloraxis={
-            "colorscale": NORDESTE_SEQUENCIAL,
+            "colorscale": paleta["sequencial"],
             "cmin": df["renda_per_capita"].min(),
             "cmax": df["renda_per_capita"].max(),
             "colorbar": {
@@ -170,6 +170,7 @@ def mapa_simulador(
     mapa já abre centralizado e com zoom nele, com um halo dourado ao
     redor do ponto pra confirmar visualmente qual foi encontrado.
     """
+    paleta = paleta_ativa()
     df = df.copy()
     df["_status"] = df[coluna_equipamento].map(
         {True: "Tem", False: "Deserto Cultural"}
@@ -205,10 +206,10 @@ def mapa_simulador(
             locations=["CE"],
             z=[1],
             featureidkey="properties.SIGLA",
-            colorscale=[[0, "#C1440E"], [1, "#C1440E"]],
+            colorscale=[[0, paleta["deserto"]], [1, paleta["deserto"]]],
             showscale=False,
             marker_opacity=0,
-            marker_line_color="#C1440E",
+            marker_line_color=paleta["deserto"],
             marker_line_width=2.5,
             hoverinfo="skip",
         )
@@ -234,10 +235,11 @@ def mapa_simulador(
         color="_status",
         custom_data=["municipio"],
         hover_name="municipio",
-        # Azul x terracota em vez de verde x vermelho: a combinação
-        # verde/vermelho é justamente a mais difícil pra quem tem
-        # daltonismo (protanopia/deuteranopia), que é o tipo mais comum
-        color_discrete_map={"Tem": "#1B7A8C", "Deserto Cultural": "#C1440E"},
+        # O par de cores vem da paleta ativa (paleta_ativa()["tem"]/
+        # ["nao_tem"]) — já nasce evitando a combinação verde/vermelho,
+        # a mais difícil pra quem tem daltonismo, e se ajusta ainda mais
+        # conforme o modo escolhido em Acessibilidade
+        color_discrete_map={"Tem": paleta["tem"], "Deserto Cultural": paleta["nao_tem"]},
         size_max=26,
         labels={"_status": "Situação"},
     )
@@ -282,7 +284,7 @@ def grafico_renda_x_equipamentos(df: pd.DataFrame, altura: int = 420):
             "mesorregiao": "Mesorregião",
         },
         opacity=0.8,
-        color_discrete_sequence=NORDESTE_DISCRETA,
+        color_discrete_sequence=paleta_ativa()["discreta"],
     )
     fig.update_layout(yaxis={"dtick": 1}, height=altura, margin={"t": 10})
     aplicar_texto_escuro(fig)
@@ -307,7 +309,7 @@ def grafico_presenca_equipamentos(df: pd.DataFrame, altura: int = 420):
         orientation="h",
         text_auto=".1f",
         color="% dos municípios que têm",
-        color_continuous_scale=NORDESTE_SEQUENCIAL,
+        color_continuous_scale=paleta_ativa()["sequencial"],
     )
     fig.update_traces(
         textposition="outside",
@@ -351,7 +353,7 @@ def grafico_equidade_por_mesorregiao(df: pd.DataFrame, altura: int = 420):
             "pct_sem_equipamento": "% de municípios sem museu, teatro ou cinema",
             "renda_media": "Renda média per capita (R$)",
         },
-        color_continuous_scale=NORDESTE_SEQUENCIAL,
+        color_continuous_scale=paleta_ativa()["sequencial"],
     )
     fig.update_traces(
         textposition="outside",

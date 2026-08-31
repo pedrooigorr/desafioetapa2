@@ -90,13 +90,7 @@ from src.simulador import (
     calcular_simulacao,
 )
 from src.theme import (
-    COR_DEMANDA,
-    COR_DEMANDA_CLARO,
-    COR_GESTOR,
-    COR_GESTOR_CLARO,
     COR_NEUTRA,
-    COR_SIMULADOR,
-    COR_SIMULADOR_CLARO,
     CSS_CUSTOMIZADO,
     barra_secao,
     box_glossario,
@@ -110,6 +104,7 @@ from src.theme import (
     estado_vazio,
     estilo_texto_tabela,
     marcador,
+    paleta_ativa,
     rodape_app,
     selo_deserto,
     titulo_secao,
@@ -130,6 +125,17 @@ inicializar_preferencias()
 inicializar_gamificacao()
 
 df = carregar_dados()
+
+# Cores das 3 features + paletas de gráfico, conforme o modo de
+# daltonismo escolhido em Acessibilidade (recalculada a cada rerun, então
+# reflete a escolha mais recente sem precisar recarregar a página)
+CORES = paleta_ativa()
+COR_GESTOR = CORES["gestor"]
+COR_GESTOR_CLARO = CORES["gestor_claro"]
+COR_DEMANDA = CORES["demanda"]
+COR_DEMANDA_CLARO = CORES["demanda_claro"]
+COR_SIMULADOR = CORES["simulador"]
+COR_SIMULADOR_CLARO = CORES["simulador_claro"]
 
 # ----------------------------------------------------------------------
 # CSS de acessibilidade — os controles em si aparecem logo abaixo do

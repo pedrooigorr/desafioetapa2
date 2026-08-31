@@ -6,7 +6,16 @@ tabelas e no CSS customizado da interface.
 Também concentra os componentes visuais reaproveitados pelo app: header,
 footer, cards de apresentação (hero), cards de KPI, chips de status e as
 tarjas coloridas que dão identidade a cada seção.
+
+Suporte a daltonismo: as cores que DIFERENCIAM categorias na tela ao mesmo
+tempo (as 3 cores das features, o par "Tem/Deserto Cultural" do mapa do
+Simulador, e as paletas dos gráficos) trocam de conjunto conforme o modo
+escolhido em Acessibilidade — ver `_PALETAS_DALTONISMO` e `paleta_ativa()`
+logo abaixo. Cores usadas sozinhas (o terracota do header, botões, links)
+não mudam: não há ambiguidade a resolver quando só existe uma cor na tela.
 """
+
+import streamlit as st
 
 from src.icones import icone
 
@@ -44,6 +53,94 @@ COR_SIMULADOR_CLARO = "#FBF0DC"
 # dessas páginas transversais)
 COR_NEUTRA = "#6B4226"        # marrom-couro
 COR_NEUTRA_CLARO = "#EFE6DC"
+
+# ----------------------------------------------------------------------
+# Modos de daltonismo — cada um substitui só as cores que competem entre
+# si na mesma tela (as 3 cores de feature, o par "Tem"/"Deserto Cultural"
+# do Simulador, e as paletas dos gráficos). "Anopia" (ausência total) e
+# "anomalia" (percepção reduzida) do mesmo eixo de cor são tratadas pelo
+# mesmo conjunto de cores — a correção que ajuda quem não distingue duas
+# cores de jeito nenhum também ajuda quem só as distingue com dificuldade.
+#
+#   - Protanopia/Protanomalia  → eixo do vermelho (cone L) comprometido
+#   - Deuteranopia/Deuteranomalia → eixo do verde (cone M) comprometido
+#   - Tritanopia/Tritanomalia  → eixo do azul/amarelo (cone S) comprometido
+#
+# "protan" e "deutan" partem da paleta Okabe–Ito (Color Universal Design),
+# uma das poucas paletas qualitativas com segurança documentada para os
+# dois tipos de daltonismo vermelho-verde ao mesmo tempo. "tritan" evita
+# pares azul/verde e amarelo/violeta (os que se confundem nesse eixo) e
+# usa a distinção vermelho-verde, que segue intacta na tritanopia.
+# ----------------------------------------------------------------------
+_PALETAS_DALTONISMO = {
+    "padrao": {
+        "gestor": "#1B7A8C", "gestor_claro": "#E3F0F2",
+        "demanda": "#4C6444", "demanda_claro": "#EAF0E4",
+        "simulador": "#B8792A", "simulador_claro": "#FBF0DC",
+        "deserto": "#C1440E", "deserto_claro": "#FBEBD4",
+        "tem": "#1B7A8C", "nao_tem": "#C1440E",
+        "discreta": [
+            "#C1440E", "#F2A93B", "#1B7A8C", "#4C6444",
+            "#8C1C13", "#D9A441", "#6B4226",
+        ],
+        "sequencial": ["#F5C466", "#F2A93B", "#C1440E", "#7A2E0E"],
+    },
+    "protan": {
+        "gestor": "#0072B2", "gestor_claro": "#DCEBF5",
+        "demanda": "#009E73", "demanda_claro": "#DAF0E9",
+        "simulador": "#E69F00", "simulador_claro": "#FBEBD1",
+        "deserto": "#D55E00", "deserto_claro": "#FBE0D1",
+        "tem": "#0072B2", "nao_tem": "#D55E00",
+        "discreta": [
+            "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+            "#0072B2", "#D55E00", "#CC79A7",
+        ],
+        "sequencial": ["#DCEBF5", "#9CC6E5", "#3E86C4", "#0B3D63"],
+    },
+    "deutan": {
+        "gestor": "#0072B2", "gestor_claro": "#DCEBF5",
+        "demanda": "#CC79A7", "demanda_claro": "#F3E1EC",
+        "simulador": "#E69F00", "simulador_claro": "#FBEBD1",
+        "deserto": "#D55E00", "deserto_claro": "#FBE0D1",
+        "tem": "#0072B2", "nao_tem": "#D55E00",
+        "discreta": [
+            "#0072B2", "#E69F00", "#56B4E9", "#CC79A7",
+            "#D55E00", "#F0E442", "#009E73",
+        ],
+        "sequencial": ["#DFF3F0", "#8FD0C5", "#2C9C87", "#0B4F43"],
+    },
+    "tritan": {
+        "gestor": "#2E7D32", "gestor_claro": "#E3F0E3",
+        "demanda": "#C62828", "demanda_claro": "#FBE3E3",
+        "simulador": "#EF6C00", "simulador_claro": "#FDEBD8",
+        "deserto": "#8B3A3A", "deserto_claro": "#F0DCDC",
+        "tem": "#2E7D32", "nao_tem": "#8B3A3A",
+        "discreta": [
+            "#D7263D", "#2E7D32", "#F46036", "#6D4C41",
+            "#AD1457", "#7C7C3A", "#4E342E",
+        ],
+        "sequencial": ["#E8F5E9", "#A5D6A7", "#43A047", "#1B5E20"],
+    },
+}
+
+# Rótulos exibidos no seletor do painel de Acessibilidade
+MODOS_DALTONISMO = {
+    "padrao": "Padrão",
+    "protan": "Protanopia / Protanomalia",
+    "deutan": "Deuteranopia / Deuteranomalia",
+    "tritan": "Tritanopia / Tritanomalia",
+}
+
+
+def paleta_ativa() -> dict:
+    """
+    Devolve o conjunto de cores em uso agora, conforme o modo escolhido
+    em Acessibilidade (`st.session_state["a11y_daltonismo"]`). Chamada a
+    cada rerun do Streamlit, então reflete a escolha mais recente sem
+    precisar recarregar a página.
+    """
+    modo = st.session_state.get("a11y_daltonismo", "padrao")
+    return _PALETAS_DALTONISMO.get(modo, _PALETAS_DALTONISMO["padrao"])
 
 
 def cabecalho_app() -> str:
@@ -93,8 +190,7 @@ def rodape_app() -> str:
 
 
 # Cores usadas para colorir a tabela de municípios prioritários
-_TABELA_COR_MIN = (251, 235, 212)  # areia clara
-_TABELA_COR_MAX = (193, 68, 14)  # terracota
+_TABELA_COR_MIN = (251, 235, 212)  # areia clara — não muda por modo, é só o "vazio"
 
 # Texto preto/marrom bem escuro e maior, para dar destaque às tabelas
 _TEXTO_DESTAQUE = "color: #1A0F08; font-weight: 700; font-size: 15px;"
@@ -104,11 +200,28 @@ _TEXTO_DESTAQUE = "color: #1A0F08; font-weight: 700; font-size: 15px;"
 TEXTO_ESCURO = "#1A0F08"
 
 
+def _hex_para_rgb(hexadecimal: str) -> tuple[int, int, int]:
+    h = hexadecimal.lstrip("#")
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+
+
+def _escurecer(hexadecimal: str, fator: float = 0.62) -> str:
+    """Escurece uma cor hex multiplicando cada canal pelo fator (0 a 1)."""
+    r, g, b = _hex_para_rgb(hexadecimal)
+    return f"#{int(r * fator):02X}{int(g * fator):02X}{int(b * fator):02X}"
+
+
 def _interpolar_cor(valor: float, vmin: float, vmax: float) -> str:
-    """Interpola entre areia clara e terracota conforme o valor (0 a 1)."""
+    """
+    Interpola entre areia clara e a cor de "Deserto Cultural" do modo de
+    cores ativo, conforme o valor (0 a 1). O sinal principal do gradiente
+    é a luminosidade (claro → escuro), que se mantém legível em qualquer
+    tipo de daltonismo — a matiz só reforça, nunca é a única pista.
+    """
+    cor_max = _hex_para_rgb(paleta_ativa()["deserto"])
     t = 0.0 if vmax == vmin else (valor - vmin) / (vmax - vmin)
     r, g, b = (
-        int(_TABELA_COR_MIN[i] + t * (_TABELA_COR_MAX[i] - _TABELA_COR_MIN[i]))
+        int(_TABELA_COR_MIN[i] + t * (cor_max[i] - _TABELA_COR_MIN[i]))
         for i in range(3)
     )
     return f"background-color: rgb({r},{g},{b}); {_TEXTO_DESTAQUE}"
@@ -205,11 +318,16 @@ def chip_equipamento(nome: str, tem: bool) -> str:
     """
     Chip compacto de status de um equipamento cultural num município —
     ícone do próprio equipamento (Lucide) em vez de um check/x genérico,
-    verde-cactos pra "tem" e terracota pra "não tem". Substitui os blocos
-    grandes e saturados da Demanda Cidadã: comunica o mesmo, sem dominar
-    visualmente a página.
+    verde-cactos pra "tem" e terracota pra "não tem" (cores que se ajustam
+    ao modo de daltonismo ativo). Substitui os blocos grandes e saturados
+    da Demanda Cidadã: comunica o mesmo, sem dominar visualmente a página.
     """
-    cor, fundo = ("#4C6444", "#EAF0E4") if tem else ("#C1440E", "#FBEBD4")
+    paleta = paleta_ativa()
+    cor, fundo = (
+        (paleta["demanda"], paleta["demanda_claro"])
+        if tem
+        else (paleta["deserto"], paleta["deserto_claro"])
+    )
     icone_nome = ICONE_EQUIPAMENTO.get(nome, "landmark")
     return (
         f'<div class="radar-chip" style="border-color:{cor}; background:{fundo};">'
@@ -220,7 +338,7 @@ def chip_equipamento(nome: str, tem: bool) -> str:
     )
 
 
-def estado_vazio(icone_nome: str, texto: str, cor: str = "#B8792A") -> str:
+def estado_vazio(icone_nome: str, texto: str, cor: str | None = None) -> str:
     """
     Bloco de estado vazio com ícone Lucide grande + texto — usado nos
     dois pontos do app onde "nada aconteceu ainda" (Simulador antes do
@@ -228,6 +346,7 @@ def estado_vazio(icone_nome: str, texto: str, cor: str = "#B8792A") -> str:
     só uma caixa de texto azul (st.info), que fica igual a qualquer
     outro aviso do app e não comunica "está vazio por enquanto".
     """
+    cor = cor or paleta_ativa()["simulador"]
     return (
         f'<div class="radar-vazio">'
         f'<div class="radar-vazio-icone" style="color:{cor};">'
@@ -237,7 +356,7 @@ def estado_vazio(icone_nome: str, texto: str, cor: str = "#B8792A") -> str:
     )
 
 
-def titulo_secao(icone_nome: str, texto: str, cor: str = "#C1440E") -> str:
+def titulo_secao(icone_nome: str, texto: str, cor: str | None = None) -> str:
     """
     Título de seção (equivalente a um st.subheader) com ícone Lucide ao
     lado — st.subheader/st.header não aceitam ícone nesta versão do
@@ -245,6 +364,7 @@ def titulo_secao(icone_nome: str, texto: str, cor: str = "#C1440E") -> str:
     componente HTML próprio pra manter a mesma hierarquia visual do
     resto do app.
     """
+    cor = cor or paleta_ativa()["deserto"]
     return (
         f'<div class="radar-titulo-secao">'
         f'<span style="color:{cor};">{icone(icone_nome, cor="currentColor", tamanho=22)}</span>'
@@ -283,12 +403,14 @@ def selo_deserto(compacto: bool = False) -> str:
     """
     Selo visual de "Deserto Cultural" — usado em qualquer lugar que
     identifique um município sem museu, teatro nem cinema. Ter um símbolo
-    próprio (e não só uma cor) dá peso conceitual ao termo e funciona
-    também pra quem tem daltonismo.
+    próprio (e não só uma cor) dá peso conceitual ao termo e já funciona
+    para quem tem daltonismo mesmo sem trocar de modo — a cor de fundo
+    ainda se ajusta ao modo ativo via style inline (sobrepõe o CSS fixo).
     """
+    cor = paleta_ativa()["deserto"]
     texto = "" if compacto else '<span class="radar-selo-deserto-texto">Deserto Cultural</span>'
     return (
-        '<span class="radar-selo-deserto">'
+        f'<span class="radar-selo-deserto" style="background:{cor};">'
         f'{icone("sun-dim", cor="#FFFDF8", tamanho=13)}'
         f"{texto}</span>"
     )
@@ -299,8 +421,11 @@ def contador_hero(numero: str, complemento: str, subtexto: str) -> str:
     Número grande de impacto na tela inicial — resume o problema central
     do projeto numa frase só, antes de qualquer navegação.
     """
+    cor = paleta_ativa()["deserto"]
+    cor_escura = _escurecer(cor)
     return (
-        '<div class="radar-contador-hero">'
+        f'<div class="radar-contador-hero" '
+        f'style="background:linear-gradient(100deg, {cor} 0%, {cor_escura} 100%);">'
         f'<div class="radar-contador-hero-icone">{icone("sun-dim", cor="#FFFDF8", tamanho=30)}</div>'
         '<div class="radar-contador-hero-conteudo">'
         f'<div class="radar-contador-hero-numero">{numero}</div>'
@@ -311,8 +436,9 @@ def contador_hero(numero: str, complemento: str, subtexto: str) -> str:
     )
 
 
-def box_glossario(titulo: str, texto: str, cor: str = COR_DESERTO) -> str:
+def box_glossario(titulo: str, texto: str, cor: str | None = None) -> str:
     """Box de definição fixa — usado pro glossário do 'Deserto Cultural'."""
+    cor = cor or paleta_ativa()["deserto"]
     return (
         f'<div class="radar-glossario" style="border-left-color:{cor};">'
         f'<div class="radar-glossario-titulo" style="color:{cor};">'
@@ -330,12 +456,13 @@ def cartao_conquista(
     desbloqueada: bool,
     atual: int,
     meta: int,
-    cor: str = "#4C6444",
+    cor: str | None = None,
 ) -> str:
     """
     Card de conquista (badge) — desbloqueada fica colorida e opaca,
     bloqueada fica esmaecida com o progresso rumo à meta.
     """
+    cor = cor or paleta_ativa()["demanda"]
     if desbloqueada:
         classe = "radar-conquista desbloqueada"
         estilo = f"border-color:{cor}; background:#FFFDF8;"

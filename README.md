@@ -9,17 +9,17 @@ em ferramenta de decisão, de voz cidadã e de cobrança pública.
 
 Squad **ZeroKai** · Desafio dos Dados VIVO 2026 · ODS 4, 10 e 11
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-gzekaz2ty8a.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://radar-cultural-gzekaz2ty8a.streamlit.app/)
 
 ---
 
 ## ✨ O projeto
 
 O Ceará tem 184 municípios, mas o acesso à cultura está longe de estar
-distribuído de forma equilibrada entre eles. O **Cultura Ceará** nasceu
+distribuído de forma equilibrada entre eles. O **Radar Cultural** nasceu
 de uma pergunta simples — quem tem acesso a museu, teatro ou cinema perto
-de casa, e quem não tem — e virou três ferramentas complementares,
-construídas em cima do mesmo dado real:
+de casa, e quem não tem — e virou quatro seções complementares,
+construídas em cima do mesmo dado real.
 
 ### 👨‍💼 Painel do Gestor
 O raio-x da desigualdade cultural: mapa interativo, gráficos de presença
@@ -30,7 +30,9 @@ equipamentos culturais. Feito pra quem decide política pública.
 ### 🗳️ Demanda Cidadã
 A voz de quem mora lá: o cidadão escolhe seu município, vê o que já
 existe e registra o que mais gostaria de ver. Cada pedido vira contagem
-pública e pesa de verdade no ranking de prioridades do Painel do Gestor.
+pública, pesa de verdade no ranking de prioridades do Painel do Gestor e
+alimenta um mural de feedback (comentário + like/dislike + resposta) por
+município.
 
 ### 💰 Simulador & Transparência
 Simula o impacto de instalar um museu, teatro ou cinema num município
@@ -38,15 +40,34 @@ antes de construir — e gera cards prontos (formato Stories/Instagram)
 pra baixar e cobrar publicamente investimento nos municípios com maior
 deserto cultural.
 
+### 📖 Metodologia
+Fontes de dados, a fórmula do Índice de Prioridade e as decisões de
+tratamento de dados, tudo num lugar só — pra quem for avaliar o projeto
+não precisar garimpar essa informação espalhada pelo app.
+
+## 🕹️ Gamificação e acessibilidade
+
+Duas camadas transversais, presentes nas 4 seções acima:
+
+- **Gamificação** (`src/gamificacao.py`) — perfil leve (apelido + avatar
+  ou foto, sem senha), progresso de exploração ("já visitou X de 184
+  municípios") e 6 conquistas desbloqueadas por uso do app.
+- **Acessibilidade** (`src/acessibilidade.py`) — alto contraste, tamanho
+  de texto ajustável, leitura em voz alta (Web Speech API do navegador)
+  e **4 modos de cor para daltonismo** (Protanopia/Protanomalia,
+  Deuteranopia/Deuteranomalia, Tritanopia/Tritanomalia), que trocam as
+  cores das 3 features, do mapa e dos gráficos por paletas seguras pra
+  cada tipo — sem precisar recarregar a página.
+
 ## 🗺️ Fontes dos dados
 
-- **IBGE** — MUNIC, Suplemento de Cultura 2014 (equipamentos culturais)
+- **IBGE** — MUNIC, Suplemento de Cultura 2021 (equipamentos culturais)
 - **IBGE** — Censo Demográfico 2022 (população e renda per capita)
 
 Os detalhes de como as bases foram cruzadas, as decisões de tratamento de
-dados e um achado interessante (biblioteca existe em 100% dos municípios
-cearenses, por isso fica de fora do Índice de Prioridade) estão
-documentados em [`data/README.md`](data/README.md).
+dados e um achado interessante (biblioteca existe em 99,5% dos
+municípios cearenses, por isso fica de fora do Índice de Prioridade)
+estão documentados em [`data/README.md`](data/README.md).
 
 ## 🛠️ Stack técnico
 
@@ -56,8 +77,9 @@ documentados em [`data/README.md`](data/README.md).
 - **Pandas** — carregamento e tratamento dos dados
 - **Plotly** (Express + Graph Objects) — todas as visualizações
 - **OpenStreetMap** — tiles do mapa interativo
-- **Pillow (PIL)** — geração dos cards PNG compartilháveis
-- CSS customizado (injetado via Streamlit) — identidade visual própria
+- **Pillow (PIL)** — geração dos cards PNG compartilháveis e das fotos de perfil
+- CSS customizado (injetado via Streamlit) — identidade visual própria, com
+  paletas alternativas para os 4 modos de acessibilidade a cores
 
 ## 🚀 Como rodar localmente
 
@@ -105,15 +127,18 @@ O app abre em `http://localhost:8501`.
 │   ├── radar_cultural_ce.csv   # Base de dados combinada (184 municípios)
 │   └── README.md               # Como os dados foram cruzados
 ├── src/
+│   ├── acessibilidade.py       # Alto contraste, tamanho de texto, voz, daltonismo
 │   ├── ceara_boundary.py       # Contorno geográfico oficial do Ceará
 │   ├── charts.py               # Construção dos gráficos Plotly
 │   ├── data_loader.py          # Carregamento e cálculo do Índice de Prioridade
-│   ├── demanda.py               # Lógica da Demanda Cidadã
-│   ├── geo.py                   # Cálculo de distância (Haversine)
-│   ├── icones.py                 # Ícones SVG inline (Lucide)
+│   ├── demanda.py              # Lógica da Demanda Cidadã e do mural de feedback
+│   ├── gamificacao.py          # Perfil, progresso de exploração e conquistas
+│   ├── geo.py                  # Cálculo de distância (Haversine)
+│   ├── icones.py                # Ícones SVG inline (Lucide)
 │   ├── mascara_fora_ceara.py   # Máscara visual do mapa
+│   ├── resumos.py               # Resumos automáticos (acessibilidade/leitores de tela)
 │   ├── simulador.py             # Lógica do Simulador de Investimento
-│   ├── theme.py                  # Paleta de cores e CSS customizado
+│   ├── theme.py                  # Paleta de cores (inclusive as 4 de daltonismo) e CSS
 │   └── transparencia.py          # Geração dos cards PNG do Painel de Transparência
 ├── streamlit_app.py     # Ponto de entrada da aplicação
 └── pyproject.toml       # Dependências do projeto

@@ -14,8 +14,9 @@ do Ceará e as colunas:
 | `mesorregiao` | Uma das 7 mesorregiões do Ceará |
 | `populacao` | População (Censo 2022, resultado do Universo — definitivo) |
 | `renda_per_capita` | Renda per capita em R$ (Censo 2022, resultado preliminar da amostra) |
+| `lat` / `lon` | Coordenadas do município (centróide), usadas no mapa interativo e no cálculo de distância do Simulador |
 | `tem_museu` / `tem_teatro_sala_espetaculo` / `tem_cinema` / `tem_biblioteca` | Existência de cada equipamento (MUNIC 2021) |
-| `n_equipamentos` | Soma dos 4 equipamentos acima (0 a 4) |
+| `n_equipamentos` | Soma dos 4 equipamentos acima (0 a 4) — recalculada em runtime por `data_loader.py`, a coluna do CSV não é usada diretamente |
 
 **Achado relevante:** biblioteca pública existe em **99,5% dos municípios
 do Ceará** (183 de 184 — só Graça é exceção), então ela quase não ajuda a
@@ -53,6 +54,11 @@ um ponto forte para o critério de tratamento de dados.
 5. **Mesorregião**: cruzada pelo código IBGE do município usando a
    classificação oficial de mesorregiões do IBGE (código de 4 dígitos:
    2 primeiros = UF, 2 seguintes = mesorregião).
+6. **Coordenadas (`lat`/`lon`)**: cruzadas de uma base pública de
+   municípios brasileiros pelo código IBGE, usadas pro mapa interativo
+   (`src/charts.py`) e pro cálculo de distância real do Simulador de
+   Investimento (fórmula de Haversine, `src/geo.py`). Zero municípios
+   ficaram sem coordenada.
 
 Todos os cruzamentos bateram **184 de 184** municípios, sem nenhuma linha
 perdida em nenhuma das etapas.
@@ -82,10 +88,9 @@ Com essa troca, o "gap" entre o ano da MUNIC e o ano do Censo caiu de 4
 anos (2014 vs 2010) para **apenas 1 ano** (2021 vs 2022) — o conjunto de
 dados do projeto ficou bem mais contemporâneo.
 
-## Demanda Cidadã (substituiu o antigo "Cultura Perto de Mim")
+## Demanda Cidadã 
 
-O segundo modo do app ("Demanda Cidadã") deixou de ser um feed de
-descoberta de eventos e virou uma ferramenta de coleta de demanda: o
+O segundo modo do app ("Demanda Cidadã") é uma ferramenta de coleta e demanda: o
 cidadão escolhe o município dele, vê o que já existe (dado real do Radar
 Cultural) e registra — entre o que falta — o que mais gostaria de ver.
 Inclui duas categorias "aspiracionais" (Centro Cultural, Oficina
@@ -106,9 +111,17 @@ Isso se conecta com o resto do app de duas formas, ambas em
    esse tipo for simulável — museu, teatro ou cinema; biblioteca e as
    categorias aspiracionais ainda não entram no Simulador).
 
+**Mural de feedback**: além do pedido em si, cada município tem um mural
+de comentários (apelido + avatar/foto + texto livre + like/dislike +
+resposta), pensado como espaço pra contexto que um voto sozinho não
+carrega ("por que esse equipamento importa aqui"). Mesmo componente
+reaproveitado nas 3 seções que mostram feedback (Demanda Cidadã, Painel
+do Gestor, Simulador & Transparência). Um voto (like ou dislike) por
+sessão por comentário; clicar de novo desfaz.
+
 Persistência: sessão do navegador, como o resto do protótipo — os
-pedidos somem ao recarregar a página. Os arquivos antigos do Feed
-(`src/eventos.py`, `src/feed_ui.py`) não são mais usados pelo
+pedidos e o mural somem ao recarregar a página. Os arquivos antigos do
+Feed (`src/eventos.py`, `src/feed_ui.py`) não são mais usados pelo
 `streamlit_app.py` e podem ser apagados do repositório.
 
 ## Painel de Transparência do Gestor (Simulador & Transparência)
@@ -133,15 +146,37 @@ extração inviável dentro do tempo do desafio. Decidimos substituir por
 este Painel de Transparência, que já entrega o mesmo tipo de pressão de
 accountability usando só dado que já tínhamos validado.
 
-## Gamificação (conquistas + progresso de exploração)
+## Gamificação (perfil, progresso de exploração e conquistas)
 
-Módulo `src/gamificacao.py`. Duas mecânicas, session-based (zeram ao
-recarregar a página):
+Módulo `src/gamificacao.py`. Três mecânicas, todas session-based (zeram
+ao recarregar a página, sem banco de dados nem login):
 
-1. **Progresso de exploração**: conta quantos dos 184 municípios a
+1. **Perfil**: apelido + avatar (emoji ou foto recortada/comprimida em
+   base64 com Pillow) — dá identidade ao mural de feedback e ao "Meu
+   Perfil", mas não é autenticação de verdade.
+2. **Progresso de exploração**: conta quantos dos 184 municípios a
    pessoa já "visitou" — abrindo na Demanda Cidadã ou clicando no mapa
    do Simulador.
-2. **Conquistas**: 6 badges desbloqueados por uso — Primeiro Pedido,
+3. **Conquistas**: 6 badges desbloqueados por uso — Primeiro Pedido,
    Explorador (5 municípios), Voz Ativa (3 mesorregiões), Cartógrafo (20
    municípios), Atento ao Deserto (pedido registrado num Deserto
    Cultural) e Mobilizador (10 pedidos).
+
+## Acessibilidade a cores (daltonismo)
+
+Módulo `src/acessibilidade.py` (controles) + `src/theme.py` (paletas).
+As cores que **diferenciam categorias na mesma tela** — as 3 cores das
+features, o par "Tem"/"Deserto Cultural" do mapa do Simulador, e a
+paleta discreta/sequencial dos gráficos (incluindo as 7 mesorregiões
+listadas na seção "Como os dados foram cruzados") — trocam de conjunto
+conforme o modo escolhido: Protanopia/Protanomalia, Deuteranopia/
+Deuteranomalia ou Tritanopia/Tritanomalia. Anopia (ausência total) e
+anomalia (percepção reduzida) do mesmo eixo de cor usam o mesmo ajuste.
+
+As paletas protan/deutan partem da **Okabe–Ito** (Color Universal
+Design), uma referência com segurança documentada pros dois tipos de
+daltonismo vermelho-verde ao mesmo tempo. A paleta tritan evita os pares
+azul/verde e amarelo/violeta (os que se confundem nesse eixo) e usa a
+distinção vermelho-verde, que segue intacta na tritanopia. Cores usadas
+sozinhas (o terracota do cabeçalho, por exemplo) não mudam — não há
+ambiguidade a resolver quando só existe uma cor na tela.

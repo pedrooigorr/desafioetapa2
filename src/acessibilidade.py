@@ -12,6 +12,8 @@ from __future__ import annotations
 import streamlit as st
 import streamlit.components.v1 as components
 
+from src.theme import MODOS_DALTONISMO
+
 TAMANHOS_TEXTO = {
     "Normal": 1.0,
     "Grande": 1.15,
@@ -22,27 +24,75 @@ TAMANHOS_TEXTO = {
 def inicializar_preferencias():
     st.session_state.setdefault("a11y_alto_contraste", False)
     st.session_state.setdefault("a11y_tamanho_texto", "Normal")
+    st.session_state.setdefault("a11y_daltonismo", "padrao")
 
 
 @st.dialog("Acessibilidade")
 def abrir_acessibilidade():
     """
     Modal de configurações de acessibilidade — alto contraste, tamanho de
-    texto. Abre por cima da página (não é mais um expansor em linha) pra
-    poder ser acionado por um ícone compacto dentro do cabeçalho, junto
-    do ícone de Perfil.
+    texto e modo de daltonismo. Abre por cima da página (não é mais um
+    expansor em linha) pra poder ser acionado por um ícone compacto
+    dentro do cabeçalho, junto do ícone de Perfil.
+
+    Os três controles usam uma chave "sombra" (prefixo "_") separada da
+    chave permanente ("a11y_..."), sincronizada via on_change. É o
+    padrão recomendado pelo próprio Streamlit para widgets que só
+    existem enquanto o modal está aberto: como o Streamlit apaga de
+    st.session_state a chave de qualquer widget que "some" da tela por
+    um run (o modal fechado conta como sumir), amarrar o widget direto
+    na chave permanente fazia a preferência voltar ao padrão assim que
+    a pessoa navegava pra outra página e voltava. A chave permanente,
+    por não pertencer a nenhum widget, nunca é apagada — só o valor do
+    widget-sombra se perde entre uma abertura e outra do modal, e a
+    gente já reconstrói o widget com o valor certo (`value`/`index`)
+    toda vez que ele reabre.
     """
     st.checkbox(
         "Modo alto contraste",
-        key="a11y_alto_contraste",
+        value=st.session_state.a11y_alto_contraste,
+        key="_a11y_alto_contraste",
+        on_change=lambda: st.session_state.update(
+            a11y_alto_contraste=st.session_state._a11y_alto_contraste
+        ),
         help="Troca a paleta por uma versão em preto/branco/amarelo, "
         "com contraste bem mais forte",
     )
     st.select_slider(
         "Tamanho do texto",
         options=list(TAMANHOS_TEXTO.keys()),
-        key="a11y_tamanho_texto",
+        value=st.session_state.a11y_tamanho_texto,
+        key="_a11y_tamanho_texto",
+        on_change=lambda: st.session_state.update(
+            a11y_tamanho_texto=st.session_state._a11y_tamanho_texto
+        ),
     )
+
+    st.divider()
+    _opcoes_daltonismo = list(MODOS_DALTONISMO.keys())
+    st.selectbox(
+        "Modo de cores para daltonismo",
+        options=_opcoes_daltonismo,
+        format_func=lambda chave: MODOS_DALTONISMO[chave],
+        index=_opcoes_daltonismo.index(st.session_state.a11y_daltonismo),
+        key="_a11y_daltonismo",
+        on_change=lambda: st.session_state.update(
+            a11y_daltonismo=st.session_state._a11y_daltonismo
+        ),
+        help="Troca as cores que diferenciam categorias na tela — as 3 "
+        "cores das features, o mapa do Simulador e os gráficos — por um "
+        "conjunto testado pra cada tipo de daltonismo. Anopia (ausência "
+        "total) e anomalia (percepção reduzida) do mesmo eixo de cor "
+        "usam o mesmo ajuste.",
+    )
+    st.caption(
+        "Vale pros gráficos, pro mapa, pelos cards das 3 features e pelo "
+        "selo de Deserto Cultural. Cores usadas sozinhas (como o "
+        "terracota do cabeçalho) não mudam — no momento em que só existe "
+        "uma cor na tela, não existe confusão a evitar."
+    )
+
+    st.divider()
     st.caption(
         "Cada painel também tem um botão pra ouvir o resumo em voz alta."
     )

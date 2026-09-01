@@ -9,7 +9,7 @@ em ferramenta de decisão, de voz cidadã e de cobrança pública.
 
 Squad **ZeroKai** · Desafio dos Dados VIVO 2026 · ODS 4, 10 e 11
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-gzekaz2ty8a.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://radar-cultural-gzekaz2ty8a.streamlit.app/)
 
 ---
 
